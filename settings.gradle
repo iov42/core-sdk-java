@@ -1,0 +1,5 @@
+rootProject.name = 'core-sdk-java'
+
+include 'core-sdk'
+include 'http-backend-httpclient'
+include 'integration-testing'

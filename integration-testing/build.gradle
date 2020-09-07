@@ -1,0 +1,21 @@
+dependencies {
+    api project(':core-sdk')
+    api project(':http-backend-httpclient')
+
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.6.2'
+    testImplementation 'org.mockito:mockito-core:3.5.13'
+    testImplementation 'org.slf4j:slf4j-simple:1.7.30'
+}
+
+version = '0.0.1'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
+
+jar {
+    manifest {
+        attributes 'Implementation-Title': project.name, 'Implementation-Version': version
+    }
+}

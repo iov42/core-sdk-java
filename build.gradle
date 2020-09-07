@@ -1,0 +1,79 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+}
+
+plugins {
+    id 'com.iov42.solutions.artifactoryplugin' version '0.0.2'
+    id 'com.jfrog.artifactory' version '4.11.0'
+    id 'java'
+}
+
+repositories {
+    mavenCentral()
+}
+
+allprojects {
+    group = 'com.iov42.solutions'
+
+    apply plugin: 'java-library'
+
+    repositories {
+        mavenCentral()
+        maven {
+            url "${artifactory.contextUrl}/${artifactory.repoKey}"
+            credentials {
+                username = artifactory.user
+                password = artifactory.password
+            }
+        }
+    }
+
+    test {
+        useJUnitPlatform()
+    }
+}
+
+// configuration for published projects
+configure([project(':core-sdk'), project(':http-backend-httpclient')]) {
+
+    apply plugin: 'maven-publish'
+    apply plugin: 'com.jfrog.artifactory'
+
+    artifactory {
+        publish {
+            contextUrl = artifactory.contextUrl
+            repository {
+                repoKey = artifactory.repoKey
+                username = artifactory.user
+                password = artifactory.password
+                maven = true
+            }
+            defaults {
+                publications('mavenJava')
+                publishBuildInfo = true
+                publishArtifacts = true
+                publishPom = true
+            }
+        }
+        resolve {
+            repository {
+                repoKey = artifactory.repoKey
+                username = artifactory.user
+                password = artifactory.password
+                maven = true
+            }
+        }
+    }
+
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                groupId project.group
+                artifactId project.name
+                from components.java
+            }
+        }
+    }
+}
