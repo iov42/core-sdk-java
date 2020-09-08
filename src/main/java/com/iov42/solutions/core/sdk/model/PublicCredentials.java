@@ -6,20 +6,17 @@ public class PublicCredentials {
 
     private String protocolId;
 
+    public PublicCredentials(String key, String protocolId) {
+        this.key = key;
+        this.protocolId = protocolId;
+    }
+
     public String getKey() {
         return key;
     }
 
-    public void setKey(String key) {
-        this.key = key;
-    }
-
     public String getProtocolId() {
         return protocolId;
-    }
-
-    public void setProtocolId(String protocolId) {
-        this.protocolId = protocolId;
     }
 
     @Override

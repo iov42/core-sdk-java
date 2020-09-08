@@ -9,9 +9,9 @@ import java.net.http.HttpResponse;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
-public class HttpClientUtil {
+public class PlatformUtils {
 
-    private HttpClientUtil() {
+    private PlatformUtils() {
         // static usage only
     }
 
@@ -22,6 +22,11 @@ public class HttpClientUtil {
 
     public static CompletableFuture<HttpResponse<String>> post(String url, String body, String... headers) throws URISyntaxException {
         HttpRequest request = build(url, headers).POST(HttpRequest.BodyPublishers.ofString(body)).build();
+        return HttpClient.newHttpClient().sendAsync(request, HttpResponse.BodyHandlers.ofString());
+    }
+
+    public static CompletableFuture<HttpResponse<String>> put(String url, String body, String... headers) throws URISyntaxException {
+        HttpRequest request = build(url, headers).PUT(HttpRequest.BodyPublishers.ofString(body)).build();
         return HttpClient.newHttpClient().sendAsync(request, HttpResponse.BodyHandlers.ofString());
     }
 

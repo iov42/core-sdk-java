@@ -12,13 +12,13 @@ import java.util.concurrent.ExecutionException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class HttpClientUtilTest {
+public class PlatformUtilsTest {
 
     @Test
     @DisplayName("Basic http GET test")
     public void testGET() throws InterruptedException, IOException, URISyntaxException {
         String url = "https://postman-echo.com/get?param1=test1&param2=test2";
-        HttpResponse<String> response = HttpClientUtil.get(url);
+        HttpResponse<String> response = PlatformUtils.get(url);
         assertNotNull(response);
         assertEquals(200, response.statusCode());
         assertNotNull(response.body());
@@ -29,7 +29,7 @@ public class HttpClientUtilTest {
     public void testPOST() throws URISyntaxException, ExecutionException, InterruptedException {
         String url = "https://postman-echo.com/post";
         String body = "This is expected to be sent back as part of response body.";
-        CompletableFuture<HttpResponse<String>> future = HttpClientUtil.post(url, body);
+        CompletableFuture<HttpResponse<String>> future = PlatformUtils.post(url, body);
         assertNotNull(future);
         HttpResponse<String> response = future.get();
         assertNotNull(response);
