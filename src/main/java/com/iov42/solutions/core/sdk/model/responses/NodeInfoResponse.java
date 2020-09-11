@@ -1,12 +1,14 @@
-package com.iov42.solutions.core.sdk.model;
+package com.iov42.solutions.core.sdk.model.responses;
 
-public class NodeInfo {
+import com.iov42.solutions.core.sdk.model.PublicCredentials;
+
+public class NodeInfoResponse {
 
     private String nodeId;
 
     private PublicCredentials publicCredentials;
 
-    public NodeInfo(String nodeId, PublicCredentials publicCredentials) {
+    public NodeInfoResponse(String nodeId, PublicCredentials publicCredentials) {
         this.nodeId = nodeId;
         this.publicCredentials = publicCredentials;
     }

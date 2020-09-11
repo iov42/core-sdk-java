@@ -1,4 +1,6 @@
-package com.iov42.solutions.core.sdk.model;
+package com.iov42.solutions.core.sdk.model.requests;
+
+import com.iov42.solutions.core.sdk.model.requests.BaseRequest;
 
 public class CreateAssetRequest extends BaseRequest {
 

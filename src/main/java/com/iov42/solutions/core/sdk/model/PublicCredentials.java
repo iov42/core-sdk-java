@@ -6,7 +6,7 @@ public class PublicCredentials {
 
     private String protocolId;
 
-    public PublicCredentials(String key, String protocolId) {
+    public PublicCredentials(String protocolId, String key) {
         this.key = key;
         this.protocolId = protocolId;
     }

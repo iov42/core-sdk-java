@@ -1,4 +1,4 @@
-package com.iov42.solutions.core.sdk.http;
+package com.iov42.solutions.core.sdk.utils;
 
 import java.io.IOException;
 import java.net.URI;
@@ -9,24 +9,24 @@ import java.net.http.HttpResponse;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
-public class PlatformUtils {
+public class HttpUtils {
 
-    private PlatformUtils() {
-        // static usage only
-    }
+    public static final String AUTHORISATIONS = "X-IOV42-Authorisations";
+
+    public static final String AUTHENTICATION = "X-IOV42-Authentication";
 
     public static HttpResponse<String> get(String url, String... headers) throws URISyntaxException, IOException, InterruptedException {
-        HttpRequest request = build(url, headers).GET().build();
+        var request = build(url, headers).GET().build();
         return HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
     }
 
-    public static CompletableFuture<HttpResponse<String>> post(String url, String body, String... headers) throws URISyntaxException {
-        HttpRequest request = build(url, headers).POST(HttpRequest.BodyPublishers.ofString(body)).build();
+    public static CompletableFuture<HttpResponse<String>> post(String url, byte[] body, String... headers) throws URISyntaxException {
+        var request = build(url, headers).POST(HttpRequest.BodyPublishers.ofByteArray(body)).build();
         return HttpClient.newHttpClient().sendAsync(request, HttpResponse.BodyHandlers.ofString());
     }
 
     public static CompletableFuture<HttpResponse<String>> put(String url, String body, String... headers) throws URISyntaxException {
-        HttpRequest request = build(url, headers).PUT(HttpRequest.BodyPublishers.ofString(body)).build();
+        var request = build(url, headers).PUT(HttpRequest.BodyPublishers.ofString(body)).build();
         return HttpClient.newHttpClient().sendAsync(request, HttpResponse.BodyHandlers.ofString());
     }
 

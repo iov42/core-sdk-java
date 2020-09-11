@@ -1,54 +1,47 @@
 package com.iov42.solutions.core.sdk.model;
 
+import java.util.Arrays;
+
 public class KeyPairData {
 
-    private String identityId;
+    private final String identityId;
 
-    private ProtocolType protocolId;
+    private final byte[] privateKey;
 
-    private String prvKeyBase64;
+    private final ProtocolType protocolId;
 
-    private String pubKeyBase64;
+    private final byte[] publicKey;
+
+    public KeyPairData(String identityId, ProtocolType protocolId, byte[] publicKey, byte[] privateKey) {
+        this.identityId = identityId;
+        this.publicKey = publicKey;
+        this.privateKey = privateKey;
+        this.protocolId = protocolId;
+    }
 
     public String getIdentityId() {
         return identityId;
     }
 
-    public void setIdentityId(String identityId) {
-        this.identityId = identityId;
+    public byte[] getPrivateKey() {
+        return privateKey;
     }
 
     public ProtocolType getProtocolId() {
         return protocolId;
     }
 
-    public void setProtocolId(ProtocolType protocolId) {
-        this.protocolId = protocolId;
-    }
-
-    public String getPrvKeyBase64() {
-        return prvKeyBase64;
-    }
-
-    public void setPrvKeyBase64(String prvKeyBase64) {
-        this.prvKeyBase64 = prvKeyBase64;
-    }
-
-    public String getPubKeyBase64() {
-        return pubKeyBase64;
-    }
-
-    public void setPubKeyBase64(String pubKeyBase64) {
-        this.pubKeyBase64 = pubKeyBase64;
+    public byte[] getPublicKey() {
+        return publicKey;
     }
 
     @Override
     public String toString() {
         return "KeyPairData{" +
                 "identityId='" + identityId + '\'' +
+                ", privateKey=" + Arrays.toString(privateKey) +
                 ", protocolId=" + protocolId +
-                ", prvKeyBase64='" + prvKeyBase64 + '\'' +
-                ", pubKeyBase64='" + pubKeyBase64 + '\'' +
+                ", publicKey=" + Arrays.toString(publicKey) +
                 '}';
     }
 }

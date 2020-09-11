@@ -1,5 +1,7 @@
 package com.iov42.solutions.core.sdk.model;
 
+import com.iov42.solutions.core.sdk.model.requests.BaseRequest;
+
 public class GetHeadersData extends BaseRequest {
 
     private String authenticationBase64Url;

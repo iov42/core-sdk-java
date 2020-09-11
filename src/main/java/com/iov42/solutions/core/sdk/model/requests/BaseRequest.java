@@ -1,7 +1,10 @@
-package com.iov42.solutions.core.sdk.model;
+package com.iov42.solutions.core.sdk.model.requests;
 
-public class BaseRequest {
+import com.google.gson.annotations.Expose;
 
+public abstract class BaseRequest {
+
+    @Expose
     private String requestId;
 
     public String getRequestId() {

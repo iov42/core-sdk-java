@@ -1,4 +1,4 @@
-package com.iov42.solutions.core.sdk.model;
+package com.iov42.solutions.core.sdk.model.requests;
 
 public class AddDelegateRequest extends BaseRequest {
 
