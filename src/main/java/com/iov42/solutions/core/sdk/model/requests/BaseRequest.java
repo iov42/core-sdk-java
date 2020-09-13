@@ -1,11 +1,16 @@
 package com.iov42.solutions.core.sdk.model.requests;
 
-import com.google.gson.annotations.Expose;
-
 public abstract class BaseRequest {
 
-    @Expose
     private String requestId;
+
+    public BaseRequest() {
+
+    }
+
+    public BaseRequest(String requestId) {
+        this.requestId = requestId;
+    }
 
     public String getRequestId() {
         return requestId;

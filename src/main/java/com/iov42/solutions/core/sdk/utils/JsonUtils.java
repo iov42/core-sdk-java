@@ -11,7 +11,6 @@ public class JsonUtils {
 
     private static final Gson PARSER = new GsonBuilder()
             .serializeNulls()
-            .excludeFieldsWithoutExposeAnnotation()
             .create();
 
     private JsonUtils() {

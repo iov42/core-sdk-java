@@ -2,7 +2,7 @@ package com.iov42.solutions.core.sdk.model;
 
 import java.util.Arrays;
 
-public class KeyPairData {
+public class KeyPairWrapper {
 
     private final String identityId;
 
@@ -12,7 +12,7 @@ public class KeyPairData {
 
     private final byte[] publicKey;
 
-    public KeyPairData(String identityId, ProtocolType protocolId, byte[] publicKey, byte[] privateKey) {
+    public KeyPairWrapper(String identityId, ProtocolType protocolId, byte[] publicKey, byte[] privateKey) {
         this.identityId = identityId;
         this.publicKey = publicKey;
         this.privateKey = privateKey;
@@ -37,7 +37,7 @@ public class KeyPairData {
 
     @Override
     public String toString() {
-        return "KeyPairData{" +
+        return "KeyPairWrapper{" +
                 "identityId='" + identityId + '\'' +
                 ", privateKey=" + Arrays.toString(privateKey) +
                 ", protocolId=" + protocolId +

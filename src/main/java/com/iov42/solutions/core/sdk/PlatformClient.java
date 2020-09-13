@@ -3,20 +3,16 @@ package com.iov42.solutions.core.sdk;
 import com.iov42.solutions.core.sdk.errors.HttpClientError;
 import com.iov42.solutions.core.sdk.errors.HttpServerError;
 import com.iov42.solutions.core.sdk.model.HealthChecks;
-import com.iov42.solutions.core.sdk.model.KeyPairData;
-import com.iov42.solutions.core.sdk.model.SignatoryIOV;
-import com.iov42.solutions.core.sdk.model.SignatureIOV;
-import com.iov42.solutions.core.sdk.model.requests.BaseRequest;
+import com.iov42.solutions.core.sdk.model.KeyPairWrapper;
 import com.iov42.solutions.core.sdk.model.requests.CreateIdentityRequest;
+import com.iov42.solutions.core.sdk.model.responses.AsyncRequestInfo;
 import com.iov42.solutions.core.sdk.model.responses.NodeInfoResponse;
 import com.iov42.solutions.core.sdk.utils.HttpUtils;
 import com.iov42.solutions.core.sdk.utils.JsonUtils;
 import com.iov42.solutions.core.sdk.utils.PlatformUtils;
-import com.iov42.solutions.core.sdk.utils.SecurityUtils;
 
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -30,7 +26,7 @@ import java.util.concurrent.CompletableFuture;
  */
 public class PlatformClient {
 
-    public static final String DEFAULT_URL = "https://api.sandbox.iov42.dev/api";
+    public static final String DEFAULT_URL = "https://api.sandbox.iov42.dev";
 
     private String url;
 
@@ -58,25 +54,15 @@ public class PlatformClient {
      * Input:
      * request -> request details
      * keyPair -> key pair used to sign the request
+     * @return
      */
-    public CompletableFuture<HttpResponse<String>> createIdentity(CreateIdentityRequest request, KeyPairData keyPair) throws Exception {
-
-        SignatoryIOV signatory = new SignatoryIOV(request.getIdentityId(), keyPair.getProtocolId().name(),keyPair.getPrivateKey());
+    public CompletableFuture<HttpResponse<String>> createIdentity(CreateIdentityRequest request, KeyPairWrapper keyPair) throws Exception {
 
         String body = JsonUtils.toJson(request);
 
-        SignatureIOV authorisationSignature = SecurityUtils.sign(signatory, body);
-        SignatureIOV authenticationSignature = SecurityUtils.sign(signatory, authorisationSignature.getSignature());
+        List<String> headers = PlatformUtils.createHeaders(keyPair, body);
 
-        List<String> headers = new ArrayList<>();
-        headers.add(HttpUtils.AUTHENTICATION);
-        headers.add(PlatformUtils.getEncodedHeaderValue(authenticationSignature));
-        headers.add(HttpUtils.AUTHORISATIONS);
-        headers.add(PlatformUtils.getEncodedHeaderValue(List.of(authorisationSignature)));
-
-        CompletableFuture<HttpResponse<String>> response = HttpUtils.post(url + "/" + version + "/identities", body.getBytes(StandardCharsets.UTF_8), headers.toArray(new String[0]));
-
-        return response;
+        return HttpUtils.postAsync(url + "/" + version + "/identities", body.getBytes(StandardCharsets.UTF_8), headers.toArray(new String[0]));
     }
 
     /**
@@ -104,9 +90,9 @@ public class PlatformClient {
      * See api specs at:
      * https://api.sandbox.iov42.dev/api/v1/apidocs/redoc.html#tag/requests/paths/~1requests~1{requestId}/get
      */
-    public BaseRequest getRequest(String requestId) throws Exception {
+    public AsyncRequestInfo getRequest(String requestId) throws Exception {
         HttpResponse<String> response = HttpUtils.get(url + "/" + version + "requests/" + requestId);
-        return handleResponse(response, BaseRequest.class);
+        return handleResponse(response, AsyncRequestInfo.class);
     }
 
     private <T> T handleResponse(HttpResponse<String> response, Class<T> clazz) throws HttpClientError, HttpServerError {
@@ -116,5 +102,15 @@ public class PlatformClient {
             throw new HttpServerError(response.body(), response.statusCode());
         }
         return JsonUtils.fromJson(response.body(), clazz);
+    }
+
+    private void handleResponse(HttpResponse<String> response) throws HttpClientError, HttpServerError {
+        if (response.statusCode() == 303) {
+
+        } else if (response.statusCode() >= 400 && response.statusCode() < 500) {
+            throw new HttpClientError(response.body(), response.statusCode());
+        } else if (response.statusCode() >= 500) {
+            throw new HttpServerError(response.body(), response.statusCode());
+        }
     }
 }

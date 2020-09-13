@@ -30,7 +30,7 @@ public class HttpUtilsTest {
     public void testPOST() throws URISyntaxException, ExecutionException, InterruptedException {
         String url = "https://postman-echo.com/post";
         String body = "This is expected to be sent back as part of response body.";
-        CompletableFuture<HttpResponse<String>> future = HttpUtils.post(url, body.getBytes(StandardCharsets.UTF_8));
+        CompletableFuture<HttpResponse<String>> future = HttpUtils.postAsync(url, body.getBytes(StandardCharsets.UTF_8));
         assertNotNull(future);
         HttpResponse<String> response = future.get();
         assertNotNull(response);

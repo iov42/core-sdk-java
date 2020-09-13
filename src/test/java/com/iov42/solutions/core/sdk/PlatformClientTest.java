@@ -1,19 +1,23 @@
 package com.iov42.solutions.core.sdk;
 
-import com.iov42.solutions.core.sdk.model.*;
+import com.iov42.solutions.core.sdk.model.HealthChecks;
+import com.iov42.solutions.core.sdk.model.KeyPairWrapper;
+import com.iov42.solutions.core.sdk.model.ProtocolType;
+import com.iov42.solutions.core.sdk.model.PublicCredentials;
 import com.iov42.solutions.core.sdk.model.requests.CreateIdentityRequest;
 import com.iov42.solutions.core.sdk.model.responses.NodeInfoResponse;
+import com.iov42.solutions.core.sdk.utils.HttpUtils;
 import com.iov42.solutions.core.sdk.utils.SecurityUtils;
 import org.junit.jupiter.api.Test;
 
+import java.net.http.HttpHeaders;
 import java.net.http.HttpResponse;
 import java.security.KeyPair;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class PlatformClientTest {
 
@@ -23,22 +27,30 @@ public class PlatformClientTest {
 
     @Test
     public void testCreateIdentity() throws Exception {
-        String identityId = "Identity-" + UUID.randomUUID().toString();
-        String requestId = "Request-" + UUID.randomUUID().toString();
+        String identityId = "I-" + UUID.randomUUID().toString();
+        String requestId = "R-" + UUID.randomUUID().toString();
 
         KeyPair keyPair = SecurityUtils.generateKeyPair();
 
         String publicKey = SecurityUtils.encodeBase64(keyPair.getPublic().getEncoded());
         PublicCredentials credentials = new PublicCredentials(ProtocolType.SHA256WithRSA.name(), publicKey);
 
-        KeyPairData keyPairData = new KeyPairData(identityId, ProtocolType.SHA256WithRSA, keyPair.getPublic().getEncoded(), keyPair.getPrivate().getEncoded());
+        KeyPairWrapper keyPairWrapper = new KeyPairWrapper(identityId, ProtocolType.SHA256WithRSA, keyPair.getPublic().getEncoded(), keyPair.getPrivate().getEncoded());
 
-        CreateIdentityRequest request = new CreateIdentityRequest(identityId, credentials);
+        CreateIdentityRequest request = new CreateIdentityRequest(requestId, identityId, credentials);
 
-        CompletableFuture<HttpResponse<String>> response = client.createIdentity(request, keyPairData);
-        assertNotNull(response);
-        HttpResponse<String> stringHttpResponse = response.get();
-        assertNotNull(stringHttpResponse);
+        Consumer<HttpHeaders> redirectConsumer = httpHeaders -> httpHeaders.firstValue("location").ifPresent(l -> {
+            try {
+                HttpResponse<String> response = HttpUtils.get(PlatformClient.DEFAULT_URL + l);
+                assertNotNull(response.body());
+                // assertEquals(identityId, response.body());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+        client.createIdentity(request, keyPairWrapper)
+                .thenApply(HttpResponse::headers)
+                .thenAccept(redirectConsumer).join();
     }
 
     @Test

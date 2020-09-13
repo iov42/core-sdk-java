@@ -11,22 +11,32 @@ import java.util.concurrent.CompletableFuture;
 
 public class HttpUtils {
 
-    public static final String AUTHORISATIONS = "X-IOV42-Authorisations";
-
     public static final String AUTHENTICATION = "X-IOV42-Authentication";
+
+    public static final String AUTHORISATIONS = "X-IOV42-Authorisations";
 
     public static HttpResponse<String> get(String url, String... headers) throws URISyntaxException, IOException, InterruptedException {
         var request = build(url, headers).GET().build();
         return HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
     }
 
-    public static CompletableFuture<HttpResponse<String>> post(String url, byte[] body, String... headers) throws URISyntaxException {
+    public static HttpResponse<String> post(String url, byte[] body, String... headers) throws URISyntaxException, IOException, InterruptedException {
+        var request = build(url, headers).POST(HttpRequest.BodyPublishers.ofByteArray(body)).build();
+        return HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+    }
+
+    public static CompletableFuture<HttpResponse<String>> postAsync(String url, byte[] body, String... headers) throws URISyntaxException {
         var request = build(url, headers).POST(HttpRequest.BodyPublishers.ofByteArray(body)).build();
         return HttpClient.newHttpClient().sendAsync(request, HttpResponse.BodyHandlers.ofString());
     }
 
-    public static CompletableFuture<HttpResponse<String>> put(String url, String body, String... headers) throws URISyntaxException {
+    public static HttpResponse<String> put(String url, String body, String... headers) throws URISyntaxException, IOException, InterruptedException {
         var request = build(url, headers).PUT(HttpRequest.BodyPublishers.ofString(body)).build();
+        return HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+    }
+
+    public static CompletableFuture<HttpResponse<String>> putAsync(String url, byte[] body, String... headers) throws URISyntaxException {
+        var request = build(url, headers).PUT(HttpRequest.BodyPublishers.ofByteArray(body)).build();
         return HttpClient.newHttpClient().sendAsync(request, HttpResponse.BodyHandlers.ofString());
     }
 
