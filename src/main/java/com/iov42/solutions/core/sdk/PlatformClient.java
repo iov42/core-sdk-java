@@ -86,7 +86,7 @@ public class PlatformClient {
 
         List<String> headers = PlatformUtils.createPostHeadersWithClaims(keyPair, body, plainClaims);
 
-        return HttpUtils.postAsync(url + "/" + version + "/identities", body.getBytes(StandardCharsets.UTF_8), headers.toArray(new String[0]));
+        return HttpUtils.postAsync(url + "/" + version + "/identities/" + request.getSubjectId() + "/claims", body.getBytes(StandardCharsets.UTF_8), headers.toArray(new String[0]));
     }
 
     /**
