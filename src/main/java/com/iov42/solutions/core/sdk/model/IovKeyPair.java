@@ -3,7 +3,7 @@ package com.iov42.solutions.core.sdk.model;
 import java.security.KeyPair;
 import java.util.Arrays;
 
-public class KeyPairWrapper {
+public class IovKeyPair {
 
     private final String identityId;
 
@@ -13,14 +13,14 @@ public class KeyPairWrapper {
 
     private final byte[] publicKey;
 
-    public KeyPairWrapper(String identityId, ProtocolType protocolId, KeyPair keyPair) {
+    public IovKeyPair(String identityId, ProtocolType protocolId, KeyPair keyPair) {
         this.identityId = identityId;
         this.protocolId = protocolId;
         this.privateKey = keyPair.getPrivate().getEncoded();
         this.publicKey = keyPair.getPublic().getEncoded();
     }
 
-    public KeyPairWrapper(String identityId, ProtocolType protocolId, byte[] publicKey, byte[] privateKey) {
+    public IovKeyPair(String identityId, ProtocolType protocolId, byte[] publicKey, byte[] privateKey) {
         this.identityId = identityId;
         this.privateKey = privateKey;
         this.protocolId = protocolId;
@@ -45,7 +45,7 @@ public class KeyPairWrapper {
 
     @Override
     public String toString() {
-        return "KeyPairWrapper{" +
+        return "IovKeyPair{" +
                 "identityId='" + identityId + '\'' +
                 ", privateKey=" + Arrays.toString(privateKey) +
                 ", protocolId=" + protocolId +

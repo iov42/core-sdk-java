@@ -1,7 +1,7 @@
 package com.iov42.solutions.core.sdk;
 
 import com.iov42.solutions.core.sdk.model.HealthChecks;
-import com.iov42.solutions.core.sdk.model.KeyPairWrapper;
+import com.iov42.solutions.core.sdk.model.IovKeyPair;
 import com.iov42.solutions.core.sdk.model.ProtocolType;
 import com.iov42.solutions.core.sdk.model.PublicCredentials;
 import com.iov42.solutions.core.sdk.model.requests.CreateIdentityRequest;
@@ -35,7 +35,7 @@ public class PlatformClientTest {
         String publicKey = SecurityUtils.encodeBase64(keyPair.getPublic().getEncoded());
         PublicCredentials credentials = new PublicCredentials(ProtocolType.SHA256WithRSA.name(), publicKey);
 
-        KeyPairWrapper keyPairWrapper = new KeyPairWrapper(identityId, ProtocolType.SHA256WithRSA, keyPair);
+        IovKeyPair iovKeyPair = new IovKeyPair(identityId, ProtocolType.SHA256WithRSA, keyPair);
 
         CreateIdentityRequest request = new CreateIdentityRequest(requestId, identityId, credentials);
 
@@ -59,7 +59,7 @@ public class PlatformClientTest {
                 }
             });
         };
-        client.createIdentity(request, keyPairWrapper)
+        client.createIdentity(request, iovKeyPair)
                 .thenApply(HttpResponse::headers)
                 .thenAccept(redirectHandler).join();
 
@@ -69,6 +69,12 @@ public class PlatformClientTest {
 
         AsyncRequestInfo identity = client.getIdentity(identityId, newReqId, nodeId, keyPairWrapper);
         assertNotNull(identity);*/
+    }
+
+
+    private Consumer<HttpHeaders> getHttpHeadersConsumer() {
+        return headers -> {
+        };
     }
 
     @Test
