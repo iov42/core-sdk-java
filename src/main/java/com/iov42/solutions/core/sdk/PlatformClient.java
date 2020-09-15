@@ -2,6 +2,7 @@ package com.iov42.solutions.core.sdk;
 
 import com.iov42.solutions.core.sdk.errors.PlatformError;
 import com.iov42.solutions.core.sdk.errors.PlatformException;
+import com.iov42.solutions.core.sdk.http.HttpClientProvider;
 import com.iov42.solutions.core.sdk.model.HealthChecks;
 import com.iov42.solutions.core.sdk.model.IovKeyPair;
 import com.iov42.solutions.core.sdk.model.requests.CreateClaimsRequest;
@@ -33,7 +34,9 @@ public class PlatformClient {
 
     private String version = "v1";
 
-    public PlatformClient(String url) {
+    private HttpClientProvider<HttpResponse<String>> httpClientProvider;
+
+    public PlatformClient(String url, HttpClientProvider<HttpResponse<String>> httpClientProvider) {
         if (Objects.isNull(url) || url.trim().length() == 0) {
             throw new IllegalArgumentException("Invalid URL argument");
         }
@@ -41,10 +44,11 @@ public class PlatformClient {
         if (this.url.endsWith("/")) {
             this.url = this.url.substring(0, this.url.length() - 1);
         }
+        this.httpClientProvider = httpClientProvider;
     }
 
-    public PlatformClient(String url, String version) {
-        this(url);
+    public PlatformClient(String url, String version, HttpClientProvider<HttpResponse<String>> httpClientProvider) {
+        this(url, httpClientProvider);
         this.version = version;
     }
 

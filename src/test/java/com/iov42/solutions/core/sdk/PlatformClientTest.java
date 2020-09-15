@@ -1,5 +1,6 @@
 package com.iov42.solutions.core.sdk;
 
+import com.iov42.solutions.core.sdk.http.DefaultHttpClientProvider;
 import com.iov42.solutions.core.sdk.model.HealthChecks;
 import com.iov42.solutions.core.sdk.model.IovKeyPair;
 import com.iov42.solutions.core.sdk.model.ProtocolType;
@@ -8,6 +9,7 @@ import com.iov42.solutions.core.sdk.model.requests.CreateIdentityRequest;
 import com.iov42.solutions.core.sdk.model.responses.AsyncRequestInfo;
 import com.iov42.solutions.core.sdk.model.responses.NodeInfoResponse;
 import com.iov42.solutions.core.sdk.utils.SecurityUtils;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.net.http.HttpHeaders;
@@ -23,7 +25,12 @@ public class PlatformClientTest {
 
     private static final String URL = "https://api.sandbox.iov42.dev/api";
 
-    private final PlatformClient client = new PlatformClient(URL);
+    private PlatformClient client;
+
+    @BeforeEach
+    public void setup() {
+        client = new PlatformClient(URL, new DefaultHttpClientProvider());
+    }
 
     @Test
     public void testCreateIdentity() throws Exception {
@@ -71,12 +78,6 @@ public class PlatformClientTest {
         assertNotNull(identity);*/
     }
 
-
-    private Consumer<HttpHeaders> getHttpHeadersConsumer() {
-        return headers -> {
-        };
-    }
-
     @Test
     public void testGetHealthChecks() throws Exception {
         Optional<HealthChecks> optInfo = client.getHealthChecks();
@@ -95,6 +96,11 @@ public class PlatformClientTest {
         assertNotNull(info.getPublicCredentials());
         assertNotNull(info.getPublicCredentials().getKey());
         assertNotNull(info.getPublicCredentials().getProtocolId());
+    }
+
+    private Consumer<HttpHeaders> getHttpHeadersConsumer() {
+        return headers -> {
+        };
     }
 
     private NodeInfoResponse getNodeInfo() throws Exception {
