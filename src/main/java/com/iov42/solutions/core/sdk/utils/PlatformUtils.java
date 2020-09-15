@@ -14,8 +14,25 @@ import java.util.concurrent.TimeUnit;
 
 public class PlatformUtils {
 
+    public static final String AUTHENTICATION = "X-IOV42-Authentication";
+
+    public static final String AUTHORISATIONS = "X-IOV42-Authorisations";
+
     private PlatformUtils() {
         // static usage only
+    }
+
+    public static List<String> createGetHeaders(KeyPairWrapper keyPair, String payload) {
+
+        SignatoryIOV signatory = new SignatoryIOV(keyPair.getIdentityId(), keyPair.getProtocolId().name(), keyPair.getPrivateKey());
+
+        SignatureIOV authenticationSignature = SecurityUtils.sign(signatory, payload);
+
+        List<String> headers = new ArrayList<>();
+        headers.add(AUTHENTICATION);
+        headers.add(PlatformUtils.getEncodedHeaderValue(authenticationSignature));
+
+        return headers;
     }
 
     public static List<String> createHeaders(KeyPairWrapper keyPair, String body) {
@@ -26,9 +43,9 @@ public class PlatformUtils {
         SignatureIOV authenticationSignature = SecurityUtils.sign(signatory, authorisationSignature.getSignature());
 
         List<String> headers = new ArrayList<>();
-        headers.add(HttpUtils.AUTHENTICATION);
+        headers.add(AUTHENTICATION);
         headers.add(PlatformUtils.getEncodedHeaderValue(authenticationSignature));
-        headers.add(HttpUtils.AUTHORISATIONS);
+        headers.add(AUTHORISATIONS);
         headers.add(PlatformUtils.getEncodedHeaderValue(List.of(authorisationSignature)));
         headers.add("Content-Type");
         headers.add("application/json");

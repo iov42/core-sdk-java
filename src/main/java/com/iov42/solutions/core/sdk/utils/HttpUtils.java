@@ -11,10 +11,6 @@ import java.util.concurrent.CompletableFuture;
 
 public class HttpUtils {
 
-    public static final String AUTHENTICATION = "X-IOV42-Authentication";
-
-    public static final String AUTHORISATIONS = "X-IOV42-Authorisations";
-
     public static HttpResponse<String> get(String url, String... headers) throws URISyntaxException, IOException, InterruptedException {
         var request = build(url, headers).GET().build();
         return HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());

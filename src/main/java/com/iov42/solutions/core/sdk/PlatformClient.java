@@ -1,7 +1,7 @@
 package com.iov42.solutions.core.sdk;
 
-import com.iov42.solutions.core.sdk.errors.HttpClientError;
-import com.iov42.solutions.core.sdk.errors.HttpServerError;
+import com.iov42.solutions.core.sdk.errors.PlatformError;
+import com.iov42.solutions.core.sdk.errors.PlatformException;
 import com.iov42.solutions.core.sdk.model.HealthChecks;
 import com.iov42.solutions.core.sdk.model.KeyPairWrapper;
 import com.iov42.solutions.core.sdk.model.requests.CreateIdentityRequest;
@@ -26,7 +26,7 @@ import java.util.concurrent.CompletableFuture;
  */
 public class PlatformClient {
 
-    public static final String DEFAULT_URL = "https://api.sandbox.iov42.dev";
+    public static final String BASE_URL = "https://api.sandbox.iov42.dev";
 
     private String url;
 
@@ -54,6 +54,7 @@ public class PlatformClient {
      * Input:
      * request -> request details
      * keyPair -> key pair used to sign the request
+     *
      * @return
      */
     public CompletableFuture<HttpResponse<String>> createIdentity(CreateIdentityRequest request, KeyPairWrapper keyPair) throws Exception {
@@ -76,6 +77,27 @@ public class PlatformClient {
     }
 
     /**
+     * Retrieves an identity in the iov42 platform
+     * See api spec at:
+     * https://api.sandbox.iov42.dev/api/v1/apidocs/redoc.html#tag/identities/paths/~1identities~1{identityId}/get
+     * Input:
+     * identityId -> identity's identifier
+     * keyPair -> key pair used to sign the request
+     * delegatorIdentityId -> identity on which behalf the request is executed, if different than the one in the keyPair
+     */
+    public AsyncRequestInfo getIdentity(String identityId, String requestId, String nodeId, KeyPairWrapper keyPair) throws Exception {
+
+        String queryParameters = String.format("?requestId=%s&nodeId=%s", requestId, nodeId);
+        String relativeUrl = "/api"+version+"/identities/"+identityId+queryParameters;
+        String url = this.url + "/" + version + "/identities/" + identityId + queryParameters;
+
+        List<String> headers = PlatformUtils.createGetHeaders(keyPair, relativeUrl);
+        HttpResponse<String> response = HttpUtils.get(url, headers.toArray(new String[0]));
+
+        return handleResponse(response, AsyncRequestInfo.class);
+    }
+
+    /**
      * Retrieves information about a node in the iov42 platform
      * See the api specs at:
      * https://api.sandbox.iov42.dev/api/v1/apidocs/redoc.html#tag/operations/paths/~1node-info/get
@@ -91,26 +113,15 @@ public class PlatformClient {
      * https://api.sandbox.iov42.dev/api/v1/apidocs/redoc.html#tag/requests/paths/~1requests~1{requestId}/get
      */
     public AsyncRequestInfo getRequest(String requestId) throws Exception {
-        HttpResponse<String> response = HttpUtils.get(url + "/" + version + "requests/" + requestId);
+        HttpResponse<String> response = HttpUtils.get(url + "/" + version + "/requests/" + requestId);
         return handleResponse(response, AsyncRequestInfo.class);
     }
 
-    private <T> T handleResponse(HttpResponse<String> response, Class<T> clazz) throws HttpClientError, HttpServerError {
-        if (response.statusCode() >= 400 && response.statusCode() < 500) {
-            throw new HttpClientError(response.body(), response.statusCode());
-        } else if (response.statusCode() >= 500) {
-            throw new HttpServerError(response.body(), response.statusCode());
+    public <T> T handleResponse(HttpResponse<String> response, Class<T> clazz) throws PlatformException {
+        if (response.statusCode() >= 400) {
+            PlatformError error = JsonUtils.fromJson(response.body(), PlatformError.class);
+            throw new PlatformException(error.toString());
         }
         return JsonUtils.fromJson(response.body(), clazz);
-    }
-
-    private void handleResponse(HttpResponse<String> response) throws HttpClientError, HttpServerError {
-        if (response.statusCode() == 303) {
-
-        } else if (response.statusCode() >= 400 && response.statusCode() < 500) {
-            throw new HttpClientError(response.body(), response.statusCode());
-        } else if (response.statusCode() >= 500) {
-            throw new HttpServerError(response.body(), response.statusCode());
-        }
     }
 }
