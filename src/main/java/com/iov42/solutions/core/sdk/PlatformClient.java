@@ -5,14 +5,8 @@ import com.iov42.solutions.core.sdk.errors.PlatformException;
 import com.iov42.solutions.core.sdk.http.HttpClientProvider;
 import com.iov42.solutions.core.sdk.model.HealthChecks;
 import com.iov42.solutions.core.sdk.model.IovKeyPair;
-import com.iov42.solutions.core.sdk.model.requests.CreateClaimsRequest;
-import com.iov42.solutions.core.sdk.model.requests.CreateIdentityRequest;
-import com.iov42.solutions.core.sdk.model.requests.GetIdentityClaimsRequest;
-import com.iov42.solutions.core.sdk.model.requests.GetIdentityRequest;
-import com.iov42.solutions.core.sdk.model.responses.GetClaimsResponse;
-import com.iov42.solutions.core.sdk.model.responses.GetIdentityResponse;
-import com.iov42.solutions.core.sdk.model.responses.NodeInfoResponse;
-import com.iov42.solutions.core.sdk.model.responses.RequestInfoResponse;
+import com.iov42.solutions.core.sdk.model.requests.*;
+import com.iov42.solutions.core.sdk.model.responses.*;
 import com.iov42.solutions.core.sdk.utils.JsonUtils;
 import com.iov42.solutions.core.sdk.utils.PlatformUtils;
 
@@ -117,9 +111,13 @@ public class PlatformClient {
      */
     public GetIdentityResponse getIdentity(GetIdentityRequest request, IovKeyPair keyPair) throws Exception {
 
-        String queryParameters = String.format("?requestId=%s&nodeId=%s", request.getRequestId(), request.getNodeId());
-        String relativeUrl = "/api/" + version + "/identities/" + request.getIdentityId() + queryParameters;
-        String url = this.url + "/" + version + "/identities/" + request.getIdentityId() + queryParameters;
+        String requestId = request.getRequestId();
+        String nodeId = request.getNodeId();
+        String identityId = request.getIdentityId();
+
+        String queryParameters = String.format("?requestId=%s&nodeId=%s", requestId, nodeId);
+        String relativeUrl = "/api/" + version + "/identities/" + identityId + queryParameters;
+        String url = this.url + "/" + version + "/identities/" + identityId + queryParameters;
 
         List<String> headers = PlatformUtils.createGetHeaders(keyPair, relativeUrl);
         HttpResponse<String> response = httpClientProvider.executeGet(url, headers.toArray(new String[0]));
@@ -127,6 +125,42 @@ public class PlatformClient {
         return handleResponse(response, GetIdentityResponse.class);
     }
 
+    /**
+     * Retrieves a single identity's claim
+     * See api spec at:
+     * https://api.sandbox.iov42.dev/api/v1/apidocs/redoc.html#tag/identities/paths/~1identities~1{identityId}~1claims~1{hashedClaim}/get
+     * Input:
+     * identityId -> identity's identifier
+     * keyPair -> key pair used to sign the request
+     * delegatorIdentityId -> identity on which behalf the request is signed, if different than the one in the keyPair
+     */
+    public ClaimEndorsementsResponse getIdentityClaim(GetIdentityClaimRequest request, IovKeyPair keyPair) throws Exception {
+
+        String requestId = request.getRequestId();
+        String nodeId = request.getNodeId();
+        String queryParameters = String.format("?requestId=%s&nodeId=%s", requestId, nodeId);
+        String identityId = request.getIdentityId();
+        String hashedClaim = request.getHashedClaim();
+
+        String relativeUrl = "/api/" + version + "/identities/" + identityId + "/claims/" + hashedClaim + queryParameters;
+        String url = this.url + "/" + version + "/identities/" + identityId + "/claims" + queryParameters;
+
+        List<String> headers = PlatformUtils.createGetHeaders(keyPair, relativeUrl);
+        HttpResponse<String> response = httpClientProvider.executeGet(url, headers.toArray(new String[0]));
+
+        return handleResponse(response, ClaimEndorsementsResponse.class);
+    }
+
+    /**
+     * Retrieves an identity's claims
+     * See api spec at:
+     * https://api.sandbox.iov42.dev/api/v1/apidocs/redoc.html#tag/identities/paths/~1identities~1{identityId}~1claims/get
+     *
+     * @param request parameters
+     * @param keyPair -> key pair used to sign the request
+     * @return {@link GetClaimsResponse}
+     * @throws Exception
+     */
     public GetClaimsResponse getIdentityClaims(GetIdentityClaimsRequest request, IovKeyPair keyPair) throws Exception {
 
         String requestId = request.getRequestId();

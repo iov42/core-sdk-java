@@ -4,12 +4,12 @@ public class BaseResponse {
 
     private String proof;
 
-    public String getProof() {
-        return proof;
+    public BaseResponse(String proof) {
+        this.proof = proof;
     }
 
-    public void setProof(String proof) {
-        this.proof = proof;
+    public String getProof() {
+        return proof;
     }
 
     @Override

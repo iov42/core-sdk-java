@@ -1,41 +1,40 @@
 package com.iov42.solutions.core.sdk.model.responses;
 
+import java.util.Arrays;
+
 /**
  * Response object of the {@link com.iov42.solutions.core.sdk.PlatformClient#getRequest(String)}
  */
-public class RequestInfoResponse {
-
-    private String proof;
+public class RequestInfoResponse extends BaseResponse {
 
     private String requestId;
 
     private String[] resources;
 
-    public String getProof() {
-        return proof;
-    }
 
-    public void setProof(String proof) {
-        this.proof = proof;
+    public RequestInfoResponse(String proof, String requestId, String[] resources) {
+        super(proof);
+        this.requestId = requestId;
+        this.resources = resources;
     }
 
     public String getRequestId() {
         return requestId;
     }
 
-    public void setRequestId(String requestId) {
-        this.requestId = requestId;
-    }
-
     public String[] getResources() {
         return resources;
     }
 
-    public void setResources(String[] resources) {
-        this.resources = resources;
-    }
-
     public boolean hasFinished() {
         return resources != null;
+    }
+
+    @Override
+    public String toString() {
+        return "RequestInfoResponse{" +
+                "requestId='" + requestId + '\'' +
+                ", resources=" + Arrays.toString(resources) +
+                "} " + super.toString();
     }
 }

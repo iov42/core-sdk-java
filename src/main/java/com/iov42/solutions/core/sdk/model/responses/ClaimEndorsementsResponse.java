@@ -1,18 +1,20 @@
 package com.iov42.solutions.core.sdk.model.responses;
 
-public class ClaimResponse extends BaseResponse {
+import java.util.List;
+
+public class ClaimEndorsementsResponse extends BaseResponse {
 
     private String claim;
 
     private String delegateIdentityId;
 
-    private String resource;
+    private List<EndorsementResponse> endorsements;
 
-    public ClaimResponse(String claim, String delegateIdentityId, String proof, String resource) {
+    public ClaimEndorsementsResponse(String proof, String claim, String delegateIdentityId, List<EndorsementResponse> endorsements) {
         super(proof);
         this.claim = claim;
         this.delegateIdentityId = delegateIdentityId;
-        this.resource = resource;
+        this.endorsements = endorsements;
     }
 
     public String getClaim() {
@@ -23,16 +25,16 @@ public class ClaimResponse extends BaseResponse {
         return delegateIdentityId;
     }
 
-    public String getResource() {
-        return resource;
+    public List<EndorsementResponse> getEndorsements() {
+        return endorsements;
     }
 
     @Override
     public String toString() {
-        return "ClaimResponse{" +
+        return "ClaimEndorsementsResponse{" +
                 "claim='" + claim + '\'' +
                 ", delegateIdentityId='" + delegateIdentityId + '\'' +
-                ", resource='" + resource + '\'' +
+                ", endorsements=" + endorsements +
                 "} " + super.toString();
     }
 }

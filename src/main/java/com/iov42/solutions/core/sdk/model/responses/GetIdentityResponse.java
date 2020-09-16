@@ -15,20 +15,18 @@ public class GetIdentityResponse extends BaseResponse {
 
     private List<PublicCredentials> publicCredentials;
 
+    public GetIdentityResponse(String proof, String identityId, List<PublicCredentials> publicCredentials) {
+        super(proof);
+        this.identityId = identityId;
+        this.publicCredentials = publicCredentials;
+    }
+
     public String getIdentityId() {
         return identityId;
     }
 
-    public void setIdentityId(String identityId) {
-        this.identityId = identityId;
-    }
-
     public List<PublicCredentials> getPublicCredentials() {
         return publicCredentials;
-    }
-
-    public void setPublicCredentials(List<PublicCredentials> publicCredentials) {
-        this.publicCredentials = publicCredentials;
     }
 
     @Override
