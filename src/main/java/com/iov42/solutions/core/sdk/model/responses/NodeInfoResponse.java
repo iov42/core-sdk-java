@@ -1,7 +1,11 @@
 package com.iov42.solutions.core.sdk.model.responses;
 
+import com.iov42.solutions.core.sdk.PlatformClient;
 import com.iov42.solutions.core.sdk.model.PublicCredentials;
 
+/**
+ * Response object of the {@link PlatformClient#getNodeInfo()}
+ */
 public class NodeInfoResponse {
 
     private String nodeId;

@@ -4,8 +4,7 @@ import com.iov42.solutions.core.sdk.PlatformClient;
 import com.iov42.solutions.core.sdk.model.IovKeyPair;
 import com.iov42.solutions.core.sdk.model.SignatoryIOV;
 import com.iov42.solutions.core.sdk.model.SignatureIOV;
-import com.iov42.solutions.core.sdk.model.requests.BaseRequest;
-import com.iov42.solutions.core.sdk.model.responses.AsyncRequestInfo;
+import com.iov42.solutions.core.sdk.model.responses.RequestInfoResponse;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -13,6 +12,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -86,18 +86,23 @@ public class PlatformUtils {
         }
     }
 
-    public static AsyncRequestInfo waitForRequest(PlatformClient client, BaseRequest requestResponse) throws Exception {
-        if (requestResponse == null || requestResponse.getRequestId() == null || requestResponse.getRequestId().trim().length() == 0) {
+    public static RequestInfoResponse waitForRequest(String requestId, PlatformClient client, int reTryAfter) throws Exception {
+        if (requestId == null || requestId.trim().length() == 0) {
             return null;
         }
-        AsyncRequestInfo result;
+        int attempts = 10;
+        RequestInfoResponse result = null;
         while (true) {
-            result = client.getRequest(requestResponse.getRequestId());
-            if (result.hasFinished()) {
+            if (attempts == 0) {
                 break;
             }
+            result = client.getRequest(requestId);
+            if (Objects.nonNull(result) && result.hasFinished()) {
+                break;
+            }
+            attempts--;
             // wait on the thread for a second
-            TimeUnit.MILLISECONDS.sleep(100);
+            TimeUnit.SECONDS.sleep(reTryAfter);
         }
         return result;
     }

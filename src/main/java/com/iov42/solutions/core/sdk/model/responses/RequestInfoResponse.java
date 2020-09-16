@@ -1,20 +1,15 @@
 package com.iov42.solutions.core.sdk.model.responses;
 
-public class AsyncRequestInfo {
-
-    private String requestId;
+/**
+ * Response object of the {@link com.iov42.solutions.core.sdk.PlatformClient#getRequest(String)}
+ */
+public class RequestInfoResponse {
 
     private String proof;
 
+    private String requestId;
+
     private String[] resources;
-
-    public String getRequestId() {
-        return requestId;
-    }
-
-    public void setRequestId(String requestId) {
-        this.requestId = requestId;
-    }
 
     public String getProof() {
         return proof;
@@ -22,6 +17,14 @@ public class AsyncRequestInfo {
 
     public void setProof(String proof) {
         this.proof = proof;
+    }
+
+    public String getRequestId() {
+        return requestId;
+    }
+
+    public void setRequestId(String requestId) {
+        this.requestId = requestId;
     }
 
     public String[] getResources() {

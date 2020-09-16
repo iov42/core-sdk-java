@@ -1,5 +1,7 @@
 package com.iov42.solutions.core.sdk;
 
+import com.iov42.solutions.core.sdk.model.IovKeyPair;
+
 public class TestContext {
 
     private String assetId;
@@ -10,7 +12,13 @@ public class TestContext {
 
     private String assetWithQuantityId;
 
+    private boolean createdIdentity = false;
+
     private String identityId;
+
+    private IovKeyPair keyPair;
+
+    private String requestId;
 
     private String subjectAssetTypeId;
 
@@ -57,6 +65,22 @@ public class TestContext {
         this.identityId = identityId;
     }
 
+    public IovKeyPair getKeyPair() {
+        return keyPair;
+    }
+
+    public void setKeyPair(IovKeyPair keyPair) {
+        this.keyPair = keyPair;
+    }
+
+    public String getRequestId() {
+        return requestId;
+    }
+
+    public void setRequestId(String requestId) {
+        this.requestId = requestId;
+    }
+
     public String getSubjectAssetTypeId() {
         return subjectAssetTypeId;
     }
@@ -71,5 +95,13 @@ public class TestContext {
 
     public void setSubjectId(String subjectId) {
         this.subjectId = subjectId;
+    }
+
+    public boolean isCreatedIdentity() {
+        return createdIdentity;
+    }
+
+    public void setCreatedIdentity(boolean createdIdentity) {
+        this.createdIdentity = createdIdentity;
     }
 }
