@@ -7,7 +7,9 @@ import com.iov42.solutions.core.sdk.model.HealthChecks;
 import com.iov42.solutions.core.sdk.model.IovKeyPair;
 import com.iov42.solutions.core.sdk.model.requests.CreateClaimsRequest;
 import com.iov42.solutions.core.sdk.model.requests.CreateIdentityRequest;
+import com.iov42.solutions.core.sdk.model.requests.GetIdentityClaimsRequest;
 import com.iov42.solutions.core.sdk.model.requests.GetIdentityRequest;
+import com.iov42.solutions.core.sdk.model.responses.GetClaimsResponse;
 import com.iov42.solutions.core.sdk.model.responses.GetIdentityResponse;
 import com.iov42.solutions.core.sdk.model.responses.NodeInfoResponse;
 import com.iov42.solutions.core.sdk.model.responses.RequestInfoResponse;
@@ -123,6 +125,22 @@ public class PlatformClient {
         HttpResponse<String> response = httpClientProvider.executeGet(url, headers.toArray(new String[0]));
 
         return handleResponse(response, GetIdentityResponse.class);
+    }
+
+    public GetClaimsResponse getIdentityClaims(GetIdentityClaimsRequest request, IovKeyPair keyPair) throws Exception {
+
+        String requestId = request.getRequestId();
+        String nodeId = request.getNodeId();
+        String queryParameters = String.format("?requestId=%s&nodeId=%s", requestId, nodeId);
+        String identityId = request.getIdentityId();
+
+        String relativeUrl = "/api/" + version + "/identities/" + identityId + "/claims" + queryParameters;
+        String url = this.url + "/" + version + "/identities/" + identityId + "/claims" + queryParameters;
+
+        List<String> headers = PlatformUtils.createGetHeaders(keyPair, relativeUrl);
+        HttpResponse<String> response = httpClientProvider.executeGet(url, headers.toArray(new String[0]));
+
+        return handleResponse(response, GetClaimsResponse.class);
     }
 
     /**
