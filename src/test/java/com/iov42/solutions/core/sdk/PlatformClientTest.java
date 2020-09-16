@@ -74,28 +74,6 @@ public class PlatformClientTest {
         }
 
         @Test
-        @DisplayName("Create Identity Claims Test")
-        @Order(2)
-        void testCreateIdentityClaims() {
-            String requestId = UUID.randomUUID().toString();
-
-            CreateClaimsRequest request = new CreateClaimsRequest();
-            request.setRequestId(requestId);
-            request.setClaims(List.of("claim1", "claim2"));
-            request.setSubjectId(context.getIdentityId());
-
-            client.createIdentityClaims(request, context.getKeyPair())
-                    .whenComplete((response, throwable) -> {
-                        Optional<RequestInfoResponse> info = client.handleRedirect(requestId, response.headers());
-                        assertTrue(info.isPresent());
-                        assertNotNull(info.get());
-                        assertNotNull(info.get().getProof());
-                        assertNotNull(info.get().getResources());
-                        assertEquals(requestId, info.get().getRequestId());
-                    }).join();
-        }
-
-        @Test
         @DisplayName("Get Identity Test")
         @Order(2)
         void testGetIdentity() throws Exception {
@@ -115,6 +93,30 @@ public class PlatformClientTest {
             assertNotNull(identityResponse.getIdentityId());
             assertEquals(identityId, identityResponse.getIdentityId());
             assertNotNull(identityResponse.getPublicCredentials());
+        }
+
+        @Test
+        @DisplayName("Create Identity Claims Test")
+        @Order(3)
+        void testCreateIdentityClaims() {
+            assumeTrue(context.isCreatedIdentity(), "In order to perform this test, identity must be created. Run IdentityTest together.");
+
+            String requestId = UUID.randomUUID().toString();
+
+            CreateClaimsRequest request = new CreateClaimsRequest();
+            request.setRequestId(requestId);
+            request.setClaims(List.of("claim1", "claim2"));
+            request.setSubjectId(context.getIdentityId());
+
+            client.createIdentityClaims(request, context.getKeyPair())
+                    .whenComplete((response, throwable) -> {
+                        Optional<RequestInfoResponse> info = client.handleRedirect(requestId, response.headers());
+                        assertTrue(info.isPresent());
+                        assertNotNull(info.get());
+                        assertNotNull(info.get().getProof());
+                        assertNotNull(info.get().getResources());
+                        assertEquals(requestId, info.get().getRequestId());
+                    }).join();
         }
     }
 
