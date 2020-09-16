@@ -5,14 +5,9 @@ import com.iov42.solutions.core.sdk.model.HealthChecks;
 import com.iov42.solutions.core.sdk.model.IovKeyPair;
 import com.iov42.solutions.core.sdk.model.ProtocolType;
 import com.iov42.solutions.core.sdk.model.PublicCredentials;
-import com.iov42.solutions.core.sdk.model.requests.CreateClaimsRequest;
-import com.iov42.solutions.core.sdk.model.requests.CreateIdentityRequest;
-import com.iov42.solutions.core.sdk.model.requests.GetIdentityClaimsRequest;
-import com.iov42.solutions.core.sdk.model.requests.GetIdentityRequest;
-import com.iov42.solutions.core.sdk.model.responses.GetClaimsResponse;
-import com.iov42.solutions.core.sdk.model.responses.GetIdentityResponse;
-import com.iov42.solutions.core.sdk.model.responses.NodeInfoResponse;
-import com.iov42.solutions.core.sdk.model.responses.RequestInfoResponse;
+import com.iov42.solutions.core.sdk.model.requests.*;
+import com.iov42.solutions.core.sdk.model.responses.*;
+import com.iov42.solutions.core.sdk.utils.PlatformUtils;
 import com.iov42.solutions.core.sdk.utils.SecurityUtils;
 import org.junit.jupiter.api.*;
 
@@ -137,6 +132,23 @@ public class PlatformClientTest {
             GetClaimsResponse claimsResponse = client.getIdentityClaims(request, context.getKeyPair());
             assertNotNull(claimsResponse);
             assertNotNull(claimsResponse.getClaims());
+        }
+
+        @Test
+        @DisplayName("Get Identity Claim Test (Single Claim)")
+        @Order(5)
+        void testGetIdentityClaim() throws Exception {
+            assumeTrue(context.isCreatedIdentity(), "In order to perform this test, identity must be created. Run IdentityTest together.");
+
+            GetIdentityClaimRequest request = new GetIdentityClaimRequest();
+            request.setRequestId(UUID.randomUUID().toString());
+            request.setIdentityId(context.getIdentityId());
+            request.setNodeId(getNodeInfo().getNodeId());
+            request.setHashedClaim(PlatformUtils.getEncodedClaimHash("claim1"));
+
+            ClaimEndorsementsResponse response = client.getIdentityClaim(request, context.getKeyPair());
+            assertNotNull(response);
+            assertNotNull(response.getClaim());
         }
     }
 

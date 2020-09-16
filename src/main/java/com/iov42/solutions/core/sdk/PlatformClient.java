@@ -129,10 +129,11 @@ public class PlatformClient {
      * Retrieves a single identity's claim
      * See api spec at:
      * https://api.sandbox.iov42.dev/api/v1/apidocs/redoc.html#tag/identities/paths/~1identities~1{identityId}~1claims~1{hashedClaim}/get
-     * Input:
-     * identityId -> identity's identifier
-     * keyPair -> key pair used to sign the request
-     * delegatorIdentityId -> identity on which behalf the request is signed, if different than the one in the keyPair
+     *
+     * @param request {@link GetIdentityClaimRequest}
+     * @param keyPair {@link IovKeyPair}
+     * @return {@link ClaimEndorsementsResponse}
+     * @throws Exception
      */
     public ClaimEndorsementsResponse getIdentityClaim(GetIdentityClaimRequest request, IovKeyPair keyPair) throws Exception {
 
@@ -143,7 +144,7 @@ public class PlatformClient {
         String hashedClaim = request.getHashedClaim();
 
         String relativeUrl = "/api/" + version + "/identities/" + identityId + "/claims/" + hashedClaim + queryParameters;
-        String url = this.url + "/" + version + "/identities/" + identityId + "/claims" + queryParameters;
+        String url = this.url + "/" + version + "/identities/" + identityId + "/claims/" + hashedClaim + queryParameters;
 
         List<String> headers = PlatformUtils.createGetHeaders(keyPair, relativeUrl);
         HttpResponse<String> response = httpClientProvider.executeGet(url, headers.toArray(new String[0]));
