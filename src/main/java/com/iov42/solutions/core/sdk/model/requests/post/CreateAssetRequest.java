@@ -1,4 +1,4 @@
-package com.iov42.solutions.core.sdk.model.requests;
+package com.iov42.solutions.core.sdk.model.requests.post;
 
 import com.iov42.solutions.core.sdk.model.requests.BaseRequest;
 
@@ -9,6 +9,10 @@ public class CreateAssetRequest extends BaseRequest {
     private String assetTypeId;
 
     private String quantity;
+
+    public CreateAssetRequest() {
+        super();
+    }
 
     public String getAssetId() {
         return assetId;

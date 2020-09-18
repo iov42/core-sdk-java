@@ -1,11 +1,13 @@
 package com.iov42.solutions.core.sdk.model.requests;
 
+import java.util.UUID;
+
 public abstract class BaseRequest {
 
-    private String requestId;
+    private final String requestId;
 
     public BaseRequest() {
-
+        this.requestId = UUID.randomUUID().toString();
     }
 
     public BaseRequest(String requestId) {
@@ -14,10 +16,6 @@ public abstract class BaseRequest {
 
     public String getRequestId() {
         return requestId;
-    }
-
-    public void setRequestId(String requestId) {
-        this.requestId = requestId;
     }
 
     @Override

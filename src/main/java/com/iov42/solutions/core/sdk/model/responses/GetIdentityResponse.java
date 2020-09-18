@@ -2,7 +2,7 @@ package com.iov42.solutions.core.sdk.model.responses;
 
 import com.iov42.solutions.core.sdk.model.IovKeyPair;
 import com.iov42.solutions.core.sdk.model.PublicCredentials;
-import com.iov42.solutions.core.sdk.model.requests.GetIdentityRequest;
+import com.iov42.solutions.core.sdk.model.requests.get.GetIdentityRequest;
 
 import java.util.List;
 

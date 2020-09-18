@@ -1,4 +1,6 @@
-package com.iov42.solutions.core.sdk.model.requests;
+package com.iov42.solutions.core.sdk.model.requests.post;
+
+import com.iov42.solutions.core.sdk.model.requests.BaseRequest;
 
 import java.util.Map;
 
@@ -10,7 +12,11 @@ public class CreateEndorsementsRequest extends BaseRequest {
 
     private String subjectId;
 
-    public CreateEndorsementsRequest() {
+    public CreateEndorsementsRequest(String subjectId, String endorserId, Map<String, String> endorsements) {
+        super();
+        this.subjectId = subjectId;
+        this.endorserId = endorserId;
+        this.endorsements = endorsements;
     }
 
     public CreateEndorsementsRequest(String requestId, String subjectId, String endorserId, Map<String, String> endorsements) {
@@ -24,24 +30,12 @@ public class CreateEndorsementsRequest extends BaseRequest {
         return endorsements;
     }
 
-    public void setEndorsements(Map<String, String> endorsements) {
-        this.endorsements = endorsements;
-    }
-
     public String getEndorserId() {
         return endorserId;
     }
 
-    public void setEndorserId(String endorserId) {
-        this.endorserId = endorserId;
-    }
-
     public String getSubjectId() {
         return subjectId;
-    }
-
-    public void setSubjectId(String subjectId) {
-        this.subjectId = subjectId;
     }
 
     @Override

@@ -2,18 +2,24 @@ package com.iov42.solutions.core.sdk;
 
 import com.iov42.solutions.core.sdk.errors.PlatformException;
 import com.iov42.solutions.core.sdk.http.HttpClientProvider;
-import com.iov42.solutions.core.sdk.model.*;
-import com.iov42.solutions.core.sdk.model.requests.*;
+import com.iov42.solutions.core.sdk.model.HealthChecks;
+import com.iov42.solutions.core.sdk.model.IovKeyPair;
+import com.iov42.solutions.core.sdk.model.PublicCredentials;
+import com.iov42.solutions.core.sdk.model.requests.get.GetIdentityClaimRequest;
+import com.iov42.solutions.core.sdk.model.requests.get.GetIdentityClaimsRequest;
+import com.iov42.solutions.core.sdk.model.requests.get.GetIdentityRequest;
+import com.iov42.solutions.core.sdk.model.requests.post.CreateAssetTypeRequest;
+import com.iov42.solutions.core.sdk.model.requests.post.CreateClaimsRequest;
+import com.iov42.solutions.core.sdk.model.requests.post.CreateEndorsementsRequest;
+import com.iov42.solutions.core.sdk.model.requests.post.CreateIdentityRequest;
 import com.iov42.solutions.core.sdk.model.responses.*;
 import com.iov42.solutions.core.sdk.utils.JsonUtils;
 import com.iov42.solutions.core.sdk.utils.PlatformUtils;
-import com.iov42.solutions.core.sdk.utils.SecurityUtils;
 
 import java.net.http.HttpHeaders;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -47,6 +53,24 @@ public class PlatformClient {
     public PlatformClient(String url, String version, HttpClientProvider<HttpResponse<String>> httpClientProvider) {
         this(url, httpClientProvider);
         this.version = version;
+    }
+
+    public CompletableFuture<HttpResponse<String>> createAssetType(CreateAssetTypeRequest request, IovKeyPair keyPair) {
+        String body = JsonUtils.toJson(request);
+
+        List<String> headers = PlatformUtils.createPostHeaders(keyPair, body);
+
+        String url = this.url + "/" + version + "/asset-types";
+        return httpClientProvider.executePost(url, body.getBytes(StandardCharsets.UTF_8), headers.toArray(new String[0]));
+    }
+
+    public CompletableFuture<HttpResponse<String>> getAssetType(CreateAssetTypeRequest request, IovKeyPair keyPair) {
+        String body = JsonUtils.toJson(request);
+
+        List<String> headers = PlatformUtils.createPostHeaders(keyPair, body);
+
+        String url = this.url + "/" + version + "/asset-types";
+        return httpClientProvider.executePost(url, body.getBytes(StandardCharsets.UTF_8), headers.toArray(new String[0]));
     }
 
     /**
@@ -123,10 +147,11 @@ public class PlatformClient {
      * Retrieves an identity in the iov42 platform
      * See api spec at:
      * https://api.sandbox.iov42.dev/api/v1/apidocs/redoc.html#tag/identities/paths/~1identities~1{identityId}/get
-     * Input:
-     * identityId -> identity's identifier
-     * keyPair -> key pair used to sign the request
-     * delegatorIdentityId -> identity on which behalf the request is executed, if different than the one in the keyPair
+     *
+     * @param request parameters
+     * @param keyPair -> key pair used to sign the request
+     * @return {@link GetIdentityResponse}
+     * @throws Exception
      */
     public GetIdentityResponse getIdentity(GetIdentityRequest request, IovKeyPair keyPair) throws Exception {
 
@@ -149,8 +174,8 @@ public class PlatformClient {
      * See api spec at:
      * https://api.sandbox.iov42.dev/api/v1/apidocs/redoc.html#tag/identities/paths/~1identities~1{identityId}~1claims~1{hashedClaim}/get
      *
-     * @param request {@link GetIdentityClaimRequest}
-     * @param keyPair {@link IovKeyPair}
+     * @param request parameters
+     * @param keyPair -> key pair used to sign the request
      * @return {@link ClaimEndorsementsResponse}
      * @throws Exception
      */
@@ -195,6 +220,30 @@ public class PlatformClient {
         HttpResponse<String> response = httpClientProvider.executeGet(url, headers.toArray(new String[0]));
 
         return handleResponse(response, GetClaimsResponse.class);
+    }
+
+    /**
+     * Retrieves identity public credentials, like public key and protocol
+     * See the api specs at:
+     * https://api.sandbox.iov42.dev/api/v1/apidocs/redoc.html#tag/identities/paths/~1identities~1{identityId}~1public-key/get
+     *
+     * @param request parameters
+     * @param keyPair -> key pair used to sign the request
+     * @return {@link PublicCredentials}
+     * @throws Exception
+     */
+    public PublicCredentials getIdentityPublicKey(GetIdentityRequest request, IovKeyPair keyPair) throws Exception {
+        String requestId = request.getRequestId();
+        String nodeId = request.getNodeId();
+        String identityId = request.getIdentityId();
+
+        String queryParameters = String.format("?requestId=%s&nodeId=%s", requestId, nodeId);
+        String relativeUrl = "/api/" + version + "/identities/" + identityId + "/public-key" + queryParameters;
+        String url = this.url + "/" + version + "/identities/" + identityId + "/public-key" + queryParameters;
+
+        List<String> headers = PlatformUtils.createGetHeaders(keyPair, relativeUrl);
+        HttpResponse<String> response = httpClientProvider.executeGet(url, headers.toArray(new String[0]));
+        return handleResponse(response, PublicCredentials.class);
     }
 
     /**

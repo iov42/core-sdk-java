@@ -1,8 +1,14 @@
-package com.iov42.solutions.core.sdk.model.requests;
+package com.iov42.solutions.core.sdk.model.requests.post;
+
+import com.iov42.solutions.core.sdk.model.requests.BaseRequest;
 
 public class AddDelegateRequest extends BaseRequest {
 
     private String delegateIdentityId;
+
+    public AddDelegateRequest() {
+        super();
+    }
 
     public String getDelegateIdentityId() {
         return delegateIdentityId;

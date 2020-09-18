@@ -1,23 +1,21 @@
-package com.iov42.solutions.core.sdk.model.requests;
+package com.iov42.solutions.core.sdk.model.requests.get;
 
 public class GetIdentityClaimRequest extends GetIdentityRequest {
 
     private String hashedClaim;
 
-    public GetIdentityClaimRequest() {
+    public GetIdentityClaimRequest(String nodeId, String identityId, String hashedClaim) {
+        super(nodeId, identityId);
+        this.hashedClaim = hashedClaim;
     }
 
-    public GetIdentityClaimRequest(String requestId, String identityId, String nodeId, String hashedClaim) {
-        super(requestId, identityId, nodeId);
+    public GetIdentityClaimRequest(String requestId, String nodeId, String identityId, String hashedClaim) {
+        super(requestId, nodeId, identityId);
         this.hashedClaim = hashedClaim;
     }
 
     public String getHashedClaim() {
         return hashedClaim;
-    }
-
-    public void setHashedClaim(String hashedClaim) {
-        this.hashedClaim = hashedClaim;
     }
 
     @Override

@@ -1,25 +1,18 @@
-package com.iov42.solutions.core.sdk.model.requests;
+package com.iov42.solutions.core.sdk.model.requests.post;
 
 import com.iov42.solutions.core.sdk.model.PublicCredentials;
+import com.iov42.solutions.core.sdk.model.requests.BaseRequest;
 
-import java.util.UUID;
-
-public class CreateIdentityRequest extends AuthorisedRequest {
+public class CreateIdentityRequest extends BaseRequest {
 
     private final String identityId;
 
     private final PublicCredentials publicCredentials;
 
-    public CreateIdentityRequest(PublicCredentials publicCredentials) {
-        super(UUID.randomUUID().toString());
-        this.identityId = UUID.randomUUID().toString();
-        this.publicCredentials = publicCredentials;
-    }
-
-    public CreateIdentityRequest(String requestId, String identityId, PublicCredentials publicCredentials) {
+    public CreateIdentityRequest(String requestId, String identityId, PublicCredentials credentials) {
         super(requestId);
         this.identityId = identityId;
-        this.publicCredentials = publicCredentials;
+        this.publicCredentials = credentials;
     }
 
     public String getIdentityId() {

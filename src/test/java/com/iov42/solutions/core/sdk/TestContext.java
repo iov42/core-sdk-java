@@ -18,8 +18,6 @@ public class TestContext {
 
     private IovKeyPair keyPair;
 
-    private String requestId;
-
     private String subjectAssetTypeId;
 
     private String subjectId;
@@ -71,14 +69,6 @@ public class TestContext {
 
     public void setKeyPair(IovKeyPair keyPair) {
         this.keyPair = keyPair;
-    }
-
-    public String getRequestId() {
-        return requestId;
-    }
-
-    public void setRequestId(String requestId) {
-        this.requestId = requestId;
     }
 
     public String getSubjectAssetTypeId() {
