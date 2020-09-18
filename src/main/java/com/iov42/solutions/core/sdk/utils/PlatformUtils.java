@@ -9,10 +9,7 @@ import com.iov42.solutions.core.sdk.model.responses.RequestInfoResponse;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -28,6 +25,8 @@ public class PlatformUtils {
     public static final String HEADER_CONTENT_TYPE = "Content-Type";
 
     public static final String HEADER_IOV42_CLAIMS = "X-IOV42-Claims";
+
+    static final String ENDORSER_ONLY_CLAIM_HEADER_VALUE = "e30=";
 
     private PlatformUtils() {
         // static usage only
@@ -64,7 +63,7 @@ public class PlatformUtils {
         return headers;
     }
 
-    public static List<String> createPostHeadersWithClaims(IovKeyPair keyPair, String body, List<String> claims) {
+    public static List<String> createPostClaimsHeaders(IovKeyPair keyPair, String body, Collection<String> claims) {
         List<String> headers = createPostHeaders(keyPair, body);
 
         Map<String, String> claimMap = claims.stream()
@@ -74,6 +73,29 @@ public class PlatformUtils {
         headers.add(getEncodedHeaderValue(claimMap));
 
         return headers;
+    }
+
+    public static List<String> createPostEndorsementsHeaders(IovKeyPair keyPair, String body) {
+        List<String> headers = createPostHeaders(keyPair, body);
+
+        headers.add(HEADER_IOV42_CLAIMS);
+        headers.add(ENDORSER_ONLY_CLAIM_HEADER_VALUE);
+
+        return headers;
+    }
+
+    public static Map<String, String> endorse(SignatoryIOV endorser, String subjectId, List<String> plainClaims) {
+        return plainClaims.stream()
+                .collect(Collectors.toMap(
+                        PlatformUtils::getEncodedClaimHash,
+                        v -> SecurityUtils.sign(endorser, subjectId + ";" + PlatformUtils.getEncodedClaimHash(v)).getSignature()));
+    }
+
+    public static Map<String, String> endorse(SignatoryIOV endorser, String subjectId, String subjectTypeId, List<String> plainClaims) {
+        return plainClaims.stream()
+                .collect(Collectors.toMap(
+                        Function.identity(),
+                        v -> SecurityUtils.sign(endorser, subjectId + ";" + subjectTypeId + ";" + PlatformUtils.getEncodedClaimHash(v)).getSignature()));
     }
 
     public static String getEncodedClaimHash(String plainClaim) {

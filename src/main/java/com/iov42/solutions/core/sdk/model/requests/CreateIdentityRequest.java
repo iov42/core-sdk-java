@@ -16,12 +16,6 @@ public class CreateIdentityRequest extends AuthorisedRequest {
         this.publicCredentials = publicCredentials;
     }
 
-    public CreateIdentityRequest(String identityId, PublicCredentials publicCredentials) {
-        super(UUID.randomUUID().toString());
-        this.identityId = identityId;
-        this.publicCredentials = publicCredentials;
-    }
-
     public CreateIdentityRequest(String requestId, String identityId, PublicCredentials publicCredentials) {
         super(requestId);
         this.identityId = identityId;

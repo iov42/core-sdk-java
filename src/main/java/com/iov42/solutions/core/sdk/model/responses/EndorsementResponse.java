@@ -2,11 +2,11 @@ package com.iov42.solutions.core.sdk.model.responses;
 
 public class EndorsementResponse extends BaseResponse {
 
-    private String delegateIdentityId;
+    private final String delegateIdentityId;
 
-    private String endorsement;
+    private final String endorsement;
 
-    private String endorserId;
+    private final String endorserId;
 
     public EndorsementResponse(String delegateIdentityId, String endorsement, String endorserId, String proof) {
         super(proof);

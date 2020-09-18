@@ -4,11 +4,11 @@ import java.util.List;
 
 public class ClaimEndorsementsResponse extends BaseResponse {
 
-    private String claim;
+    private final String claim;
 
-    private String delegateIdentityId;
+    private final String delegateIdentityId;
 
-    private List<EndorsementResponse> endorsements;
+    private final List<EndorsementResponse> endorsements;
 
     public ClaimEndorsementsResponse(String proof, String claim, String delegateIdentityId, List<EndorsementResponse> endorsements) {
         super(proof);

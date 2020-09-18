@@ -11,9 +11,9 @@ import java.util.List;
  */
 public class GetIdentityResponse extends BaseResponse {
 
-    private String identityId;
+    private final String identityId;
 
-    private List<PublicCredentials> publicCredentials;
+    private final List<PublicCredentials> publicCredentials;
 
     public GetIdentityResponse(String proof, String identityId, List<PublicCredentials> publicCredentials) {
         super(proof);

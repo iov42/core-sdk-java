@@ -7,10 +7,9 @@ import java.util.Arrays;
  */
 public class RequestInfoResponse extends BaseResponse {
 
-    private String requestId;
+    private final String requestId;
 
-    private String[] resources;
-
+    private final String[] resources;
 
     public RequestInfoResponse(String proof, String requestId, String[] resources) {
         super(proof);

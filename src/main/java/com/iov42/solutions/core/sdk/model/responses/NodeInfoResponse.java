@@ -8,9 +8,9 @@ import com.iov42.solutions.core.sdk.model.PublicCredentials;
  */
 public class NodeInfoResponse {
 
-    private String nodeId;
+    private final String nodeId;
 
-    private PublicCredentials publicCredentials;
+    private final PublicCredentials publicCredentials;
 
     public NodeInfoResponse(String nodeId, PublicCredentials publicCredentials) {
         this.nodeId = nodeId;

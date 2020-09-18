@@ -2,7 +2,7 @@ package com.iov42.solutions.core.sdk.model.responses;
 
 public class BaseResponse {
 
-    private String proof;
+    private final String proof;
 
     public BaseResponse(String proof) {
         this.proof = proof;

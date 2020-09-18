@@ -4,24 +4,21 @@ import java.util.List;
 
 public class GetClaimsResponse {
 
-    private List<ClaimResponse> claims;
+    private final List<ClaimResponse> claims;
 
-    private String next;
+    private final String next;
+
+    public GetClaimsResponse(List<ClaimResponse> claims, String next) {
+        this.claims = claims;
+        this.next = next;
+    }
 
     public List<ClaimResponse> getClaims() {
         return claims;
     }
 
-    public void setClaims(List<ClaimResponse> claims) {
-        this.claims = claims;
-    }
-
     public String getNext() {
         return next;
-    }
-
-    public void setNext(String next) {
-        this.next = next;
     }
 
     @Override

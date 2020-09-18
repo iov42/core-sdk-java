@@ -1,19 +1,19 @@
 package com.iov42.solutions.core.sdk;
 
-import com.iov42.solutions.core.sdk.errors.PlatformError;
 import com.iov42.solutions.core.sdk.errors.PlatformException;
 import com.iov42.solutions.core.sdk.http.HttpClientProvider;
-import com.iov42.solutions.core.sdk.model.HealthChecks;
-import com.iov42.solutions.core.sdk.model.IovKeyPair;
+import com.iov42.solutions.core.sdk.model.*;
 import com.iov42.solutions.core.sdk.model.requests.*;
 import com.iov42.solutions.core.sdk.model.responses.*;
 import com.iov42.solutions.core.sdk.utils.JsonUtils;
 import com.iov42.solutions.core.sdk.utils.PlatformUtils;
+import com.iov42.solutions.core.sdk.utils.SecurityUtils;
 
 import java.net.http.HttpHeaders;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -85,9 +85,28 @@ public class PlatformClient {
 
         String body = JsonUtils.toJson(request);
 
-        List<String> headers = PlatformUtils.createPostHeadersWithClaims(keyPair, body, plainClaims);
+        List<String> headers = PlatformUtils.createPostClaimsHeaders(keyPair, body, plainClaims);
 
         return httpClientProvider.executePost(url + "/" + version + "/identities/" + request.getSubjectId() + "/claims", body.getBytes(StandardCharsets.UTF_8), headers.toArray(new String[0]));
+    }
+
+    /**
+     * Endorses identity's claims
+     *
+     * @param request
+     * @param keyPair
+     * @return {@link java.util.concurrent.CompletableFuture}
+     * @see <a href="https://api.sandbox.iov42.dev/api/v1/apidocs/redoc.html#tag/identities/paths/~1identities~1{identityId}~1endorsements/post">Endorse claims against an identity</a>
+     */
+    public CompletableFuture<HttpResponse<String>> endorseIdentityClaims(CreateEndorsementsRequest request, IovKeyPair keyPair) {
+        String subjectId = request.getSubjectId();
+
+        String body = JsonUtils.toJson(request);
+
+        List<String> headers = PlatformUtils.createPostEndorsementsHeaders(keyPair, body);
+
+        String url = this.url + "/" + version + "/identities/" + subjectId + "/endorsements";
+        return httpClientProvider.executePost(url, body.getBytes(StandardCharsets.UTF_8), headers.toArray(new String[0]));
     }
 
     /**
@@ -199,13 +218,14 @@ public class PlatformClient {
     }
 
     /**
-     * After a POST request, IOV42 returns HTTP 303 which you can handle by using this method
+     * After a POST request, IOV42 Platform returns HTTP 303 which you can handle by using this method
      *
      * @param requestId
-     * @param headers
+     * @param response
      * @return Optional {@link RequestInfoResponse}
      */
-    public Optional<RequestInfoResponse> handleRedirect(String requestId, HttpHeaders headers) {
+    public Optional<RequestInfoResponse> handleRedirect(String requestId, HttpResponse<String> response) {
+        HttpHeaders headers = response.headers();
         Optional<String> optLocation = headers.firstValue("location");
         int reTryAfter = Integer.parseInt(headers.firstValue("retry-after").orElse("5"));
 
@@ -215,7 +235,7 @@ public class PlatformClient {
                 /* location if present = /api/v1/requests/{requestId} */
                 return Optional.of(info);
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                throw new RuntimeException(e.getMessage(), e);
             }
         }
 
@@ -224,8 +244,7 @@ public class PlatformClient {
 
     public <T> T handleResponse(HttpResponse<String> response, Class<T> clazz) throws PlatformException {
         if (response.statusCode() >= 400) {
-            PlatformError error = JsonUtils.fromJson(response.body(), PlatformError.class);
-            throw new PlatformException(error.toString());
+            throw new PlatformException(response.body());
         }
         return JsonUtils.fromJson(response.body(), clazz);
     }

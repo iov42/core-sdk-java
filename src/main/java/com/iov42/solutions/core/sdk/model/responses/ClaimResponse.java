@@ -2,11 +2,11 @@ package com.iov42.solutions.core.sdk.model.responses;
 
 public class ClaimResponse extends BaseResponse {
 
-    private String claim;
+    private final String claim;
 
-    private String delegateIdentityId;
+    private final String delegateIdentityId;
 
-    private String resource;
+    private final String resource;
 
     public ClaimResponse(String claim, String delegateIdentityId, String proof, String resource) {
         super(proof);

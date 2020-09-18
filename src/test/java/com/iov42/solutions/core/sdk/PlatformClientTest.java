@@ -1,10 +1,7 @@
 package com.iov42.solutions.core.sdk;
 
 import com.iov42.solutions.core.sdk.http.DefaultHttpClientProvider;
-import com.iov42.solutions.core.sdk.model.HealthChecks;
-import com.iov42.solutions.core.sdk.model.IovKeyPair;
-import com.iov42.solutions.core.sdk.model.ProtocolType;
-import com.iov42.solutions.core.sdk.model.PublicCredentials;
+import com.iov42.solutions.core.sdk.model.*;
 import com.iov42.solutions.core.sdk.model.requests.*;
 import com.iov42.solutions.core.sdk.model.responses.*;
 import com.iov42.solutions.core.sdk.utils.PlatformUtils;
@@ -12,6 +9,7 @@ import com.iov42.solutions.core.sdk.utils.SecurityUtils;
 import org.junit.jupiter.api.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -60,7 +58,7 @@ public class PlatformClientTest {
             CreateIdentityRequest request = new CreateIdentityRequest(requestId, identityId, credentials);
 
             client.createIdentity(request, keyPair).whenComplete((response, throwable) -> {
-                        Optional<RequestInfoResponse> info = client.handleRedirect(requestId, response.headers());
+                        Optional<RequestInfoResponse> info = client.handleRedirect(requestId, response);
                         assertTrue(info.isPresent());
                         assertNotNull(info.get());
                         assertNotNull(info.get().getProof());
@@ -72,34 +70,10 @@ public class PlatformClientTest {
         }
 
         @Test
-        @DisplayName("Create Identity Claims Test")
-        @Order(3)
-        void testCreateIdentityClaims() {
-            assumeTrue(context.isCreatedIdentity(), "In order to perform this test, identity must be created. Run IdentityTest together.");
-
-            String requestId = UUID.randomUUID().toString();
-
-            CreateClaimsRequest request = new CreateClaimsRequest();
-            request.setRequestId(requestId);
-            request.setClaims(List.of("claim1", "claim2"));
-            request.setSubjectId(context.getIdentityId());
-
-            client.createIdentityClaims(request, context.getKeyPair())
-                    .whenComplete((response, throwable) -> {
-                        Optional<RequestInfoResponse> info = client.handleRedirect(requestId, response.headers());
-                        assertTrue(info.isPresent());
-                        assertNotNull(info.get());
-                        assertNotNull(info.get().getProof());
-                        assertNotNull(info.get().getResources());
-                        assertEquals(requestId, info.get().getRequestId());
-                    }).join();
-        }
-
-        @Test
         @DisplayName("Get Identity Test")
         @Order(2)
         void testGetIdentity() throws Exception {
-            assumeTrue(context.isCreatedIdentity(), "In order to perform this test, identity must be created. Run IdentityTest together.");
+            assumeTrue(context.isCreatedIdentity(), "In order to perform this test, identity must be created. Run IdentityTest group together.");
 
             String identityId = context.getIdentityId();
 
@@ -118,10 +92,34 @@ public class PlatformClientTest {
         }
 
         @Test
+        @DisplayName("Create Identity Claims Test")
+        @Order(3)
+        void testCreateIdentityClaims() {
+            assumeTrue(context.isCreatedIdentity(), "In order to perform this test, identity must be created. Run IdentityTest group together.");
+
+            String requestId = UUID.randomUUID().toString();
+
+            CreateClaimsRequest request = new CreateClaimsRequest();
+            request.setRequestId(requestId);
+            request.setClaims(List.of("claim1", "claim2"));
+            request.setSubjectId(context.getIdentityId());
+
+            client.createIdentityClaims(request, context.getKeyPair())
+                    .whenComplete((response, throwable) -> {
+                        Optional<RequestInfoResponse> info = client.handleRedirect(requestId, response);
+                        assertTrue(info.isPresent());
+                        assertNotNull(info.get());
+                        assertNotNull(info.get().getProof());
+                        assertNotNull(info.get().getResources());
+                        assertEquals(requestId, info.get().getRequestId());
+                    }).join();
+        }
+
+        @Test
         @DisplayName("Get Identity Claims Test")
         @Order(4)
         void testGetIdentityClaims() throws Exception {
-            assumeTrue(context.isCreatedIdentity(), "In order to perform this test, identity must be created. Run IdentityTest together.");
+            assumeTrue(context.isCreatedIdentity(), "In order to perform this test, identity must be created. Run IdentityTest group together.");
 
             GetIdentityClaimsRequest request = new GetIdentityClaimsRequest();
             request.setRequestId(UUID.randomUUID().toString());
@@ -138,7 +136,7 @@ public class PlatformClientTest {
         @DisplayName("Get Identity Claim Test (Single Claim)")
         @Order(5)
         void testGetIdentityClaim() throws Exception {
-            assumeTrue(context.isCreatedIdentity(), "In order to perform this test, identity must be created. Run IdentityTest together.");
+            assumeTrue(context.isCreatedIdentity(), "In order to perform this test, identity must be created. Run IdentityTest group together.");
 
             GetIdentityClaimRequest request = new GetIdentityClaimRequest();
             request.setRequestId(UUID.randomUUID().toString());
@@ -149,6 +147,54 @@ public class PlatformClientTest {
             ClaimEndorsementsResponse response = client.getIdentityClaim(request, context.getKeyPair());
             assertNotNull(response);
             assertNotNull(response.getClaim());
+        }
+
+        @Test
+        @DisplayName("Endorse Identity Claims Test")
+        @Order(6)
+        void testEndorseIdentityClaims() {
+            assumeTrue(context.isCreatedIdentity(), "In order to perform this test, identity must be created. Run IdentityTest group together.");
+
+            // given
+            String endorserId = UUID.randomUUID().toString();
+            IovKeyPair keyPair = new IovKeyPair(endorserId, ProtocolType.SHA256WithRSA, SecurityUtils.generateKeyPair());
+
+            PublicCredentials credentials = new PublicCredentials(ProtocolType.SHA256WithRSA.name(), SecurityUtils.encodeBase64(keyPair.getPublicKey()));
+
+            String requestId = UUID.randomUUID().toString();
+
+            client.createIdentity(new CreateIdentityRequest(requestId, endorserId, credentials), keyPair).whenComplete((response, throwable) -> {
+                Optional<RequestInfoResponse> info = client.handleRedirect(requestId, response);
+                assertTrue(info.isPresent());
+                assertNotNull(info.get());
+                assertNotNull(info.get().getProof());
+                assertNotNull(info.get().getResources());
+                assertEquals(requestId, info.get().getRequestId());
+            }).join();
+
+            String newRequestId = UUID.randomUUID().toString();
+
+            SignatoryIOV signatory = new SignatoryIOV(context.getIdentityId(), keyPair.getProtocolId().name(), keyPair.getPrivateKey());
+            List<String> claims = List.of("claim1", "claim2");
+
+            Map<String, String> endorsements = PlatformUtils.endorse(signatory, context.getSubjectId(), claims);
+
+            CreateEndorsementsRequest request = new CreateEndorsementsRequest();
+            request.setEndorserId(endorserId);
+            request.setSubjectId(context.getIdentityId());
+            request.setRequestId(newRequestId);
+            request.setEndorsements(endorsements);
+
+            client.endorseIdentityClaims(request, keyPair)
+                    .whenComplete((response, throwable) -> {
+                        Optional<RequestInfoResponse> info = client.handleRedirect(newRequestId, response);
+                        assertTrue(info.isPresent());
+                        assertNotNull(info.get());
+                        assertNotNull(info.get().getProof());
+                        assertNotNull(info.get().getResources());
+                        assertEquals(newRequestId, info.get().getRequestId());
+                    }).join();
+
         }
     }
 
