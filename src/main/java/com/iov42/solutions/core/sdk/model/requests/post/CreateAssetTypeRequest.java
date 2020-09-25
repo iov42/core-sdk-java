@@ -9,6 +9,8 @@ public class CreateAssetTypeRequest extends BaseRequest {
 
     private String type;
 
+    private Integer scale;
+
     public CreateAssetTypeRequest() {
         super();
     }
@@ -23,6 +25,15 @@ public class CreateAssetTypeRequest extends BaseRequest {
         super(requestId);
         this.assetTypeId = assetTypeId;
         this.type = type.getType();
+    }
+
+    public CreateAssetTypeRequest(String requestId, String assetTypeId, AssetTypeProperty type, Integer scale) {
+        this(requestId, assetTypeId, type);
+        this.scale = scale;
+    }
+
+    public Integer getScale() {
+        return scale;
     }
 
     public String getAssetTypeId() {

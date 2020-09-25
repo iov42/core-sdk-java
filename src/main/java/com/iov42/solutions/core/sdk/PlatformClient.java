@@ -5,6 +5,7 @@ import com.iov42.solutions.core.sdk.http.HttpClientProvider;
 import com.iov42.solutions.core.sdk.model.HealthChecks;
 import com.iov42.solutions.core.sdk.model.IovKeyPair;
 import com.iov42.solutions.core.sdk.model.PublicCredentials;
+import com.iov42.solutions.core.sdk.model.requests.get.GetAssetTypeRequest;
 import com.iov42.solutions.core.sdk.model.requests.get.GetIdentityClaimRequest;
 import com.iov42.solutions.core.sdk.model.requests.get.GetIdentityClaimsRequest;
 import com.iov42.solutions.core.sdk.model.requests.get.GetIdentityRequest;
@@ -55,6 +56,16 @@ public class PlatformClient {
         this.version = version;
     }
 
+    /**
+     * Creates a new asset type
+     * <p>
+     * See the api specs at:
+     * https://api.sandbox.iov42.dev/api/v1/apidocs/redoc.html#tag/assets/paths/~1asset-types/post
+     *
+     * @param request
+     * @param keyPair
+     * @return
+     */
     public CompletableFuture<HttpResponse<String>> createAssetType(CreateAssetTypeRequest request, IovKeyPair keyPair) {
         String body = JsonUtils.toJson(request);
 
@@ -64,13 +75,30 @@ public class PlatformClient {
         return httpClientProvider.executePost(url, body.getBytes(StandardCharsets.UTF_8), headers.toArray(new String[0]));
     }
 
-    public CompletableFuture<HttpResponse<String>> getAssetType(CreateAssetTypeRequest request, IovKeyPair keyPair) {
-        String body = JsonUtils.toJson(request);
+    /**
+     * Reads information about an asset type
+     * <p>
+     * See the API specs at:
+     * https://api.sandbox.iov42.dev/api/v1/apidocs/redoc.html#tag/assets/paths/~1asset-types~1{assetTypeId}/get
+     *
+     * @param request
+     * @param keyPair
+     * @return
+     */
+    public GetAssetTypeResponse getAssetType(GetAssetTypeRequest request, IovKeyPair keyPair) throws PlatformException {
+        String requestId = request.getRequestId();
+        String assetTypeId = request.getAssetTypeId();
+        String nodeId = request.getNodeId();
 
-        List<String> headers = PlatformUtils.createPostHeaders(keyPair, body);
 
-        String url = this.url + "/" + version + "/asset-types";
-        return httpClientProvider.executePost(url, body.getBytes(StandardCharsets.UTF_8), headers.toArray(new String[0]));
+        String queryParameters = String.format("?requestId=%s&nodeId=%s", requestId, nodeId);
+        String relativeUrl = "/api/" + version + "/asset-types/" + assetTypeId + queryParameters;
+        String url = this.url + "/" + version + "/asset-types/" + assetTypeId + queryParameters;
+
+        List<String> headers = PlatformUtils.createGetHeaders(keyPair, relativeUrl);
+        HttpResponse<String> response = httpClientProvider.executeGet(url, headers.toArray(new String[0]));
+
+        return handleResponse(response, GetAssetTypeResponse.class);
     }
 
     /**
@@ -297,4 +325,32 @@ public class PlatformClient {
         }
         return JsonUtils.fromJson(response.body(), clazz);
     }
+
+    /**
+     * Creates a new asset type
+     * <p>
+     * See the api specs at:
+     * https://api.sandbox.iov42.dev/api/v1/apidocs/redoc.html#tag/assets/paths/~1asset-types/post
+     *
+     * @param request
+     * @param keyPair
+     * @return
+     */
+    public CompletableFuture<HttpResponse<String>> createAsset(CreateAssetTypeRequest request, IovKeyPair keyPair) {
+
+//        List<String> plainClaims = request.getClaims();
+//        List<String> encodedClaims = plainClaims.stream().map(PlatformUtils::getEncodedClaimHash).collect(Collectors.toList());
+//        request.setClaims(encodedClaims);
+
+        String body = JsonUtils.toJson(request);
+        List<String> headers = PlatformUtils.createPostEndorsementsHeaders(keyPair, body);
+        return httpClientProvider.executePost(url + "/" + version + "/asset-types", body.getBytes(StandardCharsets.UTF_8), headers.toArray(new String[0]));
+
+    }
+
+    public BaseResponse readAsset() {
+        return null;
+    }
+
+
 }
