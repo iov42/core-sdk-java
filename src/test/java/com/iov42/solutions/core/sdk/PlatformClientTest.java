@@ -2,12 +2,14 @@ package com.iov42.solutions.core.sdk;
 
 import com.iov42.solutions.core.sdk.http.DefaultHttpClientProvider;
 import com.iov42.solutions.core.sdk.model.*;
-import com.iov42.solutions.core.sdk.model.requests.post.CreateClaimsRequest;
-import com.iov42.solutions.core.sdk.model.requests.post.CreateEndorsementsRequest;
-import com.iov42.solutions.core.sdk.model.requests.post.CreateIdentityRequest;
+import com.iov42.solutions.core.sdk.model.requests.get.GetAssetTypeRequest;
 import com.iov42.solutions.core.sdk.model.requests.get.GetIdentityClaimRequest;
 import com.iov42.solutions.core.sdk.model.requests.get.GetIdentityClaimsRequest;
 import com.iov42.solutions.core.sdk.model.requests.get.GetIdentityRequest;
+import com.iov42.solutions.core.sdk.model.requests.post.CreateAssetTypeRequest;
+import com.iov42.solutions.core.sdk.model.requests.post.CreateClaimsRequest;
+import com.iov42.solutions.core.sdk.model.requests.post.CreateEndorsementsRequest;
+import com.iov42.solutions.core.sdk.model.requests.post.CreateIdentityRequest;
 import com.iov42.solutions.core.sdk.model.responses.*;
 import com.iov42.solutions.core.sdk.utils.PlatformUtils;
 import com.iov42.solutions.core.sdk.utils.SecurityUtils;
@@ -34,7 +36,8 @@ public class PlatformClientTest {
         context = new TestContext();
         context.setIdentityId(UUID.randomUUID().toString());
         context.setKeyPair(new IovKeyPair(context.getIdentityId(), ProtocolType.SHA256WithRSA, SecurityUtils.generateKeyPair()));
-
+        context.setAssetTypeId(UUID.randomUUID().toString());
+        context.setAssetTypeQuantifiableId(UUID.randomUUID().toString());
         client = new PlatformClient(URL, new DefaultHttpClientProvider());
     }
 
@@ -221,6 +224,101 @@ public class PlatformClientTest {
             assertNotNull(response.getProtocolId());
             assertNotNull(response.getKey());
         }
+
+        @Test
+        @DisplayName("Create Unique Asset Type")
+        @Order(8)
+        void testCreateUniqueAssetType() throws Exception {
+            assumeTrue(context.isCreatedIdentity(), ASSUME_MESSAGE);
+
+            IovKeyPair keyPair = context.getKeyPair();
+            String requestId = UUID.randomUUID().toString();
+            String assetTypeId = context.getAssetTypeId();
+
+            CreateAssetTypeRequest request = new CreateAssetTypeRequest(requestId, assetTypeId, AssetTypeProperty.UNIQUE);
+
+            client.createAssetType(request, keyPair)
+                    .whenComplete((response, throwable) -> {
+                        Optional<RequestInfoResponse> info = client.handleRedirect(requestId, response);
+
+                        System.out.println(info);
+                        assertTrue(info.isPresent());
+                        assertNotNull(info.get());
+                        assertNotNull(info.get().getProof());
+                        assertNotNull(info.get().getResources());
+                        assertEquals(requestId, info.get().getRequestId());
+                    }).join();
+        }
+
+        @Test
+        @DisplayName("Create Quantifiable Asset Type")
+        @Order(8)
+        void testCreateQuantifiableAssetType() throws Exception {
+            assumeTrue(context.isCreatedIdentity(), ASSUME_MESSAGE);
+
+            IovKeyPair keyPair = context.getKeyPair();
+            String requestId = UUID.randomUUID().toString();
+            String assetTypeId = context.getAssetTypeQuantifiableId();
+
+            CreateAssetTypeRequest request = new CreateAssetTypeRequest(requestId, assetTypeId, AssetTypeProperty.QUANTIFIABLE, 1);
+
+            client.createAssetType(request, keyPair)
+                    .whenComplete((response, throwable) -> {
+                        Optional<RequestInfoResponse> info = client.handleRedirect(requestId, response);
+
+                        System.out.println(info);
+                        assertTrue(info.isPresent());
+                        assertNotNull(info.get());
+                        assertNotNull(info.get().getProof());
+                        assertNotNull(info.get().getResources());
+                        assertEquals(requestId, info.get().getRequestId());
+                    }).join();
+        }
+
+        @Test
+        @DisplayName("Get Unique Asset Type")
+        @Order(9)
+        void testGetUniqueAssetType() throws Exception {
+            assumeTrue(context.isCreatedIdentity(), ASSUME_MESSAGE);
+
+            String assetTypeId = context.getAssetTypeId();
+
+            String nodeId = getNodeInfo().getNodeId();
+            String requestId = UUID.randomUUID().toString();
+
+            GetAssetTypeRequest request = new GetAssetTypeRequest(requestId, nodeId, assetTypeId);
+            IovKeyPair keyPair = context.getKeyPair();
+
+            GetAssetTypeResponse assetTypeResponse = client.getAssetType(request, keyPair);
+            assertNotNull(assetTypeResponse);
+            assertNotNull(assetTypeResponse.getType());
+            assertNotNull(assetTypeResponse.getAssetTypeId());
+            assertNotNull(assetTypeResponse.getOwnerId());
+            assertNotNull(assetTypeResponse.getProof());
+        }
+
+        @Test
+        @DisplayName("Get Quantifable Asset Type")
+        @Order(9)
+        void testGetQuantifiableAssetType() throws Exception {
+            assumeTrue(context.isCreatedIdentity(), ASSUME_MESSAGE);
+
+            String assetTypeId = context.getAssetTypeQuantifiableId();
+
+            String nodeId = getNodeInfo().getNodeId();
+            String requestId = UUID.randomUUID().toString();
+
+            GetAssetTypeRequest request = new GetAssetTypeRequest(requestId, nodeId, assetTypeId);
+            IovKeyPair keyPair = context.getKeyPair();
+
+            GetAssetTypeResponse assetTypeResponse = client.getAssetType(request, keyPair);
+            assertNotNull(assetTypeResponse);
+            assertNotNull(assetTypeResponse.getType());
+            assertNotNull(assetTypeResponse.getAssetTypeId());
+            assertNotNull(assetTypeResponse.getOwnerId());
+            assertNotNull(assetTypeResponse.getProof());
+        }
+
     }
 
     @Nested
