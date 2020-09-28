@@ -325,32 +325,4 @@ public class PlatformClient {
         }
         return JsonUtils.fromJson(response.body(), clazz);
     }
-
-    /**
-     * Creates a new asset type
-     * <p>
-     * See the api specs at:
-     * https://api.sandbox.iov42.dev/api/v1/apidocs/redoc.html#tag/assets/paths/~1asset-types/post
-     *
-     * @param request
-     * @param keyPair
-     * @return
-     */
-    public CompletableFuture<HttpResponse<String>> createAsset(CreateAssetTypeRequest request, IovKeyPair keyPair) {
-
-//        List<String> plainClaims = request.getClaims();
-//        List<String> encodedClaims = plainClaims.stream().map(PlatformUtils::getEncodedClaimHash).collect(Collectors.toList());
-//        request.setClaims(encodedClaims);
-
-        String body = JsonUtils.toJson(request);
-        List<String> headers = PlatformUtils.createPostEndorsementsHeaders(keyPair, body);
-        return httpClientProvider.executePost(url + "/" + version + "/asset-types", body.getBytes(StandardCharsets.UTF_8), headers.toArray(new String[0]));
-
-    }
-
-    public BaseResponse readAsset() {
-        return null;
-    }
-
-
 }
