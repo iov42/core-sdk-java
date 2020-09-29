@@ -6,19 +6,13 @@ import com.iov42.solutions.core.sdk.model.requests.get.GetAssetTypeRequest;
 import com.iov42.solutions.core.sdk.model.requests.get.GetIdentityClaimRequest;
 import com.iov42.solutions.core.sdk.model.requests.get.GetIdentityClaimsRequest;
 import com.iov42.solutions.core.sdk.model.requests.get.GetIdentityRequest;
-import com.iov42.solutions.core.sdk.model.requests.post.CreateAssetTypeRequest;
-import com.iov42.solutions.core.sdk.model.requests.post.CreateClaimsRequest;
-import com.iov42.solutions.core.sdk.model.requests.post.CreateEndorsementsRequest;
-import com.iov42.solutions.core.sdk.model.requests.post.CreateIdentityRequest;
+import com.iov42.solutions.core.sdk.model.requests.post.*;
 import com.iov42.solutions.core.sdk.model.responses.*;
 import com.iov42.solutions.core.sdk.utils.PlatformUtils;
 import com.iov42.solutions.core.sdk.utils.SecurityUtils;
 import org.junit.jupiter.api.*;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
@@ -47,6 +41,36 @@ public class PlatformClientTest {
         return optInfo.get();
     }
 
+    private void assertRequestInfoResponse(Optional<RequestInfoResponse> item, String resourceId) {
+        var nonNullValue = item.isPresent() && item.get() != null && item.get().getProof() != null && item.get().getResources() != null;
+        assertTrue(nonNullValue && Objects.equals(item.get().getRequestId(), resourceId));
+    }
+
+    @Nested
+    @DisplayName("Node Tests")
+    class NodeTests {
+
+        @Test
+        void testGetHealthChecks() throws Exception {
+            Optional<HealthChecks> optInfo = client.getHealthChecks();
+            assertTrue(optInfo.isPresent());
+            HealthChecks healthChecks = optInfo.get();
+
+            assertNotNull(healthChecks.getBuildInfo());
+            assertNotNull(healthChecks.getBuildInfo().getName());
+            assertNotNull(healthChecks.getBuildInfo().getVersion());
+        }
+
+        @Test
+        void testGetNodeInfo() throws Exception {
+            NodeInfoResponse info = getNodeInfo();
+            assertNotNull(info.getNodeId());
+            assertNotNull(info.getPublicCredentials());
+            assertNotNull(info.getPublicCredentials().getKey());
+            assertNotNull(info.getPublicCredentials().getProtocolId());
+        }
+    }
+
     /**
      * Run Identity Tests together as a group
      */
@@ -69,16 +93,12 @@ public class PlatformClientTest {
 
             CreateIdentityRequest request = new CreateIdentityRequest(requestId, identityId, credentials);
 
-            client.createIdentity(request, keyPair).whenComplete((response, throwable) -> {
-                        Optional<RequestInfoResponse> info = client.handleRedirect(requestId, response);
-                        assertTrue(info.isPresent());
-                        assertNotNull(info.get());
-                        assertNotNull(info.get().getProof());
-                        assertNotNull(info.get().getResources());
-                        assertEquals(requestId, info.get().getRequestId());
+            client.createIdentity(request, context.getKeyPair())
+                    .whenComplete((response, throwable) -> {
+                        assertRequestInfoResponse(client.handleRedirect(requestId, response), requestId);
                         context.setCreatedIdentity(true);
-                    }
-            ).join();
+                    }).join();
+
         }
 
         @Test
@@ -93,15 +113,19 @@ public class PlatformClientTest {
 
             CreateClaimsRequest request = new CreateClaimsRequest(requestId, claims, subjectId);
 
+//            client.createIdentityClaims(request, context.getKeyPair())
+//                    .whenComplete((response, throwable) -> {
+//                        Optional<RequestInfoResponse> info = client.handleRedirect(requestId, response);
+//                        assertTrue(info.isPresent());
+//                        assertNotNull(info.get());
+//                        assertNotNull(info.get().getProof());
+//                        assertNotNull(info.get().getResources());
+//                        assertEquals(requestId, info.get().getRequestId());
+//                    }).join();
+
             client.createIdentityClaims(request, context.getKeyPair())
-                    .whenComplete((response, throwable) -> {
-                        Optional<RequestInfoResponse> info = client.handleRedirect(requestId, response);
-                        assertTrue(info.isPresent());
-                        assertNotNull(info.get());
-                        assertNotNull(info.get().getProof());
-                        assertNotNull(info.get().getResources());
-                        assertEquals(requestId, info.get().getRequestId());
-                    }).join();
+                    .whenComplete((response, throwable) -> assertRequestInfoResponse(client.handleRedirect(requestId, response), requestId)).join();
+
         }
 
         @Test
@@ -116,14 +140,8 @@ public class PlatformClientTest {
             PublicCredentials credentials = new PublicCredentials(ProtocolType.SHA256WithRSA.name(), SecurityUtils.encodeBase64(keyPair.getPublicKey()));
             String requestId = UUID.randomUUID().toString();
 
-            client.createIdentity(new CreateIdentityRequest(requestId, endorserId, credentials), keyPair).whenComplete((response, throwable) -> {
-                Optional<RequestInfoResponse> info = client.handleRedirect(requestId, response);
-                assertTrue(info.isPresent());
-                assertNotNull(info.get());
-                assertNotNull(info.get().getProof());
-                assertNotNull(info.get().getResources());
-                assertEquals(requestId, info.get().getRequestId());
-            }).join();
+            client.createIdentity(new CreateIdentityRequest(requestId, endorserId, credentials), keyPair)
+                    .whenComplete((response, throwable) -> assertRequestInfoResponse(client.handleRedirect(requestId, response), requestId)).join();
 
             // endorse identity claims
             String newRequestId = UUID.randomUUID().toString();
@@ -137,14 +155,7 @@ public class PlatformClientTest {
             CreateEndorsementsRequest request = new CreateEndorsementsRequest(newRequestId, subjectId, endorserId, endorsements);
 
             client.endorseIdentityClaims(request, keyPair)
-                    .whenComplete((response, throwable) -> {
-                        Optional<RequestInfoResponse> info = client.handleRedirect(newRequestId, response);
-                        assertTrue(info.isPresent());
-                        assertNotNull(info.get());
-                        assertNotNull(info.get().getProof());
-                        assertNotNull(info.get().getResources());
-                        assertEquals(newRequestId, info.get().getRequestId());
-                    }).join();
+                    .whenComplete((response, throwable) -> assertRequestInfoResponse(client.handleRedirect(requestId, response), requestId)).join();
         }
 
         @Test
@@ -238,16 +249,7 @@ public class PlatformClientTest {
             CreateAssetTypeRequest request = new CreateAssetTypeRequest(requestId, assetTypeId, AssetTypeProperty.UNIQUE);
 
             client.createAssetType(request, keyPair)
-                    .whenComplete((response, throwable) -> {
-                        Optional<RequestInfoResponse> info = client.handleRedirect(requestId, response);
-
-                        System.out.println(info);
-                        assertTrue(info.isPresent());
-                        assertNotNull(info.get());
-                        assertNotNull(info.get().getProof());
-                        assertNotNull(info.get().getResources());
-                        assertEquals(requestId, info.get().getRequestId());
-                    }).join();
+                    .whenComplete((response, throwable) -> assertRequestInfoResponse(client.handleRedirect(requestId, response), requestId)).join();
         }
 
         @Test
@@ -263,16 +265,7 @@ public class PlatformClientTest {
             CreateAssetTypeRequest request = new CreateAssetTypeRequest(requestId, assetTypeId, AssetTypeProperty.QUANTIFIABLE, 1);
 
             client.createAssetType(request, keyPair)
-                    .whenComplete((response, throwable) -> {
-                        Optional<RequestInfoResponse> info = client.handleRedirect(requestId, response);
-
-                        System.out.println(info);
-                        assertTrue(info.isPresent());
-                        assertNotNull(info.get());
-                        assertNotNull(info.get().getProof());
-                        assertNotNull(info.get().getResources());
-                        assertEquals(requestId, info.get().getRequestId());
-                    }).join();
+                    .whenComplete((response, throwable) -> assertRequestInfoResponse(client.handleRedirect(requestId, response), requestId)).join();
         }
 
         @Test
@@ -298,7 +291,7 @@ public class PlatformClientTest {
         }
 
         @Test
-        @DisplayName("Get Quantifable Asset Type")
+        @DisplayName("Get Quantifiable Asset Type")
         @Order(9)
         void testGetQuantifiableAssetType() throws Exception {
             assumeTrue(context.isCreatedIdentity(), ASSUME_MESSAGE);
@@ -319,30 +312,21 @@ public class PlatformClientTest {
             assertNotNull(assetTypeResponse.getProof());
         }
 
-    }
-
-    @Nested
-    @DisplayName("Node Tests")
-    class NodeTests {
-
         @Test
-        void testGetHealthChecks() throws Exception {
-            Optional<HealthChecks> optInfo = client.getHealthChecks();
-            assertTrue(optInfo.isPresent());
-            HealthChecks healthChecks = optInfo.get();
+        @DisplayName("Get Quantifiable Asset Type")
+        @Order(10)
+        void testTransferAssets() throws Exception {
+            assumeTrue(context.isCreatedIdentity(), ASSUME_MESSAGE);
 
-            assertNotNull(healthChecks.getBuildInfo());
-            assertNotNull(healthChecks.getBuildInfo().getName());
-            assertNotNull(healthChecks.getBuildInfo().getVersion());
+            IovKeyPair keyPair = context.getKeyPair();
+            String requestId = UUID.randomUUID().toString();
+            String assetTypeId = context.getAssetTypeQuantifiableId();
+
+            var request = new PostTransferRequest(context.getAssetId(), context.getSubjectAssetTypeId(), context.getIdentityId(), context.getIdentityId());
+
+            client.transfer(request, keyPair)
+                    .whenComplete((response, throwable) -> assertRequestInfoResponse(client.handleRedirect(requestId, response), requestId)).join();
         }
 
-        @Test
-        void testGetNodeInfo() throws Exception {
-            NodeInfoResponse info = getNodeInfo();
-            assertNotNull(info.getNodeId());
-            assertNotNull(info.getPublicCredentials());
-            assertNotNull(info.getPublicCredentials().getKey());
-            assertNotNull(info.getPublicCredentials().getProtocolId());
-        }
     }
 }

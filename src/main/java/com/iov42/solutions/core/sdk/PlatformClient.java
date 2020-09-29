@@ -9,10 +9,7 @@ import com.iov42.solutions.core.sdk.model.requests.get.GetAssetTypeRequest;
 import com.iov42.solutions.core.sdk.model.requests.get.GetIdentityClaimRequest;
 import com.iov42.solutions.core.sdk.model.requests.get.GetIdentityClaimsRequest;
 import com.iov42.solutions.core.sdk.model.requests.get.GetIdentityRequest;
-import com.iov42.solutions.core.sdk.model.requests.post.CreateAssetTypeRequest;
-import com.iov42.solutions.core.sdk.model.requests.post.CreateClaimsRequest;
-import com.iov42.solutions.core.sdk.model.requests.post.CreateEndorsementsRequest;
-import com.iov42.solutions.core.sdk.model.requests.post.CreateIdentityRequest;
+import com.iov42.solutions.core.sdk.model.requests.post.*;
 import com.iov42.solutions.core.sdk.model.responses.*;
 import com.iov42.solutions.core.sdk.utils.JsonUtils;
 import com.iov42.solutions.core.sdk.utils.PlatformUtils;
@@ -325,4 +322,23 @@ public class PlatformClient {
         }
         return JsonUtils.fromJson(response.body(), clazz);
     }
+
+    /**
+     * see https://api.sandbox.iov42.dev/api/v1/apidocs/redoc.html#tag/transfers/paths/~1transfers/post
+     *
+     * @param request
+     * @param keyPair
+     */
+    public CompletableFuture<HttpResponse<String>> transfer(PostTransferRequest request, IovKeyPair keyPair) {
+        String body = JsonUtils.toJson(request);
+
+        List<String> headers = PlatformUtils.createPostHeaders(keyPair, body);
+
+        return httpClientProvider.executePost(url + "/" + version + "/transfers", body.getBytes(StandardCharsets.UTF_8), headers.toArray(new String[0]));
+
+    }
+//
+//    private String executePost(String path, String body, List<String> headers) {
+//        return String.format("%s/%s/path", url, version, path)
+//    }
 }
