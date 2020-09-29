@@ -324,7 +324,9 @@ public class PlatformClient {
     }
 
     /**
-     * see https://api.sandbox.iov42.dev/api/v1/apidocs/redoc.html#tag/transfers/paths/~1transfers/post
+     * Create a single atomic request to perform one or more transfers, each consisting of a new ownership or quantity transfer (applicable only to accounts).
+     * <p>
+     * See the API specs: https://api.sandbox.iov42.dev/api/v1/apidocs/redoc.html#tag/transfers/paths/~1transfers/post
      *
      * @param request
      * @param keyPair
@@ -337,8 +339,4 @@ public class PlatformClient {
         return httpClientProvider.executePost(url + "/" + version + "/transfers", body.getBytes(StandardCharsets.UTF_8), headers.toArray(new String[0]));
 
     }
-//
-//    private String executePost(String path, String body, List<String> headers) {
-//        return String.format("%s/%s/path", url, version, path)
-//    }
 }

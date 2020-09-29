@@ -322,7 +322,7 @@ public class PlatformClientTest {
             String requestId = UUID.randomUUID().toString();
             String assetTypeId = context.getAssetTypeQuantifiableId();
 
-            var request = new PostTransferRequest(context.getAssetId(), context.getSubjectAssetTypeId(), context.getIdentityId(), context.getIdentityId());
+            var request = new PostTransferRequest(requestId, context.getAssetId(), context.getAssetTypeId(), context.getIdentityId(), context.getIdentityId());
 
             client.transfer(request, keyPair)
                     .whenComplete((response, throwable) -> assertRequestInfoResponse(client.handleRedirect(requestId, response), requestId)).join();
