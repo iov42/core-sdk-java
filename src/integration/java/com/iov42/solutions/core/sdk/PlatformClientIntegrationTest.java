@@ -9,7 +9,10 @@ import com.iov42.solutions.core.sdk.utils.PlatformUtils;
 import com.iov42.solutions.core.sdk.utils.SecurityUtils;
 import org.junit.jupiter.api.*;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
@@ -41,8 +44,8 @@ public class PlatformClientIntegrationTest {
     }
 
     private void assertRequestInfoResponse(Optional<RequestInfoResponse> item, String resourceId) {
-        assertTrue(item.isPresent() && item.get() != null && item.get().getProof() != null && item.get().getResources() != null);
-        assertTrue(Objects.equals(item.get().getRequestId(), resourceId));
+        assertTrue(item.isPresent() && item.get().getProof() != null && item.get().getResources() != null);
+        assertEquals(resourceId, item.get().getRequestId());
     }
 
     @Nested
@@ -111,16 +114,6 @@ public class PlatformClientIntegrationTest {
             String subjectId = context.getIdentityId();
 
             CreateClaimsRequest request = new CreateClaimsRequest(requestId, claims, subjectId);
-
-//            client.createIdentityClaims(request, context.getKeyPair())
-//                    .whenComplete((response, throwable) -> {
-//                        Optional<RequestInfoResponse> info = client.handleRedirect(requestId, response);
-//                        assertTrue(info.isPresent());
-//                        assertNotNull(info.get());
-//                        assertNotNull(info.get().getProof());
-//                        assertNotNull(info.get().getResources());
-//                        assertEquals(requestId, info.get().getRequestId());
-//                    }).join();
 
             client.createIdentityClaims(request, context.getKeyPair())
                     .whenComplete((response, throwable) -> assertRequestInfoResponse(client.handleRedirect(requestId, response), requestId)).join();
