@@ -40,8 +40,8 @@ public class PlatformClientTest {
     }
 
     private void assertRequestInfoResponse(Optional<RequestInfoResponse> item, String resourceId) {
-        var nonNullValue = item.isPresent() && item.get() != null && item.get().getProof() != null && item.get().getResources() != null;
-        assertTrue(nonNullValue && Objects.equals(item.get().getRequestId(), resourceId));
+        assertTrue(item.isPresent() && item.get() != null && item.get().getProof() != null && item.get().getResources() != null);
+        assertTrue(Objects.equals(item.get().getRequestId(), resourceId));
     }
 
     @Nested
@@ -347,7 +347,7 @@ public class PlatformClientTest {
 
             var assetTypeResponse = client.getAsset(request, keyPair);
             assertNotNull(assetTypeResponse);
-            // assertNotNull(assetTypeResponse.getType());
+            //assertNotNull(assetTypeResponse.getAssetId());
             assertNotNull(assetTypeResponse.getAssetTypeId());
             assertNotNull(assetTypeResponse.getOwnerId());
             assertNotNull(assetTypeResponse.getProof());
@@ -359,11 +359,11 @@ public class PlatformClientTest {
         void testTransferAssets() throws Exception {
             assumeTrue(context.isCreatedIdentity(), ASSUME_MESSAGE);
 
-            IovKeyPair keyPair = context.getKeyPair();
             String requestId = UUID.randomUUID().toString();
-            String assetTypeId = context.getAssetTypeQuantifiableId();
+            IovKeyPair keyPair = context.getKeyPair();
 
-            var request = new TransferRequest(requestId, context.getAssetId(), context.getAssetTypeId(), context.getIdentityId(), context.getIdentityId());
+            var item = new TransferItem(context.getAssetId(), context.getAssetTypeId(), context.getIdentityId(), context.getIdentityId());
+            var request = new TransferRequest(requestId, new TransferItem[]{item});
 
             client.transfer(request, keyPair)
                     .whenComplete((response, throwable) -> assertRequestInfoResponse(client.handleRedirect(requestId, response), requestId)).join();
