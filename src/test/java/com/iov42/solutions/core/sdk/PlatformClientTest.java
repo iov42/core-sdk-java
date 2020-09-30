@@ -2,10 +2,7 @@ package com.iov42.solutions.core.sdk;
 
 import com.iov42.solutions.core.sdk.http.DefaultHttpClientProvider;
 import com.iov42.solutions.core.sdk.model.*;
-import com.iov42.solutions.core.sdk.model.requests.get.GetAssetTypeRequest;
-import com.iov42.solutions.core.sdk.model.requests.get.GetIdentityClaimRequest;
-import com.iov42.solutions.core.sdk.model.requests.get.GetIdentityClaimsRequest;
-import com.iov42.solutions.core.sdk.model.requests.get.GetIdentityRequest;
+import com.iov42.solutions.core.sdk.model.requests.get.*;
 import com.iov42.solutions.core.sdk.model.requests.post.*;
 import com.iov42.solutions.core.sdk.model.responses.*;
 import com.iov42.solutions.core.sdk.utils.PlatformUtils;
@@ -32,6 +29,7 @@ public class PlatformClientTest {
         context.setKeyPair(new IovKeyPair(context.getIdentityId(), ProtocolType.SHA256WithRSA, SecurityUtils.generateKeyPair()));
         context.setAssetTypeId(UUID.randomUUID().toString());
         context.setAssetTypeQuantifiableId(UUID.randomUUID().toString());
+        context.setAssetId(UUID.randomUUID().toString());
         client = new PlatformClient(URL, new DefaultHttpClientProvider());
     }
 
@@ -313,8 +311,51 @@ public class PlatformClientTest {
         }
 
         @Test
-        @DisplayName("Get Quantifiable Asset Type")
+        @DisplayName("Create Asset")
         @Order(10)
+        void testCreateAsset() throws Exception {
+            assumeTrue(context.isCreatedIdentity(), ASSUME_MESSAGE);
+
+            IovKeyPair keyPair = context.getKeyPair();
+            String requestId = UUID.randomUUID().toString();
+            String assetTypeId = context.getAssetTypeId();
+            String assetId = context.getAssetId();
+
+            var request = new CreateAssetRequest(requestId, assetId, assetTypeId);
+
+            client.createAsset(request, keyPair)
+                    .whenComplete((response, throwable) -> {
+                        assertRequestInfoResponse(client.handleRedirect(requestId, response), requestId);
+                        context.setAssetId(context.getAssetId());
+                    }).join();
+        }
+
+        @Test
+        @DisplayName("Get Asset")
+        @Order(11)
+        void testGetAsset() throws Exception {
+            assumeTrue(context.isCreatedIdentity(), ASSUME_MESSAGE);
+
+            String assetTypeId = context.getAssetTypeId();
+            String assetId = context.getAssetId();
+
+            String nodeId = getNodeInfo().getNodeId();
+            String requestId = UUID.randomUUID().toString();
+
+            var request = new GetAssetRequest(requestId, nodeId, assetTypeId, assetId);
+            IovKeyPair keyPair = context.getKeyPair();
+
+            var assetTypeResponse = client.getAsset(request, keyPair);
+            assertNotNull(assetTypeResponse);
+            // assertNotNull(assetTypeResponse.getType());
+            assertNotNull(assetTypeResponse.getAssetTypeId());
+            assertNotNull(assetTypeResponse.getOwnerId());
+            assertNotNull(assetTypeResponse.getProof());
+        }
+
+        @Test
+        @DisplayName("Get Quantifiable Asset Type")
+        @Order(12)
         void testTransferAssets() throws Exception {
             assumeTrue(context.isCreatedIdentity(), ASSUME_MESSAGE);
 
@@ -322,7 +363,7 @@ public class PlatformClientTest {
             String requestId = UUID.randomUUID().toString();
             String assetTypeId = context.getAssetTypeQuantifiableId();
 
-            var request = new PostTransferRequest(requestId, context.getAssetId(), context.getAssetTypeId(), context.getIdentityId(), context.getIdentityId());
+            var request = new TransferRequest(requestId, context.getAssetId(), context.getAssetTypeId(), context.getIdentityId(), context.getIdentityId());
 
             client.transfer(request, keyPair)
                     .whenComplete((response, throwable) -> assertRequestInfoResponse(client.handleRedirect(requestId, response), requestId)).join();

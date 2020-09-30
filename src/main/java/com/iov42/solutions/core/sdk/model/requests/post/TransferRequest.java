@@ -2,11 +2,11 @@ package com.iov42.solutions.core.sdk.model.requests.post;
 
 import com.iov42.solutions.core.sdk.model.requests.BaseRequest;
 
-public class PostTransferRequest extends BaseRequest {
+public class TransferRequest extends BaseRequest {
 
     private Transfers transfers;
 
-    public PostTransferRequest(String requestId, String assetId, String assetTypeId, String fromIdentityId, String toIdentityId) {
+    public TransferRequest(String requestId, String assetId, String assetTypeId, String fromIdentityId, String toIdentityId) {
         super(requestId);
         transfers = new Transfers(assetId, assetTypeId, fromIdentityId, toIdentityId);
     }
