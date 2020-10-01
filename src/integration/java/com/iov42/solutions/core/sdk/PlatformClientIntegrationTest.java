@@ -315,7 +315,7 @@ public class PlatformClientIntegrationTest {
             String assetTypeId = context.getAssetTypeId();
             String assetId = context.getAssetId();
 
-            var request = new CreateAssetRequest(requestId, assetId, assetTypeId);
+            CreateAssetRequest request = new CreateAssetRequest(requestId, assetId, assetTypeId);
 
             client.createAsset(request, keyPair)
                     .whenComplete((response, throwable) -> {
@@ -336,10 +336,10 @@ public class PlatformClientIntegrationTest {
             String nodeId = getNodeInfo().getNodeId();
             String requestId = UUID.randomUUID().toString();
 
-            var request = new GetAssetRequest(requestId, nodeId, assetTypeId, assetId);
+            GetAssetRequest request = new GetAssetRequest(requestId, nodeId, assetTypeId, assetId);
             IovKeyPair keyPair = context.getKeyPair();
 
-            var assetTypeResponse = client.getAsset(request, keyPair);
+            GetAssetResponse assetTypeResponse = client.getAsset(request, keyPair);
             assertNotNull(assetTypeResponse);
             //assertNotNull(assetTypeResponse.getAssetId());
             assertNotNull(assetTypeResponse.getAssetTypeId());
@@ -356,8 +356,8 @@ public class PlatformClientIntegrationTest {
             String requestId = UUID.randomUUID().toString();
             IovKeyPair keyPair = context.getKeyPair();
 
-            var item = new TransferItem(context.getAssetId(), context.getAssetTypeId(), context.getIdentityId(), context.getIdentityId());
-            var request = new TransferRequest(requestId, new TransferItem[]{item});
+            TransferItem item = new TransferItem(context.getAssetId(), context.getAssetTypeId(), context.getIdentityId(), context.getIdentityId());
+            TransferRequest request = new TransferRequest(requestId, new TransferItem[]{item});
 
             client.transfer(request, keyPair)
                     .whenComplete((response, throwable) -> assertRequestInfoResponse(client.handleRedirect(requestId, response), requestId)).join();
