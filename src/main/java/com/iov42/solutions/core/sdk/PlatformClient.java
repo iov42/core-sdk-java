@@ -372,16 +372,7 @@ public class PlatformClient {
      * @param request
      * @param keyPair
      */
-    public CompletableFuture<HttpResponse<String>> transferOwnership(TransferRequest request, IovKeyPair keyPair) {
-        String body = JsonUtils.toJson(request);
-
-        List<String> headers = PlatformUtils.createPostHeaders(keyPair, body);
-
-        return httpClientProvider.executePost(url + "/" + version + "/transfers", body.getBytes(StandardCharsets.UTF_8), headers.toArray(new String[0]));
-
-    }
-
-    public CompletableFuture<HttpResponse<String>> transferQuantity(TransferRequest request, IovKeyPair keyPair) {
+    public CompletableFuture<HttpResponse<String>> transfer(TransferRequest request, IovKeyPair keyPair) {
         String body = JsonUtils.toJson(request);
 
         List<String> headers = PlatformUtils.createPostHeaders(keyPair, body);

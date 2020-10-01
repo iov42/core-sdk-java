@@ -4,14 +4,13 @@ import com.iov42.solutions.core.sdk.http.DefaultHttpClientProvider;
 import com.iov42.solutions.core.sdk.model.*;
 import com.iov42.solutions.core.sdk.model.requests.get.*;
 import com.iov42.solutions.core.sdk.model.requests.post.*;
-import com.iov42.solutions.core.sdk.model.responses.GetAssetTypeResponse;
-import com.iov42.solutions.core.sdk.model.responses.NodeInfoResponse;
-import com.iov42.solutions.core.sdk.model.responses.RequestInfoResponse;
+import com.iov42.solutions.core.sdk.model.responses.*;
 import com.iov42.solutions.core.sdk.utils.PlatformUtils;
 import com.iov42.solutions.core.sdk.utils.SecurityUtils;
 import org.junit.jupiter.api.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -39,7 +38,7 @@ public class PlatformClientIntegrationTest {
     }
 
     private NodeInfoResponse getNodeInfo() throws Exception {
-        var optInfo = client.getNodeInfo();
+        Optional<NodeInfoResponse> optInfo = client.getNodeInfo();
         assertTrue(optInfo.isPresent());
         return optInfo.get();
     }
@@ -55,9 +54,9 @@ public class PlatformClientIntegrationTest {
 
         @Test
         void testGetHealthChecks() throws Exception {
-            var optInfo = client.getHealthChecks();
+            Optional<HealthChecks> optInfo = client.getHealthChecks();
             assertTrue(optInfo.isPresent());
-            var healthChecks = optInfo.get();
+            HealthChecks healthChecks = optInfo.get();
 
             assertNotNull(healthChecks.getBuildInfo());
             assertNotNull(healthChecks.getBuildInfo().getName());
@@ -66,7 +65,7 @@ public class PlatformClientIntegrationTest {
 
         @Test
         void testGetNodeInfo() throws Exception {
-            var info = getNodeInfo();
+            NodeInfoResponse info = getNodeInfo();
             assertNotNull(info.getNodeId());
             assertNotNull(info.getPublicCredentials());
             assertNotNull(info.getPublicCredentials().getKey());
@@ -88,13 +87,13 @@ public class PlatformClientIntegrationTest {
         @DisplayName("Create Identity Test")
         @Order(1)
         void testCreateIdentity() {
-            var requestId = UUID.randomUUID().toString();
-            var identityId = context.getIdentityId();
-            var keyPair = context.getKeyPair();
-            var publicKey = SecurityUtils.encodeBase64(keyPair.getPublicKey());
-            var credentials = new PublicCredentials(ProtocolType.SHA256WithRSA.name(), publicKey);
+            String requestId = UUID.randomUUID().toString();
+            String identityId = context.getIdentityId();
+            IovKeyPair keyPair = context.getKeyPair();
+            String publicKey = SecurityUtils.encodeBase64(keyPair.getPublicKey());
+            PublicCredentials credentials = new PublicCredentials(ProtocolType.SHA256WithRSA.name(), publicKey);
 
-            var request = new CreateIdentityRequest(requestId, identityId, credentials);
+            CreateIdentityRequest request = new CreateIdentityRequest(requestId, identityId, credentials);
 
             client.createIdentity(request, context.getKeyPair())
                     .whenComplete((response, throwable) -> {
@@ -110,11 +109,11 @@ public class PlatformClientIntegrationTest {
         void testCreateIdentityClaims() {
             assumeTrue(context.isCreatedIdentity(), ASSUME_MESSAGE);
 
-            var requestId = UUID.randomUUID().toString();
-            var claims = List.of("claim1", "claim2");
-            var subjectId = context.getIdentityId();
+            String requestId = UUID.randomUUID().toString();
+            List<String> claims = List.of("claim1", "claim2");
+            String subjectId = context.getIdentityId();
 
-            var request = new CreateClaimsRequest(requestId, claims, subjectId);
+            CreateClaimsRequest request = new CreateClaimsRequest(requestId, claims, subjectId);
 
             client.createIdentityClaims(request, context.getKeyPair())
                     .whenComplete((response, throwable) -> assertRequestInfoResponse(client.handleRedirect(requestId, response), requestId)).join();
@@ -128,24 +127,24 @@ public class PlatformClientIntegrationTest {
             assumeTrue(context.isCreatedIdentity(), ASSUME_MESSAGE);
 
             // create new identity that represents endorser
-            var endorserId = UUID.randomUUID().toString();
-            var keyPair = new IovKeyPair(endorserId, ProtocolType.SHA256WithRSA, SecurityUtils.generateKeyPair());
-            var credentials = new PublicCredentials(ProtocolType.SHA256WithRSA.name(), SecurityUtils.encodeBase64(keyPair.getPublicKey()));
-            var requestId = UUID.randomUUID().toString();
+            String endorserId = UUID.randomUUID().toString();
+            IovKeyPair keyPair = new IovKeyPair(endorserId, ProtocolType.SHA256WithRSA, SecurityUtils.generateKeyPair());
+            PublicCredentials credentials = new PublicCredentials(ProtocolType.SHA256WithRSA.name(), SecurityUtils.encodeBase64(keyPair.getPublicKey()));
+            String requestId = UUID.randomUUID().toString();
 
             client.createIdentity(new CreateIdentityRequest(requestId, endorserId, credentials), keyPair)
                     .whenComplete((response, throwable) -> assertRequestInfoResponse(client.handleRedirect(requestId, response), requestId)).join();
 
             // endorse identity claims
-            var newRequestId = UUID.randomUUID().toString();
-            var subjectId = context.getIdentityId();
+            String newRequestId = UUID.randomUUID().toString();
+            String subjectId = context.getIdentityId();
 
-            var signatory = new SignatoryIOV(endorserId, keyPair.getProtocolId().name(), keyPair.getPrivateKey());
-            var claims = List.of("claim1", "claim2");
+            SignatoryIOV signatory = new SignatoryIOV(endorserId, keyPair.getProtocolId().name(), keyPair.getPrivateKey());
+            List<String> claims = List.of("claim1", "claim2");
 
-            var endorsements = PlatformUtils.endorse(signatory, context.getSubjectId(), claims);
+            Map<String, String> endorsements = PlatformUtils.endorse(signatory, context.getSubjectId(), claims);
 
-            var request = new CreateEndorsementsRequest(newRequestId, subjectId, endorserId, endorsements);
+            CreateEndorsementsRequest request = new CreateEndorsementsRequest(newRequestId, subjectId, endorserId, endorsements);
 
             client.endorseIdentityClaims(request, keyPair)
                     .whenComplete((response, throwable) -> assertRequestInfoResponse(client.handleRedirect(requestId, response), requestId)).join();
@@ -157,16 +156,16 @@ public class PlatformClientIntegrationTest {
         void testGetIdentity() throws Exception {
             assumeTrue(context.isCreatedIdentity(), ASSUME_MESSAGE);
 
-            var identityId = context.getIdentityId();
+            String identityId = context.getIdentityId();
             assertNotNull(identityId);
 
-            var nodeId = getNodeInfo().getNodeId();
-            var requestId = UUID.randomUUID().toString();
+            String nodeId = getNodeInfo().getNodeId();
+            String requestId = UUID.randomUUID().toString();
 
-            var getIdentityRequest = new GetIdentityRequest(requestId, nodeId, identityId);
-            var keyPair = context.getKeyPair();
+            GetIdentityRequest getIdentityRequest = new GetIdentityRequest(requestId, nodeId, identityId);
+            IovKeyPair keyPair = context.getKeyPair();
 
-            var identityResponse = client.getIdentity(getIdentityRequest, keyPair);
+            GetIdentityResponse identityResponse = client.getIdentity(getIdentityRequest, keyPair);
             assertNotNull(identityResponse);
             assertNotNull(identityResponse.getIdentityId());
             assertEquals(identityId, identityResponse.getIdentityId());
@@ -179,15 +178,15 @@ public class PlatformClientIntegrationTest {
         void testGetIdentityClaim() throws Exception {
             assumeTrue(context.isCreatedIdentity(), ASSUME_MESSAGE);
 
-            var requestId = UUID.randomUUID().toString();
-            var nodeId = getNodeInfo().getNodeId();
-            var identityId = context.getIdentityId();
-            var hashedClaim = PlatformUtils.getEncodedClaimHash("claim1");
+            String requestId = UUID.randomUUID().toString();
+            String nodeId = getNodeInfo().getNodeId();
+            String identityId = context.getIdentityId();
+            String hashedClaim = PlatformUtils.getEncodedClaimHash("claim1");
 
-            var request = new GetIdentityClaimRequest(requestId, nodeId, identityId, hashedClaim);
-            var keyPair = context.getKeyPair();
+            GetIdentityClaimRequest request = new GetIdentityClaimRequest(requestId, nodeId, identityId, hashedClaim);
+            IovKeyPair keyPair = context.getKeyPair();
 
-            var response = client.getIdentityClaim(request, keyPair);
+            ClaimEndorsementsResponse response = client.getIdentityClaim(request, keyPair);
             assertNotNull(response);
             assertNotNull(response.getClaim());
         }
@@ -198,15 +197,15 @@ public class PlatformClientIntegrationTest {
         void testGetIdentityClaims() throws Exception {
             assumeTrue(context.isCreatedIdentity(), ASSUME_MESSAGE);
 
-            var requestId = UUID.randomUUID().toString();
-            var nodeId = getNodeInfo().getNodeId();
-            var identityId = context.getIdentityId();
+            String requestId = UUID.randomUUID().toString();
+            String nodeId = getNodeInfo().getNodeId();
+            String identityId = context.getIdentityId();
 
-            var request = new GetIdentityClaimsRequest(requestId, nodeId, identityId);
+            GetIdentityClaimsRequest request = new GetIdentityClaimsRequest(requestId, nodeId, identityId);
             request.setLimit(10);
-            var keyPair = context.getKeyPair();
+            IovKeyPair keyPair = context.getKeyPair();
 
-            var claimsResponse = client.getIdentityClaims(request, keyPair);
+            GetClaimsResponse claimsResponse = client.getIdentityClaims(request, keyPair);
             assertNotNull(claimsResponse);
             assertNotNull(claimsResponse.getClaims());
         }
@@ -217,14 +216,14 @@ public class PlatformClientIntegrationTest {
         void testGetIdentityPublicKey() throws Exception {
             assumeTrue(context.isCreatedIdentity(), ASSUME_MESSAGE);
 
-            var identityId = context.getIdentityId();
-            var keyPair = context.getKeyPair();
+            String identityId = context.getIdentityId();
+            IovKeyPair keyPair = context.getKeyPair();
 
-            var nodeId = getNodeInfo().getNodeId();
-            var requestId = UUID.randomUUID().toString();
+            String nodeId = getNodeInfo().getNodeId();
+            String requestId = UUID.randomUUID().toString();
 
-            var request = new GetIdentityRequest(requestId, nodeId, identityId);
-            var response = client.getIdentityPublicKey(request, keyPair);
+            GetIdentityRequest request = new GetIdentityRequest(requestId, nodeId, identityId);
+            PublicCredentials response = client.getIdentityPublicKey(request, keyPair);
             assertNotNull(response.getProtocolId());
             assertNotNull(response.getKey());
         }
@@ -235,11 +234,11 @@ public class PlatformClientIntegrationTest {
         void testCreateUniqueAssetType() throws Exception {
             assumeTrue(context.isCreatedIdentity(), ASSUME_MESSAGE);
 
-            var keyPair = context.getKeyPair();
-            var requestId = UUID.randomUUID().toString();
-            var assetTypeId = context.getAssetTypeId();
+            IovKeyPair keyPair = context.getKeyPair();
+            String requestId = UUID.randomUUID().toString();
+            String assetTypeId = context.getAssetTypeId();
 
-            var request = new CreateAssetTypeRequest(requestId, assetTypeId, AssetTypeProperty.UNIQUE);
+            CreateAssetTypeRequest request = new CreateAssetTypeRequest(requestId, assetTypeId, AssetTypeProperty.UNIQUE);
 
             client.createAssetType(request, keyPair)
                     .whenComplete((response, throwable) -> assertRequestInfoResponse(client.handleRedirect(requestId, response), requestId)).join();
@@ -251,11 +250,11 @@ public class PlatformClientIntegrationTest {
         void testCreateQuantifiableAssetType() throws Exception {
             assumeTrue(context.isCreatedIdentity(), ASSUME_MESSAGE);
 
-            var keyPair = context.getKeyPair();
-            var requestId = UUID.randomUUID().toString();
-            var assetTypeId = context.getAssetTypeQuantifiableId();
+            IovKeyPair keyPair = context.getKeyPair();
+            String requestId = UUID.randomUUID().toString();
+            String assetTypeId = context.getAssetTypeQuantifiableId();
 
-            var request = new CreateAssetTypeRequest(requestId, assetTypeId, AssetTypeProperty.QUANTIFIABLE, 1);
+            CreateAssetTypeRequest request = new CreateAssetTypeRequest(requestId, assetTypeId, AssetTypeProperty.QUANTIFIABLE, 1);
 
             client.createAssetType(request, keyPair)
                     .whenComplete((response, throwable) -> assertRequestInfoResponse(client.handleRedirect(requestId, response), requestId)).join();
@@ -267,16 +266,15 @@ public class PlatformClientIntegrationTest {
         void testGetUniqueAssetType() throws Exception {
             assumeTrue(context.isCreatedIdentity(), ASSUME_MESSAGE);
 
-            var assetTypeId = context.getAssetTypeId();
+            String assetTypeId = context.getAssetTypeId();
 
-            var nodeId = getNodeInfo().getNodeId();
-            var requestId = UUID.randomUUID().toString();
+            String nodeId = getNodeInfo().getNodeId();
+            String requestId = UUID.randomUUID().toString();
 
-            var request = new GetAssetTypeRequest(requestId, nodeId, assetTypeId);
-            var keyPair = context.getKeyPair();
+            GetAssetTypeRequest request = new GetAssetTypeRequest(requestId, nodeId, assetTypeId);
+            IovKeyPair keyPair = context.getKeyPair();
 
-            var assetTypeResponse = client.getAssetType(request, keyPair);
-
+            GetAssetTypeResponse assetTypeResponse = client.getAssetType(request, keyPair);
             assertNotNull(assetTypeResponse);
             assertNotNull(assetTypeResponse.getType());
             assertNotNull(assetTypeResponse.getAssetTypeId());
@@ -290,13 +288,13 @@ public class PlatformClientIntegrationTest {
         void testGetQuantifiableAssetType() throws Exception {
             assumeTrue(context.isCreatedIdentity(), ASSUME_MESSAGE);
 
-            var assetTypeId = context.getAssetTypeQuantifiableId();
+            String assetTypeId = context.getAssetTypeQuantifiableId();
 
-            var nodeId = getNodeInfo().getNodeId();
-            var requestId = UUID.randomUUID().toString();
+            String nodeId = getNodeInfo().getNodeId();
+            String requestId = UUID.randomUUID().toString();
 
-            var request = new GetAssetTypeRequest(requestId, nodeId, assetTypeId);
-            var keyPair = context.getKeyPair();
+            GetAssetTypeRequest request = new GetAssetTypeRequest(requestId, nodeId, assetTypeId);
+            IovKeyPair keyPair = context.getKeyPair();
 
             GetAssetTypeResponse assetTypeResponse = client.getAssetType(request, keyPair);
             assertNotNull(assetTypeResponse);
@@ -312,10 +310,10 @@ public class PlatformClientIntegrationTest {
         void testCreateAsset() throws Exception {
             assumeTrue(context.isCreatedIdentity(), ASSUME_MESSAGE);
 
-            var keyPair = context.getKeyPair();
-            var requestId = UUID.randomUUID().toString();
-            var assetTypeId = context.getAssetTypeId();
-            var assetId = context.getAssetId();
+            IovKeyPair keyPair = context.getKeyPair();
+            String requestId = UUID.randomUUID().toString();
+            String assetTypeId = context.getAssetTypeId();
+            String assetId = context.getAssetId();
 
             var request = new CreateAssetRequest(requestId, assetId, assetTypeId);
 
@@ -332,17 +330,16 @@ public class PlatformClientIntegrationTest {
         void testGetAsset() throws Exception {
             assumeTrue(context.isCreatedIdentity(), ASSUME_MESSAGE);
 
-            var assetTypeId = context.getAssetTypeId();
-            var assetId = context.getAssetId();
+            String assetTypeId = context.getAssetTypeId();
+            String assetId = context.getAssetId();
 
-            var nodeId = getNodeInfo().getNodeId();
-            var requestId = UUID.randomUUID().toString();
+            String nodeId = getNodeInfo().getNodeId();
+            String requestId = UUID.randomUUID().toString();
 
             var request = new GetAssetRequest(requestId, nodeId, assetTypeId, assetId);
-            var keyPair = context.getKeyPair();
+            IovKeyPair keyPair = context.getKeyPair();
 
             var assetTypeResponse = client.getAsset(request, keyPair);
-
             assertNotNull(assetTypeResponse);
             //assertNotNull(assetTypeResponse.getAssetId());
             assertNotNull(assetTypeResponse.getAssetTypeId());
@@ -356,29 +353,13 @@ public class PlatformClientIntegrationTest {
         void testTransferAssets() throws Exception {
             assumeTrue(context.isCreatedIdentity(), ASSUME_MESSAGE);
 
-            var requestId = UUID.randomUUID().toString();
-            var keyPair = context.getKeyPair();
+            String requestId = UUID.randomUUID().toString();
+            IovKeyPair keyPair = context.getKeyPair();
 
             var item = new TransferItem(context.getAssetId(), context.getAssetTypeId(), context.getIdentityId(), context.getIdentityId());
             var request = new TransferRequest(requestId, new TransferItem[]{item});
 
-            client.transferQuantity(request, keyPair)
-                    .whenComplete((response, throwable) -> assertRequestInfoResponse(client.handleRedirect(requestId, response), requestId)).join();
-        }
-
-        @Test
-        @DisplayName("Transfer Quantity")
-        @Order(12)
-        void testTransferOwnership() throws Exception {
-            assumeTrue(context.isCreatedIdentity(), ASSUME_MESSAGE);
-
-            var requestId = UUID.randomUUID().toString();
-            var keyPair = context.getKeyPair();
-
-            var item = new TransferItem(context.getAssetId(), context.getAssetTypeId(), context.getIdentityId(), context.getIdentityId());
-            var request = new TransferRequest(requestId, new TransferItem[]{item});
-
-            client.transferQuantity(request, keyPair)
+            client.transfer(request, keyPair)
                     .whenComplete((response, throwable) -> assertRequestInfoResponse(client.handleRedirect(requestId, response), requestId)).join();
         }
 
