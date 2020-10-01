@@ -27,7 +27,7 @@ public class SecurityUtils {
     public static KeyPair generateKeyPair() {
         KeyPair pair;
         try {
-            var keyGen = KeyPairGenerator.getInstance("RSA");
+            KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
             keyGen.initialize(2048);
             pair = keyGen.genKeyPair();
         } catch (NoSuchAlgorithmException ex) {

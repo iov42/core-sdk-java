@@ -12,7 +12,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class DefaultHttpClientProvider implements HttpClientProvider<HttpResponse<String>> {
 
-    private HttpClient httpClient;
+    private final HttpClient httpClient;
 
     public DefaultHttpClientProvider() {
         this.httpClient = HttpClient.newHttpClient();
@@ -25,7 +25,7 @@ public class DefaultHttpClientProvider implements HttpClientProvider<HttpRespons
     @Override
     public HttpResponse<String> executeGet(String url, String... headers) throws HttpClientException {
         try {
-            var request = build(url, headers).GET().build();
+            HttpRequest request = build(url, headers).GET().build();
             return httpClient.send(request, HttpResponse.BodyHandlers.ofString());
         } catch (Exception e) {
             throw new HttpClientException(String.format("Failed to execute GET request: [%s]", url), e);
@@ -35,7 +35,7 @@ public class DefaultHttpClientProvider implements HttpClientProvider<HttpRespons
     @Override
     public CompletableFuture<HttpResponse<String>> executePost(String url, byte[] body, String... headers) throws HttpClientException{
         try {
-            var request = build(url, headers).POST(HttpRequest.BodyPublishers.ofByteArray(body)).build();
+            HttpRequest request = build(url, headers).POST(HttpRequest.BodyPublishers.ofByteArray(body)).build();
             return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString());
         } catch (Exception e) {
             throw new HttpClientException(String.format("Failed to execute async POST request: [%s]", url), e);
@@ -45,7 +45,7 @@ public class DefaultHttpClientProvider implements HttpClientProvider<HttpRespons
     @Override
     public CompletableFuture<HttpResponse<String>> executePut(String url, byte[] body, String... headers) {
         try {
-            var request = build(url, headers).PUT(HttpRequest.BodyPublishers.ofByteArray(body)).build();
+            HttpRequest request = build(url, headers).PUT(HttpRequest.BodyPublishers.ofByteArray(body)).build();
             return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString());
         } catch (Exception e) {
             throw new HttpClientException(String.format("Failed to execute async POST request: [%s]", url), e);
