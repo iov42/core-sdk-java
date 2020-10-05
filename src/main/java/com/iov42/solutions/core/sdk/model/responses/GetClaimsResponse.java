@@ -8,7 +8,7 @@ public class GetClaimsResponse {
 
     private String next;
 
-    public GetClaimsResponse() {
+    private GetClaimsResponse() {
         // needed for Jackson parser
     }
 

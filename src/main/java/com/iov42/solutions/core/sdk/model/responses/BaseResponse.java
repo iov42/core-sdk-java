@@ -1,6 +1,6 @@
 package com.iov42.solutions.core.sdk.model.responses;
 
-public class BaseResponse {
+public abstract class BaseResponse {
 
     private String proof;
 
