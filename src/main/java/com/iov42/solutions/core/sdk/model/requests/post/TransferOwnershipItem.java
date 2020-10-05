@@ -1,6 +1,7 @@
 package com.iov42.solutions.core.sdk.model.requests.post;
 
-public class TransferItem {
+public class TransferOwnershipItem {
+
     private final String assetId;
 
     private final String assetTypeId;
@@ -9,7 +10,7 @@ public class TransferItem {
 
     private final String toIdentityId;
 
-    public TransferItem(String assetId, String assetTypeId, String fromIdentityId, String toIdentityId) {
+    public TransferOwnershipItem(String assetId, String assetTypeId, String fromIdentityId, String toIdentityId) {
         this.assetId = assetId;
         this.assetTypeId = assetTypeId;
         this.fromIdentityId = fromIdentityId;

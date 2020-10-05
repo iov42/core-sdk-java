@@ -375,7 +375,7 @@ public class PlatformClientIntegrationTest {
             String requestId = UUID.randomUUID().toString();
             IovKeyPair keyPair = context.getKeyPair();
 
-            TransferItem item = new TransferItem(context.getAssetId(), context.getAssetTypeId(), context.getIdentityId(), context.getIdentityId());
+            TransferOwnershipItem item = new TransferOwnershipItem(context.getAssetId(), context.getAssetTypeId(), context.getIdentityId(), context.getIdentityId());
             TransferRequest request = new TransferRequest(requestId, List.of(item));
 
             client.transfer(request, keyPair)

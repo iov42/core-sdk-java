@@ -6,14 +6,14 @@ import java.util.List;
 
 public class TransferRequest extends BaseRequest {
 
-    private final List<TransferItem> transfers;
+    private final List<TransferOwnershipItem> transfers;
 
-    public TransferRequest(String requestId, List<TransferItem> transfers) {
+    public TransferRequest(String requestId, List<TransferOwnershipItem> transfers) {
         super(requestId);
         this.transfers = transfers;
     }
 
-    public List<TransferItem> getTransfers() {
+    public List<TransferOwnershipItem> getTransfers() {
         return transfers;
     }
 }
