@@ -7,9 +7,13 @@ import java.util.Arrays;
  */
 public class RequestInfoResponse extends BaseResponse {
 
-    private final String requestId;
+    private String requestId;
 
-    private final String[] resources;
+    private String[] resources;
+
+    private RequestInfoResponse() {
+        // needed for Jackson parser
+    }
 
     public RequestInfoResponse(String proof, String requestId, String[] resources) {
         super(proof);

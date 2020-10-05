@@ -2,11 +2,15 @@ package com.iov42.solutions.core.sdk.model.responses;
 
 public class EndorsementResponse extends BaseResponse {
 
-    private final String delegateIdentityId;
+    private String delegateIdentityId;
 
-    private final String endorsement;
+    private String endorsement;
 
-    private final String endorserId;
+    private String endorserId;
+
+    private EndorsementResponse() {
+        // needed for Jackson parser
+    }
 
     public EndorsementResponse(String delegateIdentityId, String endorsement, String endorserId, String proof) {
         super(proof);

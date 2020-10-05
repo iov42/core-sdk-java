@@ -4,9 +4,13 @@ import java.util.List;
 
 public class GetClaimsResponse {
 
-    private final List<ClaimResponse> claims;
+    private List<ClaimResponse> claims;
 
-    private final String next;
+    private String next;
+
+    public GetClaimsResponse() {
+        // needed for Jackson parser
+    }
 
     public GetClaimsResponse(List<ClaimResponse> claims, String next) {
         this.claims = claims;

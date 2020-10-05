@@ -6,13 +6,20 @@ public class GetAssetTypeResponse extends BaseResponse {
 
     private String ownerId;
 
+    private Integer scale;
+
     private String type;
 
-    public GetAssetTypeResponse(String proof, String assetTypeId, String ownerId, String type) {
+    private GetAssetTypeResponse() {
+        // needed for Jackson parser
+    }
+
+    public GetAssetTypeResponse(String proof, String assetTypeId, String ownerId, String type, Integer scale) {
         super(proof);
         this.assetTypeId = assetTypeId;
         this.ownerId = ownerId;
         this.type = type;
+        this.scale = scale;
     }
 
     public String getAssetTypeId() {
@@ -29,6 +36,10 @@ public class GetAssetTypeResponse extends BaseResponse {
 
     public void setOwnerId(String ownerId) {
         this.ownerId = ownerId;
+    }
+
+    public Integer getScale() {
+        return scale;
     }
 
     public String getType() {

@@ -2,7 +2,11 @@ package com.iov42.solutions.core.sdk.model.responses;
 
 public class BaseResponse {
 
-    private final String proof;
+    private String proof;
+
+    public BaseResponse() {
+        // needed for Jackson parser
+    }
 
     public BaseResponse(String proof) {
         this.proof = proof;

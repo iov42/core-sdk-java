@@ -8,9 +8,13 @@ import com.iov42.solutions.core.sdk.model.PublicCredentials;
  */
 public class NodeInfoResponse {
 
-    private final String nodeId;
+    private String nodeId;
 
-    private final PublicCredentials publicCredentials;
+    private PublicCredentials publicCredentials;
+
+    private NodeInfoResponse() {
+        // needed for Jackson parser
+    }
 
     public NodeInfoResponse(String nodeId, PublicCredentials publicCredentials) {
         this.nodeId = nodeId;
