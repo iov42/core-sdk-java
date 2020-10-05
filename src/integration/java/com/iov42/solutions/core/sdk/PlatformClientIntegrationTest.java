@@ -9,6 +9,7 @@ import com.iov42.solutions.core.sdk.utils.PlatformUtils;
 import com.iov42.solutions.core.sdk.utils.SecurityUtils;
 import org.junit.jupiter.api.*;
 
+import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -335,7 +336,7 @@ public class PlatformClientIntegrationTest {
             String assetTypeId = context.getAssetTypeQuantifiableId();
             String assetWithQuantityId = context.getAssetWithQuantityId();
 
-            CreateAssetAccountRequest request = new CreateAssetAccountRequest(requestId, assetWithQuantityId, assetTypeId, "1");
+            CreateAssetAccountRequest request = new CreateAssetAccountRequest(requestId, assetWithQuantityId, assetTypeId, BigInteger.valueOf(1));
 
             client.createAsset(request, keyPair)
                     .whenComplete((response, throwable) -> {
@@ -358,12 +359,11 @@ public class PlatformClientIntegrationTest {
             GetAssetRequest request = new GetAssetRequest(requestId, nodeId, assetTypeId, assetId);
             IovKeyPair keyPair = context.getKeyPair();
 
-            GetAssetResponse assetTypeResponse = client.getAsset(request, keyPair);
-            assertNotNull(assetTypeResponse);
-            //assertNotNull(assetTypeResponse.getAssetId());
-            assertNotNull(assetTypeResponse.getAssetTypeId());
-            assertNotNull(assetTypeResponse.getOwnerId());
-            assertNotNull(assetTypeResponse.getProof());
+            GetAssetResponse response = client.getAsset(request, keyPair);
+            assertNotNull(response);
+            assertNotNull(response.getAssetTypeId());
+            assertNotNull(response.getOwnerId());
+            assertNotNull(response.getProof());
         }
 
         @Test

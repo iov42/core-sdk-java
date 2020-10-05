@@ -1,5 +1,7 @@
 package com.iov42.solutions.core.sdk.model.responses;
 
+import java.math.BigInteger;
+
 public class GetAssetResponse extends BaseResponse {
 
     private String assetId;
@@ -8,13 +10,13 @@ public class GetAssetResponse extends BaseResponse {
 
     private String ownerId;
 
-    private String quantity;
+    private BigInteger quantity;
 
     private GetAssetResponse() {
         // needed for Jackson parser
     }
 
-    public GetAssetResponse(String proof, String assetId, String assetTypeId, String ownerId, String quantity) {
+    public GetAssetResponse(String proof, String assetId, String assetTypeId, String ownerId, BigInteger quantity) {
         super(proof);
         this.assetId = assetId;
         this.assetTypeId = assetTypeId;
@@ -34,7 +36,7 @@ public class GetAssetResponse extends BaseResponse {
         return ownerId;
     }
 
-    public String getQuantity() {
+    public BigInteger getQuantity() {
         return quantity;
     }
 }
