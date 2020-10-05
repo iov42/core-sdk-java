@@ -4,18 +4,15 @@ import com.iov42.solutions.core.sdk.model.requests.BaseRequest;
 
 public class AddDelegateRequest extends BaseRequest {
 
-    private String delegateIdentityId;
+    private final String delegateIdentityId;
 
-    public AddDelegateRequest() {
+    public AddDelegateRequest(String delegateIdentityId) {
         super();
+        this.delegateIdentityId = delegateIdentityId;
     }
 
     public String getDelegateIdentityId() {
         return delegateIdentityId;
-    }
-
-    public void setDelegateIdentityId(String delegateIdentityId) {
-        this.delegateIdentityId = delegateIdentityId;
     }
 
     @Override

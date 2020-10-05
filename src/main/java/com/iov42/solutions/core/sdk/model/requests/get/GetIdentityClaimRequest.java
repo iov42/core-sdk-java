@@ -2,7 +2,7 @@ package com.iov42.solutions.core.sdk.model.requests.get;
 
 public class GetIdentityClaimRequest extends GetIdentityRequest {
 
-    private String hashedClaim;
+    private final String hashedClaim;
 
     public GetIdentityClaimRequest(String nodeId, String identityId, String hashedClaim) {
         super(nodeId, identityId);

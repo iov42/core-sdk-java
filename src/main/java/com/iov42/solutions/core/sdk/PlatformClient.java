@@ -5,14 +5,8 @@ import com.iov42.solutions.core.sdk.http.HttpClientProvider;
 import com.iov42.solutions.core.sdk.model.HealthChecks;
 import com.iov42.solutions.core.sdk.model.IovKeyPair;
 import com.iov42.solutions.core.sdk.model.PublicCredentials;
-import com.iov42.solutions.core.sdk.model.requests.get.GetAssetTypeRequest;
-import com.iov42.solutions.core.sdk.model.requests.get.GetIdentityClaimRequest;
-import com.iov42.solutions.core.sdk.model.requests.get.GetIdentityClaimsRequest;
-import com.iov42.solutions.core.sdk.model.requests.get.GetIdentityRequest;
-import com.iov42.solutions.core.sdk.model.requests.post.CreateAssetTypeRequest;
-import com.iov42.solutions.core.sdk.model.requests.post.CreateClaimsRequest;
-import com.iov42.solutions.core.sdk.model.requests.post.CreateEndorsementsRequest;
-import com.iov42.solutions.core.sdk.model.requests.post.CreateIdentityRequest;
+import com.iov42.solutions.core.sdk.model.requests.get.*;
+import com.iov42.solutions.core.sdk.model.requests.post.*;
 import com.iov42.solutions.core.sdk.model.responses.*;
 import com.iov42.solutions.core.sdk.utils.JsonUtils;
 import com.iov42.solutions.core.sdk.utils.PlatformUtils;
@@ -99,6 +93,50 @@ public class PlatformClient {
         HttpResponse<String> response = httpClientProvider.executeGet(url, headers.toArray(new String[0]));
 
         return handleResponse(response, GetAssetTypeResponse.class);
+    }
+
+    /**
+     * Creates a new asset
+     * <p>
+     * See the API specs at: https://api.sandbox.iov42.dev/api/v1/apidocs/redoc.html#tag/assets/paths/~1asset-types~1{assetTypeId}~1assets/post
+     *
+     * @param request
+     * @param keyPair
+     * @return
+     */
+    public CompletableFuture<HttpResponse<String>> createAsset(BaseCreateAssetRequest request, IovKeyPair keyPair) {
+        String body = JsonUtils.toJson(request);
+
+        List<String> headers = PlatformUtils.createPostHeaders(keyPair, body);
+
+        String url = this.url + "/" + version + "/asset-types/" + request.getAssetTypeId() + "/assets";
+        return httpClientProvider.executePost(url, body.getBytes(StandardCharsets.UTF_8), headers.toArray(new String[0]));
+    }
+
+    /**
+     * Gets an asset instance
+     * <p>
+     * See the API specs: https://api.sandbox.iov42.dev/api/v1/apidocs/redoc.html#tag/assets/paths/~1asset-types~1{assetTypeId}~1assets~1{assetId}/get
+     *
+     * @param request
+     * @param keyPair
+     * @return
+     * @throws PlatformException
+     */
+    public GetAssetResponse getAsset(GetAssetRequest request, IovKeyPair keyPair) throws PlatformException {
+        String requestId = request.getRequestId();
+        String assetTypeId = request.getAssetTypeId();
+        String assetId = request.getAssetId();
+
+
+        String queryParameters = String.format("?requestId=%s&nodeId=%s", requestId, request.getNodeId());
+        String relativeUrl = "/api/" + version + "/asset-types/" + assetTypeId + queryParameters;
+        String url = this.url + "/" + version + "/asset-types/" + assetTypeId + queryParameters;
+
+        List<String> headers = PlatformUtils.createGetHeaders(keyPair, relativeUrl);
+        HttpResponse<String> response = httpClientProvider.executeGet(url, headers.toArray(new String[0]));
+
+        return handleResponse(response, GetAssetResponse.class);
     }
 
     /**
@@ -324,5 +362,22 @@ public class PlatformClient {
             throw new PlatformException(response.body());
         }
         return JsonUtils.fromJson(response.body(), clazz);
+    }
+
+    /**
+     * Create a single atomic request to perform one or more transfers, each consisting of a new ownership or quantity transfer (applicable only to accounts).
+     * <p>
+     * See the API specs: https://api.sandbox.iov42.dev/api/v1/apidocs/redoc.html#tag/transfers/paths/~1transfers/post
+     *
+     * @param request
+     * @param keyPair
+     */
+    public CompletableFuture<HttpResponse<String>> transfer(TransferRequest request, IovKeyPair keyPair) {
+        String body = JsonUtils.toJson(request);
+
+        List<String> headers = PlatformUtils.createPostHeaders(keyPair, body);
+
+        return httpClientProvider.executePost(url + "/" + version + "/transfers", body.getBytes(StandardCharsets.UTF_8), headers.toArray(new String[0]));
+
     }
 }
