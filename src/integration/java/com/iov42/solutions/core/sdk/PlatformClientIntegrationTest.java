@@ -34,6 +34,7 @@ public class PlatformClientIntegrationTest {
         context.setAssetTypeId(UUID.randomUUID().toString());
         context.setAssetTypeQuantifiableId(UUID.randomUUID().toString());
         context.setAssetId(UUID.randomUUID().toString());
+        context.setAssetWithQuantityId(UUID.randomUUID().toString());
         client = new PlatformClient(URL, new DefaultHttpClientProvider());
     }
 
@@ -142,7 +143,7 @@ public class PlatformClientIntegrationTest {
             SignatoryIOV signatory = new SignatoryIOV(endorserId, keyPair.getProtocolId().name(), keyPair.getPrivateKey());
             List<String> claims = List.of("claim1", "claim2");
 
-            Map<String, String> endorsements = PlatformUtils.endorse(signatory, context.getSubjectId(), claims);
+            Map<String, String> endorsements = PlatformUtils.endorse(signatory, subjectId, claims);
 
             CreateEndorsementsRequest request = new CreateEndorsementsRequest(newRequestId, subjectId, endorserId, endorsements);
 
@@ -305,9 +306,9 @@ public class PlatformClientIntegrationTest {
         }
 
         @Test
-        @DisplayName("Create Asset")
+        @DisplayName("Create Asset Unique")
         @Order(10)
-        void testCreateAsset() throws Exception {
+        void testCreateAssetUnique() throws Exception {
             assumeTrue(context.isCreatedIdentity(), ASSUME_MESSAGE);
 
             IovKeyPair keyPair = context.getKeyPair();
@@ -315,12 +316,30 @@ public class PlatformClientIntegrationTest {
             String assetTypeId = context.getAssetTypeId();
             String assetId = context.getAssetId();
 
-            CreateAssetRequest request = new CreateAssetRequest(requestId, assetId, assetTypeId);
+            CreateAssetUniqueRequest request = new CreateAssetUniqueRequest(requestId, assetId, assetTypeId);
 
             client.createAsset(request, keyPair)
                     .whenComplete((response, throwable) -> {
                         assertRequestInfoResponse(client.handleRedirect(requestId, response), requestId);
-                        context.setAssetId(context.getAssetId());
+                    }).join();
+        }
+
+        @Test
+        @DisplayName("Create Account Asset")
+        @Order(10)
+        void testCreateAccountAsset() throws Exception {
+            assumeTrue(context.isCreatedIdentity(), ASSUME_MESSAGE);
+
+            IovKeyPair keyPair = context.getKeyPair();
+            String requestId = UUID.randomUUID().toString();
+            String assetTypeId = context.getAssetTypeQuantifiableId();
+            String assetWithQuantityId = context.getAssetWithQuantityId();
+
+            CreateAssetAccountRequest request = new CreateAssetAccountRequest(requestId, assetWithQuantityId, assetTypeId, "1");
+
+            client.createAsset(request, keyPair)
+                    .whenComplete((response, throwable) -> {
+                        assertRequestInfoResponse(client.handleRedirect(requestId, response), requestId);
                     }).join();
         }
 
@@ -357,7 +376,7 @@ public class PlatformClientIntegrationTest {
             IovKeyPair keyPair = context.getKeyPair();
 
             TransferItem item = new TransferItem(context.getAssetId(), context.getAssetTypeId(), context.getIdentityId(), context.getIdentityId());
-            TransferRequest request = new TransferRequest(requestId, new TransferItem[]{item});
+            TransferRequest request = new TransferRequest(requestId, List.of(item));
 
             client.transfer(request, keyPair)
                     .whenComplete((response, throwable) -> assertRequestInfoResponse(client.handleRedirect(requestId, response), requestId)).join();

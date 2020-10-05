@@ -104,7 +104,7 @@ public class PlatformClient {
      * @param keyPair
      * @return
      */
-    public CompletableFuture<HttpResponse<String>> createAsset(CreateAssetRequest request, IovKeyPair keyPair) {
+    public CompletableFuture<HttpResponse<String>> createAsset(BaseCreateAssetRequest request, IovKeyPair keyPair) {
         String body = JsonUtils.toJson(request);
 
         List<String> headers = PlatformUtils.createPostHeaders(keyPair, body);
