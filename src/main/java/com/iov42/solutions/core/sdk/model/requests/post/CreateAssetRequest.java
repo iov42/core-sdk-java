@@ -14,33 +14,19 @@ public class CreateAssetRequest extends BaseRequest {
         this.assetTypeId = assetTypeId;
     }
 
-    //private String quantity;
-
-
     public String getAssetId() {
         return assetId;
     }
 
-
     public String getAssetTypeId() {
         return assetTypeId;
     }
-
-
-//    public String getQuantity() {
-//        return quantity;
-//    }
-//
-//    public void setQuantity(String quantity) {
-//        this.quantity = quantity;
-//    }
 
     @Override
     public String toString() {
         return "CreateAssetRequest{" +
                 "assetId='" + assetId + '\'' +
                 ", assetTypeId='" + assetTypeId + '\'' +
-                //    ", quantity='" + quantity + '\'' +
                 "} " + super.toString();
     }
 }

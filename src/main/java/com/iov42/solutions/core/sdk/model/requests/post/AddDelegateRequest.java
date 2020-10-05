@@ -15,10 +15,6 @@ public class AddDelegateRequest extends BaseRequest {
         return delegateIdentityId;
     }
 
-//    public void setDelegateIdentityId(String delegateIdentityId) {
-//        this.delegateIdentityId = delegateIdentityId;
-//    }
-
     @Override
     public String toString() {
         return "AddDelegateRequest{" +
