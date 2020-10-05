@@ -9,6 +9,7 @@ import com.iov42.solutions.core.sdk.utils.PlatformUtils;
 import com.iov42.solutions.core.sdk.utils.SecurityUtils;
 import org.junit.jupiter.api.*;
 
+import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -19,6 +20,8 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 
 public class PlatformClientIntegrationTest {
+
+    static final String ASSUME_MESSAGE = "In order to perform this test, identity must be created. Run tests group together.";
 
     private static final String URL = "https://api.sandbox.iov42.dev/api";
 
@@ -38,40 +41,201 @@ public class PlatformClientIntegrationTest {
         client = new PlatformClient(URL, new DefaultHttpClientProvider());
     }
 
+    private void assertRequestInfoResponse(Optional<RequestInfoResponse> item, String resourceId) {
+        assertTrue(item.isPresent() && item.get().getProof() != null && item.get().getResources() != null);
+        assertEquals(resourceId, item.get().getRequestId());
+    }
+
+    private void createIdentity() {
+        String requestId = UUID.randomUUID().toString();
+        String identityId = context.getIdentityId();
+        IovKeyPair keyPair = context.getKeyPair();
+        String publicKey = SecurityUtils.encodeBase64(keyPair.getPublicKey());
+        PublicCredentials credentials = new PublicCredentials(ProtocolType.SHA256WithRSA.name(), publicKey);
+
+        CreateIdentityRequest request = new CreateIdentityRequest(requestId, identityId, credentials);
+
+        client.createIdentity(request, context.getKeyPair())
+                .whenComplete((response, throwable) -> {
+                    assertRequestInfoResponse(client.handleRedirect(requestId, response), requestId);
+                    context.setCreatedIdentity(true);
+                }).join();
+    }
+
     private NodeInfoResponse getNodeInfo() throws Exception {
         Optional<NodeInfoResponse> optInfo = client.getNodeInfo();
         assertTrue(optInfo.isPresent());
         return optInfo.get();
     }
 
-    private void assertRequestInfoResponse(Optional<RequestInfoResponse> item, String resourceId) {
-        assertTrue(item.isPresent() && item.get().getProof() != null && item.get().getResources() != null);
-        assertEquals(resourceId, item.get().getRequestId());
-    }
-
+    /**
+     * Run Asset Tests together as a group
+     */
     @Nested
-    @DisplayName("Node Tests")
-    class NodeTests {
+    @DisplayName("Asset Tests")
+    @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+    class AssetTests {
 
         @Test
-        void testGetHealthChecks() throws Exception {
-            Optional<HealthChecks> optInfo = client.getHealthChecks();
-            assertTrue(optInfo.isPresent());
-            HealthChecks healthChecks = optInfo.get();
+        @DisplayName("Create Account Asset")
+        @Order(10)
+        void testCreateAccountAsset() throws Exception {
+            assumeTrue(context.isCreatedIdentity(), ASSUME_MESSAGE);
 
-            assertNotNull(healthChecks.getBuildInfo());
-            assertNotNull(healthChecks.getBuildInfo().getName());
-            assertNotNull(healthChecks.getBuildInfo().getVersion());
+            IovKeyPair keyPair = context.getKeyPair();
+            String requestId = UUID.randomUUID().toString();
+            String assetTypeId = context.getAssetTypeQuantifiableId();
+            String assetWithQuantityId = context.getAssetWithQuantityId();
+
+            CreateAssetAccountRequest request = new CreateAssetAccountRequest(requestId, assetWithQuantityId, assetTypeId, BigInteger.valueOf(1));
+
+            client.createAsset(request, keyPair)
+                    .whenComplete((response, throwable) -> {
+                        assertRequestInfoResponse(client.handleRedirect(requestId, response), requestId);
+                    }).join();
         }
 
         @Test
-        void testGetNodeInfo() throws Exception {
-            NodeInfoResponse info = getNodeInfo();
-            assertNotNull(info.getNodeId());
-            assertNotNull(info.getPublicCredentials());
-            assertNotNull(info.getPublicCredentials().getKey());
-            assertNotNull(info.getPublicCredentials().getProtocolId());
+        @DisplayName("Create Asset Unique")
+        @Order(10)
+        void testCreateAssetUnique() throws Exception {
+            assumeTrue(context.isCreatedIdentity(), ASSUME_MESSAGE);
+
+            IovKeyPair keyPair = context.getKeyPair();
+            String requestId = UUID.randomUUID().toString();
+            String assetTypeId = context.getAssetTypeId();
+            String assetId = context.getAssetId();
+
+            CreateAssetUniqueRequest request = new CreateAssetUniqueRequest(requestId, assetId, assetTypeId);
+
+            client.createAsset(request, keyPair)
+                    .whenComplete((response, throwable) -> {
+                        assertRequestInfoResponse(client.handleRedirect(requestId, response), requestId);
+                    }).join();
         }
+
+        @Test
+        @DisplayName("Create Quantifiable Asset Type")
+        @Order(8)
+        void testCreateQuantifiableAssetType() throws Exception {
+            if (!context.isCreatedIdentity()) {
+                createIdentity();
+            }
+
+            assumeTrue(context.isCreatedIdentity(), ASSUME_MESSAGE);
+
+            IovKeyPair keyPair = context.getKeyPair();
+            String requestId = UUID.randomUUID().toString();
+            String assetTypeId = context.getAssetTypeQuantifiableId();
+
+            CreateAssetTypeRequest request = new CreateAssetTypeRequest(requestId, assetTypeId, AssetTypeProperty.QUANTIFIABLE, 1);
+
+            client.createAssetType(request, keyPair)
+                    .whenComplete((response, throwable) -> assertRequestInfoResponse(client.handleRedirect(requestId, response), requestId)).join();
+        }
+
+        @Test
+        @DisplayName("Create Unique Asset Type")
+        @Order(8)
+        void testCreateUniqueAssetType() throws Exception {
+            if (!context.isCreatedIdentity()) {
+                createIdentity();
+            }
+
+            assumeTrue(context.isCreatedIdentity(), ASSUME_MESSAGE);
+
+            IovKeyPair keyPair = context.getKeyPair();
+            String requestId = UUID.randomUUID().toString();
+            String assetTypeId = context.getAssetTypeId();
+
+            CreateAssetTypeRequest request = new CreateAssetTypeRequest(requestId, assetTypeId, AssetTypeProperty.UNIQUE);
+
+            client.createAssetType(request, keyPair)
+                    .whenComplete((response, throwable) -> assertRequestInfoResponse(client.handleRedirect(requestId, response), requestId)).join();
+        }
+
+        @Test
+        @DisplayName("Get Asset")
+        @Order(11)
+        void testGetAsset() throws Exception {
+            assumeTrue(context.isCreatedIdentity(), ASSUME_MESSAGE);
+
+            String assetTypeId = context.getAssetTypeId();
+            String assetId = context.getAssetId();
+
+            String nodeId = getNodeInfo().getNodeId();
+            String requestId = UUID.randomUUID().toString();
+
+            GetAssetRequest request = new GetAssetRequest(requestId, nodeId, assetTypeId, assetId);
+            IovKeyPair keyPair = context.getKeyPair();
+
+            GetAssetResponse response = client.getAsset(request, keyPair);
+            assertNotNull(response);
+            assertNotNull(response.getAssetTypeId());
+            assertNotNull(response.getOwnerId());
+            assertNotNull(response.getProof());
+        }
+
+        @Test
+        @DisplayName("Get Quantifiable Asset Type")
+        @Order(9)
+        void testGetQuantifiableAssetType() throws Exception {
+            assumeTrue(context.isCreatedIdentity(), ASSUME_MESSAGE);
+
+            String assetTypeId = context.getAssetTypeQuantifiableId();
+
+            String nodeId = getNodeInfo().getNodeId();
+            String requestId = UUID.randomUUID().toString();
+
+            GetAssetTypeRequest request = new GetAssetTypeRequest(requestId, nodeId, assetTypeId);
+            IovKeyPair keyPair = context.getKeyPair();
+
+            GetAssetTypeResponse assetTypeResponse = client.getAssetType(request, keyPair);
+            assertNotNull(assetTypeResponse);
+            assertNotNull(assetTypeResponse.getType());
+            assertNotNull(assetTypeResponse.getAssetTypeId());
+            assertNotNull(assetTypeResponse.getOwnerId());
+            assertNotNull(assetTypeResponse.getProof());
+        }
+
+        @Test
+        @DisplayName("Get Unique Asset Type")
+        @Order(9)
+        void testGetUniqueAssetType() throws Exception {
+            assumeTrue(context.isCreatedIdentity(), ASSUME_MESSAGE);
+
+            String assetTypeId = context.getAssetTypeId();
+
+            String nodeId = getNodeInfo().getNodeId();
+            String requestId = UUID.randomUUID().toString();
+
+            GetAssetTypeRequest request = new GetAssetTypeRequest(requestId, nodeId, assetTypeId);
+            IovKeyPair keyPair = context.getKeyPair();
+
+            GetAssetTypeResponse assetTypeResponse = client.getAssetType(request, keyPair);
+            assertNotNull(assetTypeResponse);
+            assertNotNull(assetTypeResponse.getType());
+            assertNotNull(assetTypeResponse.getAssetTypeId());
+            assertNotNull(assetTypeResponse.getOwnerId());
+            assertNotNull(assetTypeResponse.getProof());
+        }
+
+        @Test
+        @DisplayName("Transfer Ownership")
+        @Order(12)
+        void testTransferAssets() throws Exception {
+            assumeTrue(context.isCreatedIdentity(), ASSUME_MESSAGE);
+
+            String requestId = UUID.randomUUID().toString();
+            IovKeyPair keyPair = context.getKeyPair();
+
+            TransferOwnershipItem item = new TransferOwnershipItem(context.getAssetId(), context.getAssetTypeId(), context.getIdentityId(), context.getIdentityId());
+            TransferRequest request = new TransferRequest(requestId, List.of(item));
+
+            client.transfer(request, keyPair)
+                    .whenComplete((response, throwable) -> assertRequestInfoResponse(client.handleRedirect(requestId, response), requestId)).join();
+        }
+
     }
 
     /**
@@ -82,26 +246,11 @@ public class PlatformClientIntegrationTest {
     @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
     class IdentityTests {
 
-        static final String ASSUME_MESSAGE = "In order to perform this test, identity must be created. Run IdentityTest group together.";
-
         @Test
         @DisplayName("Create Identity Test")
         @Order(1)
         void testCreateIdentity() {
-            String requestId = UUID.randomUUID().toString();
-            String identityId = context.getIdentityId();
-            IovKeyPair keyPair = context.getKeyPair();
-            String publicKey = SecurityUtils.encodeBase64(keyPair.getPublicKey());
-            PublicCredentials credentials = new PublicCredentials(ProtocolType.SHA256WithRSA.name(), publicKey);
-
-            CreateIdentityRequest request = new CreateIdentityRequest(requestId, identityId, credentials);
-
-            client.createIdentity(request, context.getKeyPair())
-                    .whenComplete((response, throwable) -> {
-                        assertRequestInfoResponse(client.handleRedirect(requestId, response), requestId);
-                        context.setCreatedIdentity(true);
-                    }).join();
-
+            createIdentity();
         }
 
         @Test
@@ -228,159 +377,30 @@ public class PlatformClientIntegrationTest {
             assertNotNull(response.getProtocolId());
             assertNotNull(response.getKey());
         }
+    }
+
+    @Nested
+    @DisplayName("Node Tests")
+    class NodeTests {
 
         @Test
-        @DisplayName("Create Unique Asset Type")
-        @Order(8)
-        void testCreateUniqueAssetType() throws Exception {
-            assumeTrue(context.isCreatedIdentity(), ASSUME_MESSAGE);
+        void testGetHealthChecks() throws Exception {
+            Optional<HealthChecks> optInfo = client.getHealthChecks();
+            assertTrue(optInfo.isPresent());
+            HealthChecks healthChecks = optInfo.get();
 
-            IovKeyPair keyPair = context.getKeyPair();
-            String requestId = UUID.randomUUID().toString();
-            String assetTypeId = context.getAssetTypeId();
-
-            CreateAssetTypeRequest request = new CreateAssetTypeRequest(requestId, assetTypeId, AssetTypeProperty.UNIQUE);
-
-            client.createAssetType(request, keyPair)
-                    .whenComplete((response, throwable) -> assertRequestInfoResponse(client.handleRedirect(requestId, response), requestId)).join();
+            assertNotNull(healthChecks.getBuildInfo());
+            assertNotNull(healthChecks.getBuildInfo().getName());
+            assertNotNull(healthChecks.getBuildInfo().getVersion());
         }
 
         @Test
-        @DisplayName("Create Quantifiable Asset Type")
-        @Order(8)
-        void testCreateQuantifiableAssetType() throws Exception {
-            assumeTrue(context.isCreatedIdentity(), ASSUME_MESSAGE);
-
-            IovKeyPair keyPair = context.getKeyPair();
-            String requestId = UUID.randomUUID().toString();
-            String assetTypeId = context.getAssetTypeQuantifiableId();
-
-            CreateAssetTypeRequest request = new CreateAssetTypeRequest(requestId, assetTypeId, AssetTypeProperty.QUANTIFIABLE, 1);
-
-            client.createAssetType(request, keyPair)
-                    .whenComplete((response, throwable) -> assertRequestInfoResponse(client.handleRedirect(requestId, response), requestId)).join();
+        void testGetNodeInfo() throws Exception {
+            NodeInfoResponse info = getNodeInfo();
+            assertNotNull(info.getNodeId());
+            assertNotNull(info.getPublicCredentials());
+            assertNotNull(info.getPublicCredentials().getKey());
+            assertNotNull(info.getPublicCredentials().getProtocolId());
         }
-
-        @Test
-        @DisplayName("Get Unique Asset Type")
-        @Order(9)
-        void testGetUniqueAssetType() throws Exception {
-            assumeTrue(context.isCreatedIdentity(), ASSUME_MESSAGE);
-
-            String assetTypeId = context.getAssetTypeId();
-
-            String nodeId = getNodeInfo().getNodeId();
-            String requestId = UUID.randomUUID().toString();
-
-            GetAssetTypeRequest request = new GetAssetTypeRequest(requestId, nodeId, assetTypeId);
-            IovKeyPair keyPair = context.getKeyPair();
-
-            GetAssetTypeResponse assetTypeResponse = client.getAssetType(request, keyPair);
-            assertNotNull(assetTypeResponse);
-            assertNotNull(assetTypeResponse.getType());
-            assertNotNull(assetTypeResponse.getAssetTypeId());
-            assertNotNull(assetTypeResponse.getOwnerId());
-            assertNotNull(assetTypeResponse.getProof());
-        }
-
-        @Test
-        @DisplayName("Get Quantifiable Asset Type")
-        @Order(9)
-        void testGetQuantifiableAssetType() throws Exception {
-            assumeTrue(context.isCreatedIdentity(), ASSUME_MESSAGE);
-
-            String assetTypeId = context.getAssetTypeQuantifiableId();
-
-            String nodeId = getNodeInfo().getNodeId();
-            String requestId = UUID.randomUUID().toString();
-
-            GetAssetTypeRequest request = new GetAssetTypeRequest(requestId, nodeId, assetTypeId);
-            IovKeyPair keyPair = context.getKeyPair();
-
-            GetAssetTypeResponse assetTypeResponse = client.getAssetType(request, keyPair);
-            assertNotNull(assetTypeResponse);
-            assertNotNull(assetTypeResponse.getType());
-            assertNotNull(assetTypeResponse.getAssetTypeId());
-            assertNotNull(assetTypeResponse.getOwnerId());
-            assertNotNull(assetTypeResponse.getProof());
-        }
-
-        @Test
-        @DisplayName("Create Asset Unique")
-        @Order(10)
-        void testCreateAssetUnique() throws Exception {
-            assumeTrue(context.isCreatedIdentity(), ASSUME_MESSAGE);
-
-            IovKeyPair keyPair = context.getKeyPair();
-            String requestId = UUID.randomUUID().toString();
-            String assetTypeId = context.getAssetTypeId();
-            String assetId = context.getAssetId();
-
-            CreateAssetUniqueRequest request = new CreateAssetUniqueRequest(requestId, assetId, assetTypeId);
-
-            client.createAsset(request, keyPair)
-                    .whenComplete((response, throwable) -> {
-                        assertRequestInfoResponse(client.handleRedirect(requestId, response), requestId);
-                    }).join();
-        }
-
-        @Test
-        @DisplayName("Create Account Asset")
-        @Order(10)
-        void testCreateAccountAsset() throws Exception {
-            assumeTrue(context.isCreatedIdentity(), ASSUME_MESSAGE);
-
-            IovKeyPair keyPair = context.getKeyPair();
-            String requestId = UUID.randomUUID().toString();
-            String assetTypeId = context.getAssetTypeQuantifiableId();
-            String assetWithQuantityId = context.getAssetWithQuantityId();
-
-            CreateAssetAccountRequest request = new CreateAssetAccountRequest(requestId, assetWithQuantityId, assetTypeId, "1");
-
-            client.createAsset(request, keyPair)
-                    .whenComplete((response, throwable) -> {
-                        assertRequestInfoResponse(client.handleRedirect(requestId, response), requestId);
-                    }).join();
-        }
-
-        @Test
-        @DisplayName("Get Asset")
-        @Order(11)
-        void testGetAsset() throws Exception {
-            assumeTrue(context.isCreatedIdentity(), ASSUME_MESSAGE);
-
-            String assetTypeId = context.getAssetTypeId();
-            String assetId = context.getAssetId();
-
-            String nodeId = getNodeInfo().getNodeId();
-            String requestId = UUID.randomUUID().toString();
-
-            GetAssetRequest request = new GetAssetRequest(requestId, nodeId, assetTypeId, assetId);
-            IovKeyPair keyPair = context.getKeyPair();
-
-            GetAssetResponse assetTypeResponse = client.getAsset(request, keyPair);
-            assertNotNull(assetTypeResponse);
-            //assertNotNull(assetTypeResponse.getAssetId());
-            assertNotNull(assetTypeResponse.getAssetTypeId());
-            assertNotNull(assetTypeResponse.getOwnerId());
-            assertNotNull(assetTypeResponse.getProof());
-        }
-
-        @Test
-        @DisplayName("Transfer Ownership")
-        @Order(12)
-        void testTransferAssets() throws Exception {
-            assumeTrue(context.isCreatedIdentity(), ASSUME_MESSAGE);
-
-            String requestId = UUID.randomUUID().toString();
-            IovKeyPair keyPair = context.getKeyPair();
-
-            TransferOwnershipItem item = new TransferOwnershipItem(context.getAssetId(), context.getAssetTypeId(), context.getIdentityId(), context.getIdentityId());
-            TransferRequest request = new TransferRequest(requestId, List.of(item));
-
-            client.transfer(request, keyPair)
-                    .whenComplete((response, throwable) -> assertRequestInfoResponse(client.handleRedirect(requestId, response), requestId)).join();
-        }
-
     }
 }

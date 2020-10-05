@@ -4,11 +4,15 @@ import java.util.List;
 
 public class ClaimEndorsementsResponse extends BaseResponse {
 
-    private final String claim;
+    private String claim;
 
-    private final String delegateIdentityId;
+    private String delegateIdentityId;
 
-    private final List<EndorsementResponse> endorsements;
+    private List<EndorsementResponse> endorsements;
+
+    private ClaimEndorsementsResponse() {
+        // needed for Jackson parser
+    }
 
     public ClaimEndorsementsResponse(String proof, String claim, String delegateIdentityId, List<EndorsementResponse> endorsements) {
         super(proof);

@@ -11,9 +11,13 @@ import java.util.List;
  */
 public class GetIdentityResponse extends BaseResponse {
 
-    private final String identityId;
+    private String identityId;
 
-    private final List<PublicCredentials> publicCredentials;
+    private List<PublicCredentials> publicCredentials;
+
+    private GetIdentityResponse() {
+        // needed for Jackson parser
+    }
 
     public GetIdentityResponse(String proof, String identityId, List<PublicCredentials> publicCredentials) {
         super(proof);

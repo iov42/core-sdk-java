@@ -51,51 +51,6 @@ public class PlatformClient {
     }
 
     /**
-     * Creates a new asset type
-     * <p>
-     * See the api specs at:
-     * https://api.sandbox.iov42.dev/api/v1/apidocs/redoc.html#tag/assets/paths/~1asset-types/post
-     *
-     * @param request
-     * @param keyPair
-     * @return
-     */
-    public CompletableFuture<HttpResponse<String>> createAssetType(CreateAssetTypeRequest request, IovKeyPair keyPair) {
-        String body = JsonUtils.toJson(request);
-
-        List<String> headers = PlatformUtils.createPostHeaders(keyPair, body);
-
-        String url = this.url + "/" + version + "/asset-types";
-        return httpClientProvider.executePost(url, body.getBytes(StandardCharsets.UTF_8), headers.toArray(new String[0]));
-    }
-
-    /**
-     * Reads information about an asset type
-     * <p>
-     * See the API specs at:
-     * https://api.sandbox.iov42.dev/api/v1/apidocs/redoc.html#tag/assets/paths/~1asset-types~1{assetTypeId}/get
-     *
-     * @param request
-     * @param keyPair
-     * @return
-     */
-    public GetAssetTypeResponse getAssetType(GetAssetTypeRequest request, IovKeyPair keyPair) throws PlatformException {
-        String requestId = request.getRequestId();
-        String assetTypeId = request.getAssetTypeId();
-        String nodeId = request.getNodeId();
-
-
-        String queryParameters = String.format("?requestId=%s&nodeId=%s", requestId, nodeId);
-        String relativeUrl = "/api/" + version + "/asset-types/" + assetTypeId + queryParameters;
-        String url = this.url + "/" + version + "/asset-types/" + assetTypeId + queryParameters;
-
-        List<String> headers = PlatformUtils.createGetHeaders(keyPair, relativeUrl);
-        HttpResponse<String> response = httpClientProvider.executeGet(url, headers.toArray(new String[0]));
-
-        return handleResponse(response, GetAssetTypeResponse.class);
-    }
-
-    /**
      * Creates a new asset
      * <p>
      * See the API specs at: https://api.sandbox.iov42.dev/api/v1/apidocs/redoc.html#tag/assets/paths/~1asset-types~1{assetTypeId}~1assets/post
@@ -114,29 +69,22 @@ public class PlatformClient {
     }
 
     /**
-     * Gets an asset instance
+     * Creates a new asset type
      * <p>
-     * See the API specs: https://api.sandbox.iov42.dev/api/v1/apidocs/redoc.html#tag/assets/paths/~1asset-types~1{assetTypeId}~1assets~1{assetId}/get
+     * See the api specs at:
+     * https://api.sandbox.iov42.dev/api/v1/apidocs/redoc.html#tag/assets/paths/~1asset-types/post
      *
      * @param request
      * @param keyPair
      * @return
-     * @throws PlatformException
      */
-    public GetAssetResponse getAsset(GetAssetRequest request, IovKeyPair keyPair) throws PlatformException {
-        String requestId = request.getRequestId();
-        String assetTypeId = request.getAssetTypeId();
-        String assetId = request.getAssetId();
+    public CompletableFuture<HttpResponse<String>> createAssetType(CreateAssetTypeRequest request, IovKeyPair keyPair) {
+        String body = JsonUtils.toJson(request);
 
+        List<String> headers = PlatformUtils.createPostHeaders(keyPair, body);
 
-        String queryParameters = String.format("?requestId=%s&nodeId=%s", requestId, request.getNodeId());
-        String relativeUrl = "/api/" + version + "/asset-types/" + assetTypeId + queryParameters;
-        String url = this.url + "/" + version + "/asset-types/" + assetTypeId + queryParameters;
-
-        List<String> headers = PlatformUtils.createGetHeaders(keyPair, relativeUrl);
-        HttpResponse<String> response = httpClientProvider.executeGet(url, headers.toArray(new String[0]));
-
-        return handleResponse(response, GetAssetResponse.class);
+        String url = this.url + "/" + version + "/asset-types";
+        return httpClientProvider.executePost(url, body.getBytes(StandardCharsets.UTF_8), headers.toArray(new String[0]));
     }
 
     /**
@@ -197,6 +145,58 @@ public class PlatformClient {
 
         String url = this.url + "/" + version + "/identities/" + subjectId + "/endorsements";
         return httpClientProvider.executePost(url, body.getBytes(StandardCharsets.UTF_8), headers.toArray(new String[0]));
+    }
+
+    /**
+     * Gets an asset instance
+     * <p>
+     * See the API specs: https://api.sandbox.iov42.dev/api/v1/apidocs/redoc.html#tag/assets/paths/~1asset-types~1{assetTypeId}~1assets~1{assetId}/get
+     *
+     * @param request
+     * @param keyPair
+     * @return
+     * @throws PlatformException
+     */
+    public GetAssetResponse getAsset(GetAssetRequest request, IovKeyPair keyPair) throws PlatformException {
+        String requestId = request.getRequestId();
+        String assetTypeId = request.getAssetTypeId();
+        String assetId = request.getAssetId();
+
+
+        String queryParameters = String.format("?requestId=%s&nodeId=%s", requestId, request.getNodeId());
+        String relativeUrl = "/api/" + version + "/asset-types/" + assetTypeId + "/assets/" + assetId + queryParameters;
+        String url = this.url + "/" + version + "/asset-types/" + assetTypeId + "/assets/" + assetId + queryParameters;
+
+        List<String> headers = PlatformUtils.createGetHeaders(keyPair, relativeUrl);
+        HttpResponse<String> response = httpClientProvider.executeGet(url, headers.toArray(new String[0]));
+
+        return handleResponse(response, GetAssetResponse.class);
+    }
+
+    /**
+     * Reads information about an asset type
+     * <p>
+     * See the API specs at:
+     * https://api.sandbox.iov42.dev/api/v1/apidocs/redoc.html#tag/assets/paths/~1asset-types~1{assetTypeId}/get
+     *
+     * @param request
+     * @param keyPair
+     * @return
+     */
+    public GetAssetTypeResponse getAssetType(GetAssetTypeRequest request, IovKeyPair keyPair) throws PlatformException {
+        String requestId = request.getRequestId();
+        String assetTypeId = request.getAssetTypeId();
+        String nodeId = request.getNodeId();
+
+
+        String queryParameters = String.format("?requestId=%s&nodeId=%s", requestId, nodeId);
+        String relativeUrl = "/api/" + version + "/asset-types/" + assetTypeId + queryParameters;
+        String url = this.url + "/" + version + "/asset-types/" + assetTypeId + queryParameters;
+
+        List<String> headers = PlatformUtils.createGetHeaders(keyPair, relativeUrl);
+        HttpResponse<String> response = httpClientProvider.executeGet(url, headers.toArray(new String[0]));
+
+        return handleResponse(response, GetAssetTypeResponse.class);
     }
 
     /**
@@ -360,6 +360,8 @@ public class PlatformClient {
     public <T> T handleResponse(HttpResponse<String> response, Class<T> clazz) throws PlatformException {
         if (response.statusCode() >= 400) {
             throw new PlatformException(response.body());
+        } else if (Objects.isNull(response.body()) || response.body().trim().length() == 0) {
+            return null;
         }
         return JsonUtils.fromJson(response.body(), clazz);
     }
