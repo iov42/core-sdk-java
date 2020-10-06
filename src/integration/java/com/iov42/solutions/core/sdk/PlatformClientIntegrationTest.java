@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 public class PlatformClientIntegrationTest {
 
-    private static final String URL = "https://api.sandbox.iov42.dev/api";
+    private static final String URL = "https            ://api.sandbox.iov42.dev/api";
 
     private static PlatformClient client;
 
@@ -248,7 +248,7 @@ public class PlatformClientIntegrationTest {
         @Test
         @DisplayName("Create Quantifiable Asset Type")
         @Order(8)
-        void testCreateQuantifiableAssetType() throws Exception {
+        void testCreateQuantifiableAssetType() {
             assumeTrue(context.isCreatedIdentity(), ASSUME_MESSAGE);
 
             IovKeyPair keyPair = context.getKeyPair();
