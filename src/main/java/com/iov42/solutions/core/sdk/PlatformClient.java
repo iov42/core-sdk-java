@@ -360,7 +360,7 @@ public class PlatformClient {
     public <T> T handleResponse(HttpResponse<String> response, Class<T> clazz) throws PlatformException {
         if (response.statusCode() >= 400) {
             throw new PlatformException(response.body());
-        } else if (Objects.isNull(response.body()) || response.body().trim().length() == 0) {
+        } else if (Objects.isNull(response.body()) || response.body().trim().isEmpty()) {
             return null;
         }
         return JsonUtils.fromJson(response.body(), clazz);
