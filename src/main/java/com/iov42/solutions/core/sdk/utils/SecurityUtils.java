@@ -1,5 +1,7 @@
 package com.iov42.solutions.core.sdk.utils;
 
+import com.iov42.solutions.core.sdk.model.IovKeyPair;
+import com.iov42.solutions.core.sdk.model.ProtocolType;
 import com.iov42.solutions.core.sdk.model.SignatoryIOV;
 import com.iov42.solutions.core.sdk.model.SignatureIOV;
 
@@ -37,21 +39,21 @@ public class SecurityUtils {
         return pair;
     }
 
-    public static SignatureIOV sign(SignatoryIOV signatory, String data) {
+    public static SignatureIOV sign(IovKeyPair keyPair, String data) {
 
-        if (Objects.nonNull(signatory.getDelegatorIdentityId())) {
+        if (Objects.nonNull(keyPair.getDelegateIdentityId())) {
             // this is a signature on behalf of the delegator
             return new SignatureIOV(
-                    signatory.getDelegatorIdentityId(),
-                    signatory.getIdentityId(),
-                    signatory.getProtocolId(),
-                    sign(signatory.getProtocolId(), signatory.getPrivateKey(), data)
+                    keyPair.getDelegateIdentityId(),
+                    keyPair.getIdentityId(),
+                    keyPair.getProtocolId().name(),
+                    sign(keyPair.getProtocolId().name(), keyPair.getPrivateKey(), data)
             );
         }
         return new SignatureIOV(
-                signatory.getIdentityId(),
-                signatory.getProtocolId(),
-                sign(signatory.getProtocolId(), signatory.getPrivateKey(), data)
+                keyPair.getIdentityId(),
+                keyPair.getProtocolId().name(),
+                sign(keyPair.getProtocolId().name(), keyPair.getPrivateKey(), data)
         );
     }
 
@@ -66,7 +68,7 @@ public class SecurityUtils {
 
             return BASE64_ENCODER.encodeToString(signature.sign());
         } catch (NoSuchProviderException | NoSuchAlgorithmException | SignatureException | InvalidKeySpecException | InvalidKeyException ex) {
-            throw new RuntimeException("Could not sign data.", ex);
+            throw new RuntimeException("Could not sign the data.", ex);
         }
     }
 

@@ -1,15 +1,18 @@
 package com.iov42.solutions.core.sdk.model;
 
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 public class SignatureIOV {
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String delegateIdentityId;
 
-    private String identityId;
+    private final String identityId;
 
-    private String protocolId;
+    private final String protocolId;
 
-    private String signature;
+    private final String signature;
 
     public SignatureIOV(String identityId, String protocolId, String signature) {
         this.identityId = identityId;

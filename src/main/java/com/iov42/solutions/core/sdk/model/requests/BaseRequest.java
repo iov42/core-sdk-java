@@ -4,6 +4,9 @@ import java.util.UUID;
 
 public abstract class BaseRequest {
 
+    /**
+     * Unique identifier associated with the request.
+     */
     private final String requestId;
 
     public BaseRequest() {
@@ -16,12 +19,5 @@ public abstract class BaseRequest {
 
     public String getRequestId() {
         return requestId;
-    }
-
-    @Override
-    public String toString() {
-        return "BaseRequest{" +
-                "requestId='" + requestId + '\'' +
-                '}';
     }
 }

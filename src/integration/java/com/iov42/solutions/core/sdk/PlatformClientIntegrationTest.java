@@ -3,17 +3,16 @@ package com.iov42.solutions.core.sdk;
 import com.iov42.solutions.core.sdk.http.DefaultHttpClientProvider;
 import com.iov42.solutions.core.sdk.model.*;
 import com.iov42.solutions.core.sdk.model.requests.get.*;
-import com.iov42.solutions.core.sdk.model.requests.post.*;
+import com.iov42.solutions.core.sdk.model.requests.put.TransferOwnershipItem;
+import com.iov42.solutions.core.sdk.model.requests.put.TransferRequest;
+import com.iov42.solutions.core.sdk.model.requests.put.*;
 import com.iov42.solutions.core.sdk.model.responses.*;
 import com.iov42.solutions.core.sdk.utils.PlatformUtils;
 import com.iov42.solutions.core.sdk.utils.SecurityUtils;
 import org.junit.jupiter.api.*;
 
 import java.math.BigInteger;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
@@ -41,9 +40,13 @@ public class PlatformClientIntegrationTest {
         client = new PlatformClient(URL, new DefaultHttpClientProvider());
     }
 
-    private void assertRequestInfoResponse(Optional<RequestInfoResponse> item, String resourceId) {
-        assertTrue(item.isPresent() && item.get().getProof() != null && item.get().getResources() != null);
-        assertEquals(resourceId, item.get().getRequestId());
+    private void assertBaseResponse(BaseResponse item, String resourceId) {
+        assertNotNull(item);
+        if (Objects.nonNull(item.getErrors())) {
+            assertNull(item.getErrors(), item.getErrors().toString());
+        }
+        assertTrue(item.getProof() != null && item.getResources() != null);
+        assertEquals(resourceId, item.getRequestId());
     }
 
     private void createIdentity() {
@@ -57,7 +60,7 @@ public class PlatformClientIntegrationTest {
 
         client.createIdentity(request, context.getKeyPair())
                 .whenComplete((response, throwable) -> {
-                    assertRequestInfoResponse(client.handleRedirect(requestId, response), requestId);
+                    assertBaseResponse(client.handleResponse(requestId, response), requestId);
                     context.setCreatedIdentity(true);
                 }).join();
     }
@@ -87,11 +90,11 @@ public class PlatformClientIntegrationTest {
             String assetTypeId = context.getAssetTypeQuantifiableId();
             String assetWithQuantityId = context.getAssetWithQuantityId();
 
-            CreateAssetAccountRequest request = new CreateAssetAccountRequest(requestId, assetWithQuantityId, assetTypeId, BigInteger.valueOf(1));
+            CreateAssetRequest request = new CreateAssetRequest(requestId, assetTypeId, assetWithQuantityId, BigInteger.valueOf(1));
 
             client.createAsset(request, keyPair)
                     .whenComplete((response, throwable) -> {
-                        assertRequestInfoResponse(client.handleRedirect(requestId, response), requestId);
+                        assertBaseResponse(client.handleResponse(requestId, response), requestId);
                     }).join();
         }
 
@@ -106,11 +109,11 @@ public class PlatformClientIntegrationTest {
             String assetTypeId = context.getAssetTypeId();
             String assetId = context.getAssetId();
 
-            CreateAssetUniqueRequest request = new CreateAssetUniqueRequest(requestId, assetId, assetTypeId);
+            CreateAssetRequest request = new CreateAssetRequest(requestId, assetTypeId, assetId);
 
             client.createAsset(request, keyPair)
                     .whenComplete((response, throwable) -> {
-                        assertRequestInfoResponse(client.handleRedirect(requestId, response), requestId);
+                        assertBaseResponse(client.handleResponse(requestId, response), requestId);
                     }).join();
         }
 
@@ -131,7 +134,7 @@ public class PlatformClientIntegrationTest {
             CreateAssetTypeRequest request = new CreateAssetTypeRequest(requestId, assetTypeId, AssetTypeProperty.QUANTIFIABLE, 1);
 
             client.createAssetType(request, keyPair)
-                    .whenComplete((response, throwable) -> assertRequestInfoResponse(client.handleRedirect(requestId, response), requestId)).join();
+                    .whenComplete((response, throwable) -> assertBaseResponse(client.handleResponse(requestId, response), requestId)).join();
         }
 
         @Test
@@ -151,7 +154,7 @@ public class PlatformClientIntegrationTest {
             CreateAssetTypeRequest request = new CreateAssetTypeRequest(requestId, assetTypeId, AssetTypeProperty.UNIQUE);
 
             client.createAssetType(request, keyPair)
-                    .whenComplete((response, throwable) -> assertRequestInfoResponse(client.handleRedirect(requestId, response), requestId)).join();
+                    .whenComplete((response, throwable) -> assertBaseResponse(client.handleResponse(requestId, response), requestId)).join();
         }
 
         @Test
@@ -232,8 +235,8 @@ public class PlatformClientIntegrationTest {
             TransferOwnershipItem item = new TransferOwnershipItem(context.getAssetId(), context.getAssetTypeId(), context.getIdentityId(), context.getIdentityId());
             TransferRequest request = new TransferRequest(requestId, List.of(item));
 
-            client.transfer(request, keyPair)
-                    .whenComplete((response, throwable) -> assertRequestInfoResponse(client.handleRedirect(requestId, response), requestId)).join();
+            client.createTransfer(request, keyPair)
+                    .whenComplete((response, throwable) -> assertBaseResponse(client.handleResponse(requestId, response), requestId)).join();
         }
 
     }
@@ -263,11 +266,10 @@ public class PlatformClientIntegrationTest {
             List<String> claims = List.of("claim1", "claim2");
             String subjectId = context.getIdentityId();
 
-            CreateClaimsRequest request = new CreateClaimsRequest(requestId, claims, subjectId);
+            CreateIdentityClaimsRequest request = new CreateIdentityClaimsRequest(requestId, subjectId, claims);
 
             client.createIdentityClaims(request, context.getKeyPair())
-                    .whenComplete((response, throwable) -> assertRequestInfoResponse(client.handleRedirect(requestId, response), requestId)).join();
-
+                    .whenComplete((response, throwable) -> assertBaseResponse(client.handleResponse(requestId, response), requestId)).join();
         }
 
         @Test
@@ -283,21 +285,20 @@ public class PlatformClientIntegrationTest {
             String requestId = UUID.randomUUID().toString();
 
             client.createIdentity(new CreateIdentityRequest(requestId, endorserId, credentials), keyPair)
-                    .whenComplete((response, throwable) -> assertRequestInfoResponse(client.handleRedirect(requestId, response), requestId)).join();
+                    .whenComplete((response, throwable) -> assertBaseResponse(client.handleResponse(requestId, response), requestId)).join();
 
             // endorse identity claims
             String newRequestId = UUID.randomUUID().toString();
             String subjectId = context.getIdentityId();
 
-            SignatoryIOV signatory = new SignatoryIOV(endorserId, keyPair.getProtocolId().name(), keyPair.getPrivateKey());
             List<String> claims = List.of("claim1", "claim2");
 
-            Map<String, String> endorsements = PlatformUtils.endorse(signatory, subjectId, claims);
+            Map<String, String> endorsements = client.makeEndorsements(keyPair, subjectId, claims);
 
-            CreateEndorsementsRequest request = new CreateEndorsementsRequest(newRequestId, subjectId, endorserId, endorsements);
+            CreateIdentityEndorsementsRequest request = new CreateIdentityEndorsementsRequest(newRequestId, subjectId, endorserId, endorsements);
 
             client.endorseIdentityClaims(request, keyPair)
-                    .whenComplete((response, throwable) -> assertRequestInfoResponse(client.handleRedirect(requestId, response), requestId)).join();
+                    .whenComplete((response, throwable) -> assertBaseResponse(client.handleResponse(newRequestId, response), newRequestId)).join();
         }
 
         @Test
@@ -331,7 +332,7 @@ public class PlatformClientIntegrationTest {
             String requestId = UUID.randomUUID().toString();
             String nodeId = getNodeInfo().getNodeId();
             String identityId = context.getIdentityId();
-            String hashedClaim = PlatformUtils.getEncodedClaimHash("claim1");
+            String hashedClaim = PlatformUtils.hashClaim("claim1");
 
             GetIdentityClaimRequest request = new GetIdentityClaimRequest(requestId, nodeId, identityId, hashedClaim);
             IovKeyPair keyPair = context.getKeyPair();

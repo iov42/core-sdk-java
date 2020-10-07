@@ -4,8 +4,8 @@ public class GetAssetTypeRequest extends BaseGetRequest {
 
     private final String assetTypeId;
 
-    public GetAssetTypeRequest(String requestId, String assetTypeId) {
-        super(requestId);
+    public GetAssetTypeRequest(String nodeId, String assetTypeId) {
+        super(nodeId);
         this.assetTypeId = assetTypeId;
     }
 

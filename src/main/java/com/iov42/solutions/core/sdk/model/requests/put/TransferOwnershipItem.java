@@ -1,14 +1,20 @@
-package com.iov42.solutions.core.sdk.model.requests.post;
+package com.iov42.solutions.core.sdk.model.requests.put;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 public class TransferOwnershipItem {
 
-    private final String assetId;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String assetId;
 
-    private final String assetTypeId;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String assetTypeId;
 
-    private final String fromIdentityId;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String fromIdentityId;
 
-    private final String toIdentityId;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String toIdentityId;
 
     public TransferOwnershipItem(String assetId, String assetTypeId, String fromIdentityId, String toIdentityId) {
         this.assetId = assetId;
@@ -21,19 +27,15 @@ public class TransferOwnershipItem {
         return assetId;
     }
 
-
     public String getAssetTypeId() {
         return assetTypeId;
     }
-
 
     public String getFromIdentityId() {
         return fromIdentityId;
     }
 
-
     public String getToIdentityId() {
         return toIdentityId;
     }
-
 }

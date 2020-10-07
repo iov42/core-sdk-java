@@ -33,16 +33,6 @@ public class DefaultHttpClientProvider implements HttpClientProvider<HttpRespons
     }
 
     @Override
-    public CompletableFuture<HttpResponse<String>> executePost(String url, byte[] body, String... headers) throws HttpClientException{
-        try {
-            HttpRequest request = build(url, headers).POST(HttpRequest.BodyPublishers.ofByteArray(body)).build();
-            return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString());
-        } catch (Exception e) {
-            throw new HttpClientException(String.format("Failed to execute async POST request: [%s]", url), e);
-        }
-    }
-
-    @Override
     public CompletableFuture<HttpResponse<String>> executePut(String url, byte[] body, String... headers) {
         try {
             HttpRequest request = build(url, headers).PUT(HttpRequest.BodyPublishers.ofByteArray(body)).build();

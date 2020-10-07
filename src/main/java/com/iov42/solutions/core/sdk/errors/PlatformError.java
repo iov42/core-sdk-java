@@ -1,32 +1,41 @@
 package com.iov42.solutions.core.sdk.errors;
 
-import java.util.List;
+import com.iov42.solutions.core.sdk.utils.JsonUtils;
 
 public class PlatformError {
 
-    private List<BasePlatformError> errors;
+    private int errorCode;
 
-    private String requestId;
+    private String errorType;
 
-    public List<BasePlatformError> getErrors() {
-        return errors;
+    private String message;
+
+    public int getErrorCode() {
+        return errorCode;
     }
 
-    public void setErrors(List<BasePlatformError> errors) {
-        this.errors = errors;
+    public void setErrorCode(int errorCode) {
+        this.errorCode = errorCode;
     }
 
-    public String getRequestId() {
-        return requestId;
+    public String getErrorType() {
+        return errorType;
     }
 
-    public void setRequestId(String requestId) {
-        this.requestId = requestId;
+    public void setErrorType(String errorType) {
+        this.errorType = errorType;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
     }
 
     @Override
     public String toString() {
-        return "{ errors=" + errors +
-                ", requestId='" + requestId + " }";
+        return JsonUtils.toJson(this);
     }
 }

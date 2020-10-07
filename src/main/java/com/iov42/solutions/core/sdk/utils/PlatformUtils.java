@@ -2,7 +2,6 @@ package com.iov42.solutions.core.sdk.utils;
 
 import com.iov42.solutions.core.sdk.PlatformClient;
 import com.iov42.solutions.core.sdk.model.IovKeyPair;
-import com.iov42.solutions.core.sdk.model.SignatoryIOV;
 import com.iov42.solutions.core.sdk.model.SignatureIOV;
 import com.iov42.solutions.core.sdk.model.responses.RequestInfoResponse;
 
@@ -13,99 +12,66 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class PlatformUtils {
-
-    public static final String APPLICATION_JSON_VALUE = "application/json";
-
-    public static final String HEADER_AUTHENTICATION = "X-IOV42-Authentication";
-
-    public static final String HEADER_AUTHORISATIONS = "X-IOV42-Authorisations";
-
-    public static final String HEADER_CONTENT_TYPE = "Content-Type";
-
-    public static final String HEADER_IOV42_CLAIMS = "X-IOV42-Claims";
-
-    static final String ENDORSER_ONLY_CLAIM_HEADER_VALUE = "e30=";
 
     private PlatformUtils() {
         // static usage only
     }
 
-    public static List<String> createGetHeaders(IovKeyPair keyPair, String payload) {
-
-        SignatoryIOV signatory = new SignatoryIOV(keyPair.getIdentityId(), keyPair.getProtocolId().name(), keyPair.getPrivateKey());
-
-        SignatureIOV authenticationSignature = SecurityUtils.sign(signatory, payload);
-
-        List<String> headers = new ArrayList<>();
-        headers.add(HEADER_AUTHENTICATION);
-        headers.add(PlatformUtils.getEncodedHeaderValue(authenticationSignature));
-
-        return headers;
-    }
-
-    public static List<String> createPostHeaders(IovKeyPair keyPair, String body) {
-
-        SignatoryIOV signatory = new SignatoryIOV(keyPair.getIdentityId(), keyPair.getProtocolId().name(), keyPair.getPrivateKey());
-
-        SignatureIOV authorisationSignature = SecurityUtils.sign(signatory, body);
-        SignatureIOV authenticationSignature = SecurityUtils.sign(signatory, authorisationSignature.getSignature());
-
-        List<String> headers = new ArrayList<>();
-        headers.add(HEADER_AUTHENTICATION);
-        headers.add(PlatformUtils.getEncodedHeaderValue(authenticationSignature));
-        headers.add(HEADER_AUTHORISATIONS);
-        headers.add(PlatformUtils.getEncodedHeaderValue(List.of(authorisationSignature)));
-        headers.add(HEADER_CONTENT_TYPE);
-        headers.add(APPLICATION_JSON_VALUE);
-
-        return headers;
-    }
-
-    public static List<String> createPostClaimsHeaders(IovKeyPair keyPair, String body, Collection<String> claims) {
-        List<String> headers = createPostHeaders(keyPair, body);
-
+    public static List<String> createClaimsHeaders(IovKeyPair keyPair, String body, Collection<String> claims) {
         Map<String, String> claimMap = claims.stream()
-                .collect(Collectors.toMap(PlatformUtils::getEncodedClaimHash, Function.identity()));
+                .collect(Collectors.toMap(PlatformUtils::hashClaim, Function.identity()));
 
-        headers.add(HEADER_IOV42_CLAIMS);
+        List<String> headers = createPutHeaders(keyPair, body);
+        headers.add(Constants.HEADER_IOV42_CLAIMS);
         headers.add(getEncodedHeaderValue(claimMap));
-
         return headers;
     }
 
-    public static List<String> createPostEndorsementsHeaders(IovKeyPair keyPair, String body) {
-        List<String> headers = createPostHeaders(keyPair, body);
-
-        headers.add(HEADER_IOV42_CLAIMS);
-        headers.add(ENDORSER_ONLY_CLAIM_HEADER_VALUE);
-
+    public static List<String> createEndorsementsHeaders(IovKeyPair keyPair, String body) {
+        List<String> headers = createPutHeaders(keyPair, body);
+        headers.add(Constants.HEADER_IOV42_CLAIMS);
+        headers.add(Constants.ENDORSER_ONLY_CLAIM_HEADER_VALUE);
         return headers;
     }
 
-    public static Map<String, String> endorse(SignatoryIOV endorser, String subjectId, List<String> plainClaims) {
-        return plainClaims.stream()
-                .collect(Collectors.toMap(
-                        PlatformUtils::getEncodedClaimHash,
-                        v -> SecurityUtils.sign(endorser, subjectId + ";" + PlatformUtils.getEncodedClaimHash(v)).getSignature()));
+    public static List<String> createGetHeaders(IovKeyPair keyPair, String payload) {
+        SignatureIOV authenticationSignature = SecurityUtils.sign(keyPair, payload);
+
+        List<String> headers = new ArrayList<>();
+        headers.add(Constants.HEADER_AUTHENTICATION);
+        headers.add(getEncodedHeaderValue(authenticationSignature));
+        return headers;
     }
 
-    public static Map<String, String> endorse(SignatoryIOV endorser, String subjectId, String subjectTypeId, List<String> plainClaims) {
-        return plainClaims.stream()
-                .collect(Collectors.toMap(
-                        Function.identity(),
-                        v -> SecurityUtils.sign(endorser, subjectId + ";" + subjectTypeId + ";" + PlatformUtils.getEncodedClaimHash(v)).getSignature()));
+    public static List<String> createPutHeaders(IovKeyPair keyPair, String body) {
+        SignatureIOV authorisationSignature = SecurityUtils.sign(keyPair, body);
+        SignatureIOV authenticationSignature = SecurityUtils.sign(keyPair, authorisationSignature.getSignature());
+
+        List<String> headers = new ArrayList<>();
+        headers.add(Constants.HEADER_AUTHENTICATION);
+        headers.add(getEncodedHeaderValue(authenticationSignature));
+        headers.add(Constants.HEADER_AUTHORISATIONS);
+        headers.add(getEncodedHeaderValue(List.of(authorisationSignature)));
+        headers.add(Constants.HEADER_CONTENT_TYPE);
+        headers.add(Constants.APPLICATION_JSON_VALUE);
+        return headers;
     }
 
-    public static String getEncodedClaimHash(String plainClaim) {
+    public static String hashClaim(String claim) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hash = digest.digest(plainClaim.getBytes(StandardCharsets.UTF_8));
+            byte[] hash = digest.digest(claim.getBytes(StandardCharsets.UTF_8));
             return SecurityUtils.encodeBase64(hash);
         } catch (NoSuchAlgorithmException ex) {
             throw new RuntimeException("Unable to create encoded hash for claim.", ex);
         }
+    }
+
+    public static List<String> hashClaims(Stream<String> claims) {
+        return claims.map(PlatformUtils::hashClaim).collect(Collectors.toList());
     }
 
     public static RequestInfoResponse waitForRequest(String requestId, PlatformClient client, int reTryAfter) throws Exception {
@@ -131,9 +97,5 @@ public class PlatformUtils {
 
     private static String getEncodedHeaderValue(Object value) {
         return SecurityUtils.encodeBase64(JsonUtils.toJson(value).getBytes(StandardCharsets.UTF_8));
-    }
-
-    public List<String> hashClaims(List<String> claims) {
-        return claims.stream().map(PlatformUtils::getEncodedClaimHash).collect(Collectors.toList());
     }
 }

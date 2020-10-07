@@ -13,7 +13,5 @@ public interface HttpClientProvider<R> {
 
     R executeGet(String url, String... headers) throws HttpClientException;
 
-    CompletableFuture<R> executePost(String url, byte[] body, String... headers);
-
     CompletableFuture<R> executePut(String url, byte[] body, String... headers);
 }
