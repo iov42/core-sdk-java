@@ -1,9 +1,7 @@
 package com.iov42.solutions.core.sdk.utils;
 
-import com.iov42.solutions.core.sdk.model.IovKeyPair;
-import com.iov42.solutions.core.sdk.model.ProtocolType;
-import com.iov42.solutions.core.sdk.model.SignatoryIOV;
-import com.iov42.solutions.core.sdk.model.SignatureIOV;
+import com.iov42.solutions.core.sdk.model.KeyInfo;
+import com.iov42.solutions.core.sdk.model.SignatureInfo;
 
 import java.nio.charset.StandardCharsets;
 import java.security.*;
@@ -39,20 +37,20 @@ public class SecurityUtils {
         return pair;
     }
 
-    public static SignatureIOV sign(IovKeyPair keyPair, String data) {
+    public static SignatureInfo sign(KeyInfo keyPair, String data) {
 
         if (Objects.nonNull(keyPair.getDelegateIdentityId())) {
             // this is a signature on behalf of the delegator
-            return new SignatureIOV(
+            return new SignatureInfo(
                     keyPair.getDelegateIdentityId(),
                     keyPair.getIdentityId(),
-                    keyPair.getProtocolId().name(),
+                    keyPair.getProtocolId(),
                     sign(keyPair.getProtocolId().name(), keyPair.getPrivateKey(), data)
             );
         }
-        return new SignatureIOV(
+        return new SignatureInfo(
                 keyPair.getIdentityId(),
-                keyPair.getProtocolId().name(),
+                keyPair.getProtocolId(),
                 sign(keyPair.getProtocolId().name(), keyPair.getPrivateKey(), data)
         );
     }

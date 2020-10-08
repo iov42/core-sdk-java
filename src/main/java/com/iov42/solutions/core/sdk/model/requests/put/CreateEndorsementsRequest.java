@@ -1,6 +1,6 @@
 package com.iov42.solutions.core.sdk.model.requests.put;
 
-import com.iov42.solutions.core.sdk.model.IovKeyPair;
+import com.iov42.solutions.core.sdk.model.KeyInfo;
 
 import java.util.List;
 import java.util.Map;
@@ -13,9 +13,9 @@ public abstract class CreateEndorsementsRequest extends BasePutRequest {
     /**
      * A non-empty map where the keys are the hashed claims and the values are the signatures by the endorser of these hashes.
      * To create this map for identity claims call this method:
-     * {@link com.iov42.solutions.core.sdk.PlatformClient#makeEndorsements(IovKeyPair keyPair, String subjectId, List plainClaims)}
+     * {@link com.iov42.solutions.core.sdk.PlatformClient#makeEndorsements(KeyInfo keyPair, String subjectId, List plainClaims)}
      * or to create this map for asset claims or asset type call this method:
-     * {@link com.iov42.solutions.core.sdk.PlatformClient#makeEndorsements(IovKeyPair keyPair, String subjectId, String subjectTypeId, List plainClaims)}
+     * {@link com.iov42.solutions.core.sdk.PlatformClient#makeEndorsements(KeyInfo keyPair, String subjectId, String subjectTypeId, List plainClaims)}
      */
     private final Map<String, String> endorsements;
 
@@ -29,14 +29,14 @@ public abstract class CreateEndorsementsRequest extends BasePutRequest {
      */
     private final String subjectId;
 
-    public CreateEndorsementsRequest(TransactionType _type, String subjectId, String endorserId, Map<String, String> endorsements) {
+    protected CreateEndorsementsRequest(TransactionType _type, String subjectId, String endorserId, Map<String, String> endorsements) {
         super(_type);
         this.subjectId = subjectId;
         this.endorserId = endorserId;
         this.endorsements = endorsements;
     }
 
-    public CreateEndorsementsRequest(String requestId, TransactionType _type, String subjectId, String endorserId, Map<String, String> endorsements) {
+    protected CreateEndorsementsRequest(String requestId, TransactionType _type, String subjectId, String endorserId, Map<String, String> endorsements) {
         super(requestId, _type);
         this.subjectId = subjectId;
         this.endorserId = endorserId;

@@ -15,36 +15,32 @@ public abstract class CreateClaimsRequest extends BasePutRequest {
     private final String subjectId;
 
     /**
+     * The identifier of the asset-type of the asset against which the claims will be linked.
+     */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private final String subjectTypeId;
+
+    /**
      * A non-empty list of all the plain text claims.
      */
     private List<String> claims;
 
-    /**
-     * The identifier of the asset-type of the asset against which the claims will be linked.
-     */
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private String subjectTypeId;
+    protected CreateClaimsRequest(TransactionType _type, String subjectId, List<String> claims) {
+        this(_type, subjectId, null, claims);
+    }
 
-    public CreateClaimsRequest(TransactionType _type, String subjectId, String subjectTypeId, List<String> claims) {
+    protected CreateClaimsRequest(TransactionType _type, String subjectId, String subjectTypeId, List<String> claims) {
         super(_type);
         this.subjectId = subjectId;
         this.subjectTypeId = subjectTypeId;
         this.claims = claims;
     }
 
-    public CreateClaimsRequest(TransactionType _type, String subjectId, List<String> claims) {
-        super(_type);
-        this.subjectId = subjectId;
-        this.claims = claims;
-    }
-
     public CreateClaimsRequest(String requestId, TransactionType _type, String subjectId, List<String> claims) {
-        super(requestId, _type);
-        this.subjectId = subjectId;
-        this.claims = claims;
+        this(requestId, _type, subjectId, null, claims);
     }
 
-    public CreateClaimsRequest(String requestId, TransactionType _type, String subjectId, String subjectTypeId, List<String> claims) {
+    protected CreateClaimsRequest(String requestId, TransactionType _type, String subjectId, String subjectTypeId, List<String> claims) {
         super(requestId, _type);
         this.subjectId = subjectId;
         this.subjectTypeId = subjectTypeId;

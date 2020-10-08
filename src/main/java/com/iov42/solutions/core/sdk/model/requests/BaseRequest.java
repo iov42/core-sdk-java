@@ -9,11 +9,11 @@ public abstract class BaseRequest {
      */
     private final String requestId;
 
-    public BaseRequest() {
+    protected BaseRequest() {
         this.requestId = UUID.randomUUID().toString();
     }
 
-    public BaseRequest(String requestId) {
+    protected BaseRequest(String requestId) {
         this.requestId = requestId;
     }
 

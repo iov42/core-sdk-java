@@ -2,7 +2,7 @@ package com.iov42.solutions.core.sdk;
 
 import com.iov42.solutions.core.sdk.http.HttpClientProvider;
 import com.iov42.solutions.core.sdk.model.HealthChecks;
-import com.iov42.solutions.core.sdk.model.IovKeyPair;
+import com.iov42.solutions.core.sdk.model.KeyInfo;
 import com.iov42.solutions.core.sdk.model.PublicCredentials;
 import com.iov42.solutions.core.sdk.model.requests.get.*;
 import com.iov42.solutions.core.sdk.model.requests.put.*;
@@ -57,11 +57,11 @@ public class PlatformClient {
      * <p>
      *
      * @param request structure used to create asset, for more details see: {@link CreateAssetRequest}
-     * @param keyPair iov42 key-pair wrapper, for more details see: {@link IovKeyPair}
+     * @param keyPair iov42 key-pair wrapper, for more details see: {@link KeyInfo}
      * @return {@link CompletableFuture}, when completed, should contain redirect header
      * and so it should be handled with {@link #handleResponse(String requestId, HttpResponse response)}
      */
-    public CompletableFuture<HttpResponse<String>> createAsset(CreateAssetRequest request, IovKeyPair keyPair) {
+    public CompletableFuture<HttpResponse<String>> createAsset(CreateAssetRequest request, KeyInfo keyPair) {
         String body = JsonUtils.toJson(request);
         List<String> headers = PlatformUtils.createPutHeaders(keyPair, body);
 
@@ -74,11 +74,11 @@ public class PlatformClient {
      * <p>
      *
      * @param request structure used to create asset claims, for more details see: {@link CreateAssetClaimsRequest}
-     * @param keyPair iov42 key-pair wrapper, for more details see: {@link IovKeyPair}
+     * @param keyPair iov42 key-pair wrapper, for more details see: {@link KeyInfo}
      * @return {@link CompletableFuture}, when completed, should contain redirect header
      * and so it should be handled with {@link #handleResponse(String requestId, HttpResponse response)}
      */
-    public CompletableFuture<HttpResponse<String>> createAssetClaims(CreateAssetClaimsRequest request, IovKeyPair keyPair) {
+    public CompletableFuture<HttpResponse<String>> createAssetClaims(CreateAssetClaimsRequest request, KeyInfo keyPair) {
         return createClaims(request, keyPair);
     }
 
@@ -88,11 +88,11 @@ public class PlatformClient {
      * <p>
      *
      * @param request structure used to create asset type, for more details see: {@link CreateAssetTypeRequest}
-     * @param keyPair iov42 key-pair wrapper, for more details see: {@link IovKeyPair}
+     * @param keyPair iov42 key-pair wrapper, for more details see: {@link KeyInfo}
      * @return {@link CompletableFuture}, when completed, should contain redirect header
      * and so it should be handled with {@link #handleResponse(String requestId, HttpResponse response)}
      */
-    public CompletableFuture<HttpResponse<String>> createAssetType(CreateAssetTypeRequest request, IovKeyPair keyPair) {
+    public CompletableFuture<HttpResponse<String>> createAssetType(CreateAssetTypeRequest request, KeyInfo keyPair) {
 
         String body = JsonUtils.toJson(request);
         List<String> headers = PlatformUtils.createPutHeaders(keyPair, body);
@@ -106,11 +106,11 @@ public class PlatformClient {
      * <p>
      *
      * @param request structure used to create asset type claims, for more details see: {@link CreateAssetTypeClaimsRequest}
-     * @param keyPair iov42 key-pair wrapper, for more details see: {@link IovKeyPair}
+     * @param keyPair iov42 key-pair wrapper, for more details see: {@link KeyInfo}
      * @return {@link CompletableFuture}, when completed, should contain redirect header
      * and so it should be handled with {@link #handleResponse(String requestId, HttpResponse response)}
      */
-    public CompletableFuture<HttpResponse<String>> createAssetTypeClaims(CreateAssetTypeClaimsRequest request, IovKeyPair keyPair) {
+    public CompletableFuture<HttpResponse<String>> createAssetTypeClaims(CreateAssetTypeClaimsRequest request, KeyInfo keyPair) {
         return createClaims(request, keyPair);
     }
 
@@ -120,11 +120,11 @@ public class PlatformClient {
      * <p>
      *
      * @param request structure used to create new identity, for more details see: {@link CreateIdentityRequest}
-     * @param keyPair iov42 key-pair wrapper, for more details see: {@link IovKeyPair}
+     * @param keyPair iov42 key-pair wrapper, for more details see: {@link KeyInfo}
      * @return {@link CompletableFuture}, when completed, should contain redirect header
      * and so it should be handled with {@link #handleResponse(String requestId, HttpResponse response)}
      */
-    public CompletableFuture<HttpResponse<String>> createIdentity(CreateIdentityRequest request, IovKeyPair keyPair) {
+    public CompletableFuture<HttpResponse<String>> createIdentity(CreateIdentityRequest request, KeyInfo keyPair) {
 
         String body = JsonUtils.toJson(request);
         List<String> headers = PlatformUtils.createPutHeaders(keyPair, body);
@@ -137,22 +137,23 @@ public class PlatformClient {
      * <p>
      *
      * @param request structure used to create identity claims, for more details see: {@link CreateIdentityClaimsRequest}
-     * @param keyPair iov42 key-pair wrapper, for more details see: {@link IovKeyPair}
+     * @param keyPair iov42 key-pair wrapper, for more details see: {@link KeyInfo}
      * @return {@link CompletableFuture}, when completed, should contain redirect header
      * and so it should be handled with {@link #handleResponse(String requestId, HttpResponse response)}
      */
-    public CompletableFuture<HttpResponse<String>> createIdentityClaims(CreateIdentityClaimsRequest request, IovKeyPair keyPair) {
+    public CompletableFuture<HttpResponse<String>> createIdentityClaims(CreateIdentityClaimsRequest request, KeyInfo keyPair) {
         return createClaims(request, keyPair);
     }
 
     /**
-     * Create a single atomic request to perform one or more transfers, each consisting of a new ownership or quantity transfer (applicable only to accounts).
+     * Create a single atomic request to perform one or more transfers,
+     * each consisting of a new ownership or quantity transfer (applicable only to accounts).
      * <p>
      *
      * @param request
      * @param keyPair
      */
-    public CompletableFuture<HttpResponse<String>> createTransfer(TransferRequest request, IovKeyPair keyPair) {
+    public CompletableFuture<HttpResponse<String>> createTransfer(TransferRequest request, KeyInfo keyPair) {
         String body = JsonUtils.toJson(request);
         List<String> headers = PlatformUtils.createPutHeaders(keyPair, body);
 
@@ -164,11 +165,11 @@ public class PlatformClient {
      * <p>
      *
      * @param request structure used to endorse asset claims, for more details see: {@link CreateAssetEndorsementsRequest}
-     * @param keyPair iov42 key-pair wrapper, for more details see: {@link IovKeyPair}
+     * @param keyPair iov42 key-pair wrapper, for more details see: {@link KeyInfo}
      * @return {@link CompletableFuture}, when completed, should contain redirect header
      * and so it should be handled with {@link #handleResponse(String requestId, HttpResponse response)}
      */
-    public CompletableFuture<HttpResponse<String>> endorseAssetClaims(CreateAssetEndorsementsRequest request, IovKeyPair keyPair) {
+    public CompletableFuture<HttpResponse<String>> endorseAssetClaims(CreateAssetEndorsementsRequest request, KeyInfo keyPair) {
         return endorseClaims(request, keyPair);
     }
 
@@ -177,11 +178,11 @@ public class PlatformClient {
      * <p>
      *
      * @param request structure used to endorse asset type claims, for more details see: {@link CreateAssetTypeEndorsementsRequest}
-     * @param keyPair iov42 key-pair wrapper, for more details see: {@link IovKeyPair}
+     * @param keyPair iov42 key-pair wrapper, for more details see: {@link KeyInfo}
      * @return {@link CompletableFuture}, when completed, should contain redirect header
      * and so it should be handled with {@link #handleResponse(String requestId, HttpResponse response)}
      */
-    public CompletableFuture<HttpResponse<String>> endorseAssetTypeClaims(CreateAssetTypeEndorsementsRequest request, IovKeyPair keyPair) {
+    public CompletableFuture<HttpResponse<String>> endorseAssetTypeClaims(CreateAssetTypeEndorsementsRequest request, KeyInfo keyPair) {
         return endorseClaims(request, keyPair);
     }
 
@@ -190,11 +191,11 @@ public class PlatformClient {
      * <p>
      *
      * @param request structure used to endorse identity claims, for more details see: {@link CreateIdentityEndorsementsRequest}
-     * @param keyPair iov42 key-pair wrapper, for more details see: {@link IovKeyPair}
+     * @param keyPair iov42 key-pair wrapper, for more details see: {@link KeyInfo}
      * @return {@link CompletableFuture}, when completed, should contain redirect header
      * and so it should be handled with {@link #handleResponse(String requestId, HttpResponse response)}
      */
-    public CompletableFuture<HttpResponse<String>> endorseIdentityClaims(CreateIdentityEndorsementsRequest request, IovKeyPair keyPair) {
+    public CompletableFuture<HttpResponse<String>> endorseIdentityClaims(CreateIdentityEndorsementsRequest request, KeyInfo keyPair) {
         return endorseClaims(request, keyPair);
     }
 
@@ -207,7 +208,7 @@ public class PlatformClient {
      * @param keyPair
      * @return
      */
-    public GetAssetResponse getAsset(GetAssetRequest request, IovKeyPair keyPair) {
+    public GetAssetResponse getAsset(GetAssetRequest request, KeyInfo keyPair) {
         String requestId = request.getRequestId();
         String assetTypeId = request.getAssetTypeId();
         String assetId = request.getAssetId();
@@ -233,7 +234,7 @@ public class PlatformClient {
      * @param keyPair
      * @return
      */
-    public GetAssetTypeResponse getAssetType(GetAssetTypeRequest request, IovKeyPair keyPair) {
+    public GetAssetTypeResponse getAssetType(GetAssetTypeRequest request, KeyInfo keyPair) {
         String requestId = request.getRequestId();
         String assetTypeId = request.getAssetTypeId();
         String nodeId = request.getNodeId();
@@ -254,10 +255,10 @@ public class PlatformClient {
      * <p>
      *
      * @param request {@link GetAssetTypeClaimsRequest}
-     * @param keyPair {@link IovKeyPair}
+     * @param keyPair {@link KeyInfo}
      * @return {@link GetClaimsResponse}
      */
-    public GetClaimsResponse getAssetTypeClaims(GetAssetTypeClaimsRequest request, IovKeyPair keyPair) {
+    public GetClaimsResponse getAssetTypeClaims(GetAssetTypeClaimsRequest request, KeyInfo keyPair) {
         String requestId = request.getRequestId();
         String nodeId = request.getNodeId();
         Integer limit = request.getLimit();
@@ -279,7 +280,7 @@ public class PlatformClient {
      * See api specs at:
      * https://api.sandbox.iov42.dev/api/v1/apidocs/redoc.html#tag/operations/paths/~1healthchecks/get
      */
-    public Optional<HealthChecks> getHealthChecks() throws Exception {
+    public Optional<HealthChecks> getHealthChecks() {
         HttpResponse<String> response = httpClientProvider.executeGet(url + "/" + version + "/healthchecks");
         return Optional.ofNullable(handleResponse(response, HealthChecks.class));
     }
@@ -293,7 +294,7 @@ public class PlatformClient {
      * @param keyPair -> key pair used to sign the request
      * @return {@link GetIdentityResponse}
      */
-    public GetIdentityResponse getIdentity(GetIdentityRequest request, IovKeyPair keyPair) {
+    public GetIdentityResponse getIdentity(GetIdentityRequest request, KeyInfo keyPair) {
 
         String requestId = request.getRequestId();
         String nodeId = request.getNodeId();
@@ -319,7 +320,7 @@ public class PlatformClient {
      * @return {@link ClaimEndorsementsResponse}
      * @throws Exception
      */
-    public ClaimEndorsementsResponse getIdentityClaim(GetIdentityClaimRequest request, IovKeyPair keyPair) throws Exception {
+    public ClaimEndorsementsResponse getIdentityClaim(GetIdentityClaimRequest request, KeyInfo keyPair) {
 
         String requestId = request.getRequestId();
         String nodeId = request.getNodeId();
@@ -345,7 +346,7 @@ public class PlatformClient {
      * @param keyPair -> key pair used to sign the request
      * @return {@link GetClaimsResponse}
      */
-    public GetClaimsResponse getIdentityClaims(GetIdentityClaimsRequest request, IovKeyPair keyPair) {
+    public GetClaimsResponse getIdentityClaims(GetIdentityClaimsRequest request, KeyInfo keyPair) {
 
         String requestId = request.getRequestId();
         String nodeId = request.getNodeId();
@@ -370,7 +371,7 @@ public class PlatformClient {
      * @param keyPair -> key pair used to sign the request
      * @return {@link PublicCredentials}
      */
-    public PublicCredentials getIdentityPublicKey(GetIdentityRequest request, IovKeyPair keyPair) {
+    public PublicCredentials getIdentityPublicKey(GetIdentityRequest request, KeyInfo keyPair) {
         String requestId = request.getRequestId();
         String nodeId = request.getNodeId();
         String identityId = request.getIdentityId();
@@ -411,11 +412,11 @@ public class PlatformClient {
      * @param response  {@link HttpResponse}
      * @return Optional {@link BaseResponse}
      */
-    public BaseResponse handleResponse(String requestId, HttpResponse<String> response) {
+    public RequestInfoResponse handleResponse(String requestId, HttpResponse<String> response) {
         if (response.statusCode() == 303) {
             return handleRedirect(requestId, response);
         } else {
-            return handleResponse(response, BaseResponse.class);
+            return handleResponse(response, RequestInfoResponse.class);
         }
     }
 
@@ -428,7 +429,7 @@ public class PlatformClient {
      * @param plainClaims plain text list of claims.
      * @return endorsements map
      */
-    public Map<String, String> makeEndorsements(IovKeyPair endorser, String subjectId, List<String> plainClaims) {
+    public Map<String, String> makeEndorsements(KeyInfo endorser, String subjectId, List<String> plainClaims) {
         return plainClaims.stream()
                 .collect(Collectors.toMap(
                         PlatformUtils::hashClaim,
@@ -445,7 +446,7 @@ public class PlatformClient {
      * @param plainClaims   plain text list of claims.
      * @return endorsements map.
      */
-    public Map<String, String> makeEndorsements(IovKeyPair endorser, String subjectId, String subjectTypeId, List<String> plainClaims) {
+    public Map<String, String> makeEndorsements(KeyInfo endorser, String subjectId, String subjectTypeId, List<String> plainClaims) {
         return plainClaims.stream()
                 .collect(Collectors.toMap(
                         Function.identity(),
@@ -469,7 +470,7 @@ public class PlatformClient {
         return builder.toString();
     }
 
-    private CompletableFuture<HttpResponse<String>> createClaims(CreateClaimsRequest request, IovKeyPair keyPair) {
+    private CompletableFuture<HttpResponse<String>> createClaims(CreateClaimsRequest request, KeyInfo keyPair) {
         List<String> plainClaims = request.getClaims();
         List<String> encodedClaims = PlatformUtils.hashClaims(plainClaims.stream());
         request.setClaims(encodedClaims);
@@ -480,7 +481,7 @@ public class PlatformClient {
         return executePUT(request.getRequestId(), body, headers);
     }
 
-    private CompletableFuture<HttpResponse<String>> endorseClaims(CreateEndorsementsRequest request, IovKeyPair keyPair) {
+    private CompletableFuture<HttpResponse<String>> endorseClaims(CreateEndorsementsRequest request, KeyInfo keyPair) {
         String body = JsonUtils.toJson(request);
         List<String> headers = PlatformUtils.createEndorsementsHeaders(keyPair, body);
 

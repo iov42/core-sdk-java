@@ -1,8 +1,8 @@
 package com.iov42.solutions.core.sdk.utils;
 
 import com.iov42.solutions.core.sdk.PlatformClient;
-import com.iov42.solutions.core.sdk.model.IovKeyPair;
-import com.iov42.solutions.core.sdk.model.SignatureIOV;
+import com.iov42.solutions.core.sdk.model.KeyInfo;
+import com.iov42.solutions.core.sdk.model.SignatureInfo;
 import com.iov42.solutions.core.sdk.model.responses.RequestInfoResponse;
 
 import java.nio.charset.StandardCharsets;
@@ -20,7 +20,7 @@ public class PlatformUtils {
         // static usage only
     }
 
-    public static List<String> createClaimsHeaders(IovKeyPair keyPair, String body, Collection<String> claims) {
+    public static List<String> createClaimsHeaders(KeyInfo keyPair, String body, Collection<String> claims) {
         Map<String, String> claimMap = claims.stream()
                 .collect(Collectors.toMap(PlatformUtils::hashClaim, Function.identity()));
 
@@ -30,15 +30,15 @@ public class PlatformUtils {
         return headers;
     }
 
-    public static List<String> createEndorsementsHeaders(IovKeyPair keyPair, String body) {
+    public static List<String> createEndorsementsHeaders(KeyInfo keyPair, String body) {
         List<String> headers = createPutHeaders(keyPair, body);
         headers.add(Constants.HEADER_IOV42_CLAIMS);
         headers.add(Constants.ENDORSER_ONLY_CLAIM_HEADER_VALUE);
         return headers;
     }
 
-    public static List<String> createGetHeaders(IovKeyPair keyPair, String payload) {
-        SignatureIOV authenticationSignature = SecurityUtils.sign(keyPair, payload);
+    public static List<String> createGetHeaders(KeyInfo keyPair, String payload) {
+        SignatureInfo authenticationSignature = SecurityUtils.sign(keyPair, payload);
 
         List<String> headers = new ArrayList<>();
         headers.add(Constants.HEADER_AUTHENTICATION);
@@ -46,9 +46,9 @@ public class PlatformUtils {
         return headers;
     }
 
-    public static List<String> createPutHeaders(IovKeyPair keyPair, String body) {
-        SignatureIOV authorisationSignature = SecurityUtils.sign(keyPair, body);
-        SignatureIOV authenticationSignature = SecurityUtils.sign(keyPair, authorisationSignature.getSignature());
+    public static List<String> createPutHeaders(KeyInfo keyPair, String body) {
+        SignatureInfo authorisationSignature = SecurityUtils.sign(keyPair, body);
+        SignatureInfo authenticationSignature = SecurityUtils.sign(keyPair, authorisationSignature.getSignature());
 
         List<String> headers = new ArrayList<>();
         headers.add(Constants.HEADER_AUTHENTICATION);

@@ -270,11 +270,11 @@ public class PlatformClientTest {
     }
 
     private NodeInfoResponse buildNodeInfoResponse() {
-        return new NodeInfoResponse("node1", new PublicCredentials("pid", "key"));
+        return new NodeInfoResponse("node1", new PublicCredentials(ProtocolType.SHA256WithRSA, "key"));
     }
 
-    private IovKeyPair iovKeyPair() {
-        return new IovKeyPair("id", ProtocolType.SHA256WithRSA, SecurityUtils.generateKeyPair());
+    private KeyInfo iovKeyPair() {
+        return new KeyInfo("id", ProtocolType.SHA256WithRSA, SecurityUtils.generateKeyPair());
     }
 
 }

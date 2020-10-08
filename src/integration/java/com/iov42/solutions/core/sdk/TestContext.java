@@ -1,6 +1,6 @@
 package com.iov42.solutions.core.sdk;
 
-import com.iov42.solutions.core.sdk.model.IovKeyPair;
+import com.iov42.solutions.core.sdk.model.KeyInfo;
 
 public class TestContext {
 
@@ -16,7 +16,7 @@ public class TestContext {
 
     private String identityId;
 
-    private IovKeyPair keyPair;
+    private KeyInfo keyPair;
 
     private String subjectAssetTypeId;
 
@@ -63,11 +63,11 @@ public class TestContext {
         this.identityId = identityId;
     }
 
-    public IovKeyPair getKeyPair() {
+    public KeyInfo getKeyPair() {
         return keyPair;
     }
 
-    public void setKeyPair(IovKeyPair keyPair) {
+    public void setKeyPair(KeyInfo keyPair) {
         this.keyPair = keyPair;
     }
 

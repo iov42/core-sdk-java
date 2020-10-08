@@ -4,7 +4,7 @@ import com.iov42.solutions.core.sdk.errors.PlatformError;
 
 import java.util.List;
 
-public class BaseResponse {
+public abstract class BaseResponse {
 
     /**
      * The error messages with type and code will be populated in case of HTTP code >=400.

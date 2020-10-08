@@ -5,7 +5,7 @@ import java.security.KeyPair;
 /**
  * A {@link KeyPair} wrapper that also holds protocol type, identityId and optionally delegateIdentityId.
  */
-public class IovKeyPair {
+public class KeyInfo {
 
     private final String identityId;
 
@@ -17,26 +17,23 @@ public class IovKeyPair {
 
     private String delegateIdentityId;
 
-    public IovKeyPair(String identityId, ProtocolType protocolId, byte[] publicKey, byte[] privateKey) {
+    public KeyInfo(String identityId, ProtocolType protocolId, byte[] publicKey, byte[] privateKey) {
         this.identityId = identityId;
         this.privateKey = privateKey;
         this.protocolId = protocolId;
         this.publicKey = publicKey;
     }
 
-    public IovKeyPair(String identityId, ProtocolType protocolId, byte[] privateKey, byte[] publicKey, String delegateIdentityId) {
+    public KeyInfo(String identityId, ProtocolType protocolId, byte[] privateKey, byte[] publicKey, String delegateIdentityId) {
         this(identityId, protocolId, privateKey, publicKey);
         this.delegateIdentityId = delegateIdentityId;
     }
 
-    public IovKeyPair(String identityId, ProtocolType protocolId, KeyPair keyPair) {
-        this.identityId = identityId;
-        this.protocolId = protocolId;
-        this.privateKey = keyPair.getPrivate().getEncoded();
-        this.publicKey = keyPair.getPublic().getEncoded();
+    public KeyInfo(String identityId, ProtocolType protocolId, KeyPair keyPair) {
+        this(identityId, protocolId, keyPair.getPublic().getEncoded(), keyPair.getPrivate().getEncoded());
     }
 
-    public IovKeyPair(String identityId, ProtocolType protocolId, KeyPair keyPair, String delegateIdentityId) {
+    public KeyInfo(String identityId, ProtocolType protocolId, KeyPair keyPair, String delegateIdentityId) {
         this(identityId, protocolId, keyPair);
         this.delegateIdentityId = delegateIdentityId;
     }

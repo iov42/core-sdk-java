@@ -14,13 +14,13 @@ public class PublicCredentials {
      * Possible values: "SHA256WithRSA" "SHA256WithECDSA"
      * Protocol that should be used with the provided key.
      */
-    private String protocolId;
+    private ProtocolType protocolId;
 
     private PublicCredentials() {
         // needed for Jackson parser
     }
 
-    public PublicCredentials(String protocolId, String key) {
+    public PublicCredentials(ProtocolType protocolId, String key) {
         this.key = key;
         this.protocolId = protocolId;
     }
@@ -29,7 +29,7 @@ public class PublicCredentials {
         return key;
     }
 
-    public String getProtocolId() {
+    public ProtocolType getProtocolId() {
         return protocolId;
     }
 }

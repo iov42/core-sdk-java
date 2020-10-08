@@ -42,9 +42,7 @@ public class CreateAssetRequest extends BasePutRequest {
     }
 
     public CreateAssetRequest(String requestId, String assetTypeId, String assetId) {
-        super(requestId, TransactionType.CreateAssetRequest);
-        this.assetTypeId = assetTypeId;
-        this.assetId = assetId;
+        this(requestId, assetTypeId, assetId, null);
     }
 
     public CreateAssetRequest(String requestId, String assetTypeId, String assetId, BigInteger quantity) {
