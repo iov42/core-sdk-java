@@ -70,6 +70,16 @@ public interface PlatformQueryExecutor {
     ClaimEndorsementsResponse getAssetClaim(GetAssetClaimRequest request);
 
     /**
+     * Gets information about claims of an Asset.
+     *
+     * @see <a href="https://tech.iov42.com/platform/api/#tag/assets/paths/~1asset-types~1{assetTypeId}~1assets~1{assetId}~1claims/get">iov42 platform API specification: asset claims</a>
+     *
+     * @param request the {@link GetAssetClaimsRequest}
+     * @return a {@link GetClaimsResponse}
+     */
+    GetClaimsResponse getAssetClaims(GetAssetClaimsRequest request);
+
+    /**
      * Gets information of transactions of an Asset.
      *
      * @see <a href="https://tech.iov42.com/platform/api/#tag/transactions/paths/~1asset-types~1{assetTypeId}~1assets~1{assetId}~1transactions/get">iov42 platform API specification: transactions </a>

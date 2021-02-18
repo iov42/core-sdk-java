@@ -39,8 +39,12 @@ public class AuthorisedRequest {
                              @JsonProperty("authorisations") List<SignatureInfo> authorisations) {
 
         this(requestId, body, requireClaimHeaderCheck);
-        this.authorisations.addAll(authorisations);
-        this.headers.addAll(headers);
+        if (authorisations != null) {
+            this.authorisations.addAll(authorisations);
+        }
+        if (headers != null) {
+            this.headers.addAll(headers);
+        }
     }
 
     /**
@@ -50,7 +54,7 @@ public class AuthorisedRequest {
      * @return the {@link AuthorisedRequest} instance
      */
     public static AuthorisedRequest from(BaseCommandRequest commandRequest) {
-        String body = JsonUtils.toJson(commandRequest);
+        String body = generateBody(commandRequest);
         if (commandRequest instanceof ClaimsContainerRequest) {
             ClaimsContainerRequest claimsContainer = (ClaimsContainerRequest) commandRequest;
             AuthorisedRequest request = new AuthorisedRequest(commandRequest.getRequestId(), body, claimsContainer.isEndorsement());
@@ -59,6 +63,16 @@ public class AuthorisedRequest {
             return request;
         }
         return new AuthorisedRequest(commandRequest.getRequestId(), body, false);
+    }
+
+    /**
+     * Creates the body from a source {@link BaseCommandRequest}.
+     *
+     * @param commandRequest the source {@link BaseCommandRequest}
+     * @return the {@code String} representation of the command body
+     */
+    public static String generateBody(BaseCommandRequest commandRequest) {
+       return JsonUtils.toJson(commandRequest);
     }
 
     /**
@@ -119,11 +133,22 @@ public class AuthorisedRequest {
     /**
      * Adds an authorisation to the request.
      *
-     * @param signatoryInfo the authorizer
+     * @param signatoryInfo of the authorizer
      * @return the {@link AuthorisedRequest}
      */
     public AuthorisedRequest authorise(SignatoryInfo signatoryInfo) {
         authorisations.add(PlatformUtils.sign(signatoryInfo, body));
+        return this;
+    }
+
+    /**
+     * Adds an authorisation signature to the request.
+     *
+     * @param signatureInfo of the authorizer
+     * @return the {@link AuthorisedRequest}
+     */
+    public AuthorisedRequest authorise(SignatureInfo signatureInfo) {
+        authorisations.add(signatureInfo);
         return this;
     }
 

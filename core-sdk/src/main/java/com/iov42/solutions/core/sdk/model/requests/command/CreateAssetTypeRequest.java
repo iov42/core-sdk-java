@@ -73,8 +73,8 @@ public class CreateAssetTypeRequest extends BaseCommandRequest {
      * @param assetTypeId the AssetType identifier
      * @param scale       scale of the quantifiable AssetType
      */
-    public static CreateAssetTypeRequest Quantifiable(String assetTypeId, int scale) {
-        return Quantifiable(null, assetTypeId, scale);
+    public static CreateAssetTypeRequest quantifiable(String assetTypeId, int scale) {
+        return quantifiable(null, assetTypeId, scale);
     }
 
     /**
@@ -84,7 +84,7 @@ public class CreateAssetTypeRequest extends BaseCommandRequest {
      * @param assetTypeId the AssetType identifier
      * @param scale       scale of the quantifiable AssetType
      */
-    public static CreateAssetTypeRequest Quantifiable(String requestId, String assetTypeId, int scale) {
+    public static CreateAssetTypeRequest quantifiable(String requestId, String assetTypeId, int scale) {
         return new CreateAssetTypeRequest(requestId, assetTypeId, scale);
     }
 
@@ -94,8 +94,8 @@ public class CreateAssetTypeRequest extends BaseCommandRequest {
      *
      * @param assetTypeId the AssetType identifier
      */
-    public static CreateAssetTypeRequest Unique(String assetTypeId) {
-        return Unique(null, assetTypeId);
+    public static CreateAssetTypeRequest unique(String assetTypeId) {
+        return unique(null, assetTypeId);
     }
 
     /**
@@ -104,7 +104,7 @@ public class CreateAssetTypeRequest extends BaseCommandRequest {
      * @param requestId   a specific request identifier
      * @param assetTypeId the AssetType identifier
      */
-    public static CreateAssetTypeRequest Unique(String requestId, String assetTypeId) {
+    public static CreateAssetTypeRequest unique(String requestId, String assetTypeId) {
         return new CreateAssetTypeRequest(requestId, assetTypeId);
     }
 

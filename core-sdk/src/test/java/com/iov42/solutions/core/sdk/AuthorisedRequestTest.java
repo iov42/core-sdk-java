@@ -17,7 +17,7 @@ public class AuthorisedRequestTest {
         SignatoryInfo signatoryInfo =
                 new SignatoryInfo("5678", ProtocolType.SHA256WithRSA, PlatformUtils.generateKeyPair(ProtocolType.SHA256WithRSA));
 
-        CreateAssetTypeRequest request = CreateAssetTypeRequest.Unique("1234");
+        CreateAssetTypeRequest request = CreateAssetTypeRequest.unique("1234");
         AuthorisedRequest authorisedRequest = AuthorisedRequest.from(request).authorise(signatoryInfo);
 
         // act

@@ -2,9 +2,13 @@ package com.iov42.solutions.core.sdk;
 
 import com.iov42.solutions.core.sdk.model.*;
 import com.iov42.solutions.core.sdk.model.requests.command.*;
+import com.iov42.solutions.core.sdk.model.requests.get.GetIdentityClaimsRequest;
 import com.iov42.solutions.core.sdk.model.requests.get.GetIdentityRequest;
 import com.iov42.solutions.core.sdk.utils.PlatformUtils;
 import org.junit.jupiter.api.Test;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -53,7 +57,7 @@ public class IdentityTest extends BaseIntegrationTest {
         // prepare
         var identityId = randomId();
         var actor = createIdentity(identityId);
-
+        ensureEventualConsistency();
 
         // act
         var publicCredentials = client().queryAs(actor).getIdentityPublicKey(new GetIdentityRequest(identityId));
@@ -95,6 +99,51 @@ public class IdentityTest extends BaseIntegrationTest {
 
         // assert
         assertEquals(1, response.getResources().size());
+    }
+
+    @Test
+    public void claimsOnIdentityShouldBeCreatedWhenAuthenticatedByOtherIdentity() {
+
+        // prepare
+        var otherId = randomId();
+        var other = createIdentity(otherId);
+
+        var identityId = randomId();
+        var identity = createIdentity(identityId);
+
+        // act
+        var createIdentityClaimsRequest = new CreateIdentityClaimsRequest(identityId, Claims.of("claim"));
+        var authorisedRequest = AuthorisedRequest.from(createIdentityClaimsRequest).authorise(identity);
+        var response = client().send(authorisedRequest, other)
+                .whenComplete(BaseIntegrationTest::assertResponseSuccess)
+                .join();
+
+        // assert
+        assertEquals(1, response.getResources().size());
+    }
+
+    @Test
+    public void claimsOnIdentityShouldBeReadByOtherIdentity() {
+
+        // prepare
+        var otherId = randomId();
+        var other = createIdentity(otherId);
+
+        var identityId = randomId();
+        var identity = createIdentity(identityId);
+
+        var createIdentityClaimsRequest = new CreateIdentityClaimsRequest(identityId, Claims.of("claim"));
+        client().send(createIdentityClaimsRequest, identity)
+                .whenComplete(BaseIntegrationTest::assertResponseSuccess)
+                .join();
+        ensureEventualConsistency();
+
+        // act
+        var response = client().queryAs(other).getIdentityClaims(new GetIdentityClaimsRequest(identityId));
+
+        // assert
+        assertEquals(1, response.getClaims().size());
+        assertEquals(PlatformUtils.hashClaim("claim"), response.getClaims().get(0).getClaim());
     }
 
     @Test

@@ -3,6 +3,7 @@ package com.iov42.solutions.core.sdk;
 import com.iov42.solutions.core.sdk.model.Claims;
 import com.iov42.solutions.core.sdk.model.Endorsements;
 import com.iov42.solutions.core.sdk.model.requests.command.*;
+import com.iov42.solutions.core.sdk.model.requests.get.GetAssetClaimsRequest;
 import com.iov42.solutions.core.sdk.model.requests.get.GetAssetTransactionsRequest;
 import com.iov42.solutions.core.sdk.utils.PlatformUtils;
 import org.junit.jupiter.api.Test;
@@ -77,6 +78,13 @@ public class AssetTest extends BaseIntegrationTest {
         // assert
         var hashedClaim = PlatformUtils.hashClaim("claim1");
         assertResources(response.getResources(), "/asset-types/" + assetTypeId + "/assets/" + assetId + "/claims/" + hashedClaim);
+
+        // query
+        ensureEventualConsistency();
+        var claimsResponse = client().queryAs(actor).getAssetClaims(new GetAssetClaimsRequest(assetTypeId, assetId));
+        assertNotNull(claimsResponse);
+        assertEquals(1, claimsResponse.getClaims().size());
+        assertEquals(hashedClaim, claimsResponse.getClaims().get(0).getClaim());
     }
 
     @Test

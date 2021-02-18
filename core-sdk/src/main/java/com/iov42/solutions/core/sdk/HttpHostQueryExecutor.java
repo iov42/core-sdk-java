@@ -92,6 +92,18 @@ class HttpHostQueryExecutor implements PlatformQueryExecutor {
      * {@inheritDoc}
      */
     @Override
+    public GetClaimsResponse getAssetClaims(GetAssetClaimsRequest request) {
+        String assetTypeId = request.getAssetTypeId();
+        String assetId = request.getAssetId();
+
+        String path = "/api/v1/asset-types/" + assetTypeId + "/assets/" + assetId + "/claims" + buildQueryParameters(request);
+        return executeGet(path, GetClaimsResponse.class);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public GetAssetTransactionsResponse getAssetTransactions(GetAssetTransactionsRequest request) {
         String assetTypeId = request.getAssetTypeId();
         String assetId = request.getAssetId();

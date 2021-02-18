@@ -1,5 +1,6 @@
 package com.iov42.solutions.core.sdk.model.requests.command;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.iov42.solutions.core.sdk.model.Claims;
 
 /**
@@ -12,6 +13,7 @@ interface ClaimsContainerRequest {
      *
      * @return {@code true} if it is an endorsement, {@code false} otherwise.
      */
+    @JsonIgnore
     boolean isEndorsement();
 
     /**

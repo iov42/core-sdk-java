@@ -1,5 +1,6 @@
 package com.iov42.solutions.core.sdk.model.requests.command;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.iov42.solutions.core.sdk.model.Claims;
 import com.iov42.solutions.core.sdk.model.Endorsements;
@@ -68,6 +69,7 @@ public abstract class CreateEndorsementsRequest extends BaseCommandRequest imple
      *
      * @return the {@link Claims} to be endorsed
      */
+    @JsonIgnore
     @Override
     public Claims getClaims() {
         return endorsements.getClaims();

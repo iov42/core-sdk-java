@@ -21,7 +21,7 @@ public class AssetTypeTest extends BaseIntegrationTest {
         var assetTypeId = randomId();
 
         // act
-        var createAssetTypeRequest = CreateAssetTypeRequest.Unique(assetTypeId);
+        var createAssetTypeRequest = CreateAssetTypeRequest.unique(assetTypeId);
 
         var response = client().send(createAssetTypeRequest, actor)
                 .whenComplete(BaseIntegrationTest::assertResponseSuccess).join();
@@ -117,7 +117,7 @@ public class AssetTypeTest extends BaseIntegrationTest {
         var assetTypeId = randomId();
 
         // act
-        var createAssetTypeRequest = CreateAssetTypeRequest.Quantifiable(assetTypeId, 2);
+        var createAssetTypeRequest = CreateAssetTypeRequest.quantifiable(assetTypeId, 2);
         var response = client().send(createAssetTypeRequest, actor)
                 .whenComplete(BaseIntegrationTest::assertResponseSuccess).join();
 

@@ -55,7 +55,7 @@ public class DemoTest extends BaseIntegrationTest {
 
         // 1. MVA creates an AssetType to represent a Car
         var carAssetTypeId = randomId();
-        client().send(CreateAssetTypeRequest.Unique(carAssetTypeId), mva).join();
+        client().send(CreateAssetTypeRequest.unique(carAssetTypeId), mva).join();
 
         // 2. create an Identity for Alice (an individual)
         var alice = createDemoIdentity(randomId());

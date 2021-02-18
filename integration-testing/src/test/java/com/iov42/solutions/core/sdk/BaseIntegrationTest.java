@@ -93,14 +93,14 @@ public abstract class BaseIntegrationTest {
     }
 
     protected void createUniqueAssetType(SignatoryInfo ownerInfo, String assetTypeId) {
-        var createAssetTypeRequest = CreateAssetTypeRequest.Unique(assetTypeId);
+        var createAssetTypeRequest = CreateAssetTypeRequest.unique(assetTypeId);
 
         client().send(createAssetTypeRequest, ownerInfo)
                 .whenComplete(BaseIntegrationTest::assertResponseSuccess).join();
     }
 
     protected void createQuantifiableAssetType(SignatoryInfo ownerInfo, String assetTypeId, int scale) {
-        var createAssetTypeRequest = CreateAssetTypeRequest.Quantifiable(assetTypeId, scale);
+        var createAssetTypeRequest = CreateAssetTypeRequest.quantifiable(assetTypeId, scale);
         client().send(createAssetTypeRequest, ownerInfo)
                 .whenComplete(BaseIntegrationTest::assertResponseSuccess).join();
     }
