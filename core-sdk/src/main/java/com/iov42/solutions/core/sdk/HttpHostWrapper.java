@@ -10,11 +10,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 class HttpHostWrapper implements HttpBackend {
 
     private static final Logger log = LoggerFactory.getLogger(HttpHostWrapper.class);
+
+    private static final int MAX_RETRY_COUNT = 5;
 
     private final HttpBackend httpBackend;
     private final String platformHost;
@@ -25,17 +28,19 @@ class HttpHostWrapper implements HttpBackend {
     }
 
     public <T> T executeGet(String url, Collection<String> headers, Class<T> responseClass) throws HttpBackendException {
-        return convertResponse(executeGet(url, headers), responseClass);
+        return handleResponse(executeGet(url, headers), responseClass);
     }
 
     @Override
     public HttpBackendResponse executeGet(String url, Collection<String> headers) throws HttpBackendException {
         log.debug("GET {}", url);
+        // TODO provide async option for get request
         return httpBackend.executeGet(platformHost + url, headers);
     }
 
     public <T> CompletableFuture<T> executePut(String url, byte[] body, Collection<String> headers, Class<T> responseClass) throws HttpBackendException {
-        return executePut(url, body, headers).thenApply(r -> convertResponse(r, responseClass));
+        return executePut(url, body, headers)
+                .thenApply(r -> handleResponse(r, responseClass));
     }
 
     @Override
@@ -44,17 +49,44 @@ class HttpHostWrapper implements HttpBackend {
         return httpBackend.executePut(platformHost + url, body, headers);
     }
 
+    private <T> T handleResponse(HttpBackendResponse response, Class<T> responseClass) {
+        int retryCounter = MAX_RETRY_COUNT;
+        while (retryCounter-- > 0) {
+            int statusCode = response.statusCode();
+            if (statusCode >= 300 && statusCode <= 399) {
+                String location = getValue(response.headers().get("Location"));
+                String retryAfter = getValue(response.headers().get("Retry-After"));
+                if (retryAfter != null) {
+                    long delayMillis = Long.parseLong(retryAfter) * 1000;
+                    try {
+                        Thread.sleep(delayMillis);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                }
+                response = executeGet(location, null);
+                continue;
+            }
+            break;
+        }
+        return convertResponse(response, responseClass);
+    }
+
     public static <T> T convertResponse(HttpBackendResponse response, Class<T> clazz) {
         int statusCode = response.statusCode();
-        if (statusCode >= 300 && statusCode <= 399) {
-            throw new HttpBackendException("Received a 3xx http status code. The redirect statuses should be handled by the HttpBackend implementation.");
-        }
         if (!response.isSuccess() && !clazz.isAssignableFrom(ErrorResponse.class)) {
             // response is an error response
             log.error("Request failed! Url: {}, Status: {}, Body: {}", response.getRequestUrl(), response.statusCode(), response.body());
-            ErrorResponse errorResponse = HttpHostWrapper.convertResponse(response, ErrorResponse.class);
+            ErrorResponse errorResponse = convertResponse(response, ErrorResponse.class);
             throw new PlatformErrorException(statusCode, errorResponse);
         }
         return JsonUtils.fromJson(response.body(), clazz);
+    }
+
+    private static String getValue(List<String> values) {
+        if (values == null || values.size() == 0){
+            return null;
+        }
+        return values.get(0);
     }
 }
