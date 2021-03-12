@@ -217,7 +217,7 @@ class HttpHostQueryExecutor implements PlatformQueryExecutor {
     private <T> T executeGet(String path, Class<T> responseClass, int retry) {
 
         if (retry >= MAX_GET_RETRY) {
-            throw new RuntimeException("Reach retry limit for get requests.");
+            throw new RuntimeException("Reached retry limit for get requests.");
         }
 
         // add the node id to the path
