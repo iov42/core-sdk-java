@@ -185,6 +185,8 @@ public class AssetTest extends BaseIntegrationTest {
 
         transferQuantity(assetTypeId, senderAccountId, sender, receiverAccountId);
 
+        ensureEventualConsistency();
+
         // act
         var get = new GetAssetTransactionsRequest(assetTypeId, senderAccountId);
         var response = client().queryAs(sender).getAssetTransactions(get);
