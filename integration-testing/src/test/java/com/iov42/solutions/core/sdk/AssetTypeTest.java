@@ -1,7 +1,6 @@
 package com.iov42.solutions.core.sdk;
 
-import com.iov42.solutions.core.sdk.model.Claims;
-import com.iov42.solutions.core.sdk.model.Endorsements;
+import com.iov42.solutions.core.sdk.model.*;
 import com.iov42.solutions.core.sdk.model.requests.command.AuthorisedRequest;
 import com.iov42.solutions.core.sdk.model.requests.command.CreateAssetTypeClaimsRequest;
 import com.iov42.solutions.core.sdk.model.requests.command.CreateAssetTypeEndorsementsRequest;
@@ -11,10 +10,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class AssetTypeTest extends BaseIntegrationTest {
+class AssetTypeTest extends BaseIntegrationTest {
 
     @Test
-    public void uniqueAssetTypeShouldBeCreated() {
+    void uniqueAssetTypeShouldBeCreated() {
 
         // prepare
         var actor = createIdentity(randomId());
@@ -32,7 +31,7 @@ public class AssetTypeTest extends BaseIntegrationTest {
     }
 
     @Test
-    public void claimsForAssetTypeShouldBeCreated() {
+    void claimsForAssetTypeShouldBeCreated() {
 
         // prepare
         var actor = createIdentity(randomId());
@@ -55,7 +54,7 @@ public class AssetTypeTest extends BaseIntegrationTest {
     }
 
     @Test
-    public void claimsForAssetTypeShouldBeCreatedAndEndorsed() {
+    void claimsForAssetTypeShouldBeCreatedAndEndorsed() {
 
         // prepare
         var actor = createIdentity(randomId());
@@ -83,7 +82,7 @@ public class AssetTypeTest extends BaseIntegrationTest {
     }
 
     @Test
-    public void claimsForAssetTypeShouldBeEndorsed() {
+    void claimsForAssetTypeShouldBeEndorsed() {
 
         // prepare
         var actor = createIdentity(randomId());
@@ -110,7 +109,7 @@ public class AssetTypeTest extends BaseIntegrationTest {
     }
 
     @Test
-    public void quantifiableAssetTypeShouldBeCreated() {
+    void quantifiableAssetTypeShouldBeCreated() {
 
         // prepare
         var actor = createIdentity(randomId());

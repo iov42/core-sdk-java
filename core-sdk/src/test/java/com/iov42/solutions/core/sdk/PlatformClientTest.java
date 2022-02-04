@@ -3,6 +3,7 @@ package com.iov42.solutions.core.sdk;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.iov42.solutions.core.sdk.http.HttpBackend;
+import com.iov42.solutions.core.sdk.http.HttpBackendRequest;
 import com.iov42.solutions.core.sdk.http.HttpBackendResponse;
 import com.iov42.solutions.core.sdk.model.*;
 import com.iov42.solutions.core.sdk.model.requests.command.AuthorisedRequest;
@@ -24,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-public class PlatformClientTest {
+class PlatformClientTest {
 
     private static final String PLATFORM_HOST_URL = "http://test.mock";
 
@@ -46,7 +47,7 @@ public class PlatformClientTest {
         );
     }
 
-    private static HttpBackendResponse response(int statusCode, Object body) {
+    private static CompletableFuture<HttpBackendResponse> response(int statusCode, Object body) {
         String bodyStr;
         if (body instanceof String) {
             bodyStr = (String) body;
@@ -57,19 +58,15 @@ public class PlatformClientTest {
                 throw new RuntimeException("UnitTest: Could not serialize JSON body.");
             }
         }
-        return new HttpBackendResponse(null,null, statusCode, bodyStr);
+        return CompletableFuture.completedFuture(new HttpBackendResponse(null,null, statusCode, bodyStr));
     }
 
-    private static HttpBackendResponse responseOk(Object body) {
+    private static CompletableFuture<HttpBackendResponse> responseOk(Object body) {
         return response(200, body);
     }
 
-    private static CompletableFuture<HttpBackendResponse> future(HttpBackendResponse response) {
-        return CompletableFuture.completedFuture(response);
-    }
-
     private static CompletableFuture<HttpBackendResponse> commandResponse(String requestId, String... resources) {
-        return future(responseOk(buildRequestInfoResponse(requestId, resources)));
+        return responseOk(buildRequestInfoResponse(requestId, resources));
     }
 
     private static void assertSingleResource(RequestInfoResponse response, String expectedResource) {
@@ -78,7 +75,7 @@ public class PlatformClientTest {
     }
 
     private void whenExecuteCommand(String requestId, String resource) {
-        when(httpBackend.executePut(eq(PLATFORM_HOST_URL + "/api/v1/requests/" + requestId), any(), any()))
+        when(httpBackend.execute(TestHelper.put(PLATFORM_HOST_URL + "/api/v1/requests/" + requestId)))
                 .thenReturn(commandResponse(requestId, resource));
     }
 
@@ -137,9 +134,10 @@ public class PlatformClientTest {
         SignatoryInfo actor = randomSignatoryInfo();
 
         List<String> headers = new ArrayList<>();
-        when(httpBackend.executePut(any(), any(), any()))
+        when(httpBackend.execute(any()))
                 .then(invocation -> {
-                    headers.addAll(invocation.getArgument(2));
+                    HttpBackendRequest req = invocation.getArgument(0, HttpBackendRequest.class);
+                    headers.addAll(req.getHeaders().keySet());
                     return CompletableFuture.completedFuture(responseOk(""));
                 });
 
@@ -164,9 +162,14 @@ public class PlatformClientTest {
         Endorsements endorsements = new Endorsements(actor, identityId, claims);
 
         List<String> headers = new ArrayList<>();
-        when(httpBackend.executePut(any(), any(), any()))
+        when(httpBackend.execute(any()))
                 .then(invocation -> {
-                    headers.addAll(invocation.getArgument(2));
+                    HttpBackendRequest req = invocation.getArgument(0, HttpBackendRequest.class);
+
+                    // assert
+                    assertTrue(req.getHeaders().containsKey(Constants.HEADER_IOV42_CLAIMS));
+                    assertTrue(req.getHeaders().get(Constants.HEADER_IOV42_CLAIMS).contains(Constants.ENDORSER_ONLY_CLAIM_HEADER_VALUE));
+
                     return CompletableFuture.completedFuture(responseOk(""));
                 });
 
@@ -174,11 +177,6 @@ public class PlatformClientTest {
         CreateIdentityEndorsementsRequest request = new CreateIdentityEndorsementsRequest(identityId, actor.getIdentityId(), endorsements);
         AuthorisedRequest authorisedRequest = AuthorisedRequest.from(request).authorise(actor);
         platformClient.send(authorisedRequest, actor);
-
-        // assert
-        int claimsHeaderIdx = headers.indexOf(Constants.HEADER_IOV42_CLAIMS);
-        assertTrue(claimsHeaderIdx > -1);
-        assertEquals(Constants.ENDORSER_ONLY_CLAIM_HEADER_VALUE, headers.get(claimsHeaderIdx + 1));
     }
 
     @Test
@@ -189,11 +187,11 @@ public class PlatformClientTest {
         String identityId = "5678";
 
         String nodeIdRequestUrl = PLATFORM_HOST_URL + "/api/v1/node-info";
-        when(httpBackend.executeGet(eq(nodeIdRequestUrl), any()))
+        when(httpBackend.execute(TestHelper.get(nodeIdRequestUrl)))
                 .thenReturn(responseOk(new NodeInfoResponse("1234", new PublicCredentials(ProtocolType.SHA256WithRSA, "key"))));
 
         String testRequestUrl = PLATFORM_HOST_URL + "/api/v1/identities/" + identityId + "/public-key?requestId=req-1&nodeId=1234";
-        when(httpBackend.executeGet(eq(testRequestUrl), any()))
+        when(httpBackend.execute(TestHelper.get(testRequestUrl)))
                 .thenReturn(responseOk(new PublicCredentials(ProtocolType.SHA256WithRSA, "mock-key")));
 
         SignatoryInfo actor = randomSignatoryInfo();
@@ -204,8 +202,8 @@ public class PlatformClientTest {
 
         // assert
         assertEquals("mock-key", response.getKey());
-        verify(httpBackend, times(1)).executeGet(eq(nodeIdRequestUrl), any());
-        verify(httpBackend, times(1)).executeGet(eq(testRequestUrl), any());
+        verify(httpBackend, times(1)).execute(TestHelper.get(nodeIdRequestUrl));
+        verify(httpBackend, times(1)).execute(TestHelper.get(testRequestUrl));
     }
 
     @Test
@@ -221,17 +219,17 @@ public class PlatformClientTest {
 
         // 1. that request fails (simulate invalid nodeId)
         String testRequestUrlFail = PLATFORM_HOST_URL + "/api/v1/identities/" + identityId + "/public-key?requestId=req-2&nodeId=1234";
-        when(httpBackend.executeGet(eq(testRequestUrlFail), any()))
+        when(httpBackend.execute(TestHelper.get(testRequestUrlFail)))
                 .thenReturn(response(400, "{\"errors\":[{\"errorCode\":1901,\"errorType\":\"System\",\"message\":\"Given node identity does not match the current node's identity\"}],\"requestId\":\"req-2\"}"));
 
         // 2. that request fetches a new nodeId
         String nodeIdRequestUrl = PLATFORM_HOST_URL + "/api/v1/node-info";
-        when(httpBackend.executeGet(eq(nodeIdRequestUrl), any()))
+        when(httpBackend.execute(TestHelper.get(nodeIdRequestUrl)))
                 .thenReturn(responseOk(new NodeInfoResponse("0815", new PublicCredentials(ProtocolType.SHA256WithRSA, "key"))));
 
         // 3. that request is a retry of the original request #1 with a new node id that succeeds
         String testRequestUrlSuccess = PLATFORM_HOST_URL + "/api/v1/identities/" + identityId + "/public-key?requestId=req-2&nodeId=0815";
-        when(httpBackend.executeGet(eq(testRequestUrlSuccess), any()))
+        when(httpBackend.execute(TestHelper.get(testRequestUrlSuccess)))
                 .thenReturn(responseOk(new PublicCredentials(ProtocolType.SHA256WithRSA, "mock-key")));
 
         SignatoryInfo actor = randomSignatoryInfo();
@@ -242,15 +240,15 @@ public class PlatformClientTest {
 
         // assert
         assertEquals("mock-key", response.getKey());
-        verify(httpBackend, times(1)).executeGet(eq(nodeIdRequestUrl), any());
-        verify(httpBackend, times(1)).executeGet(eq(testRequestUrlFail), any());
-        verify(httpBackend, times(1)).executeGet(eq(testRequestUrlSuccess), any());
+        verify(httpBackend, times(1)).execute(TestHelper.get(nodeIdRequestUrl));
+        verify(httpBackend, times(1)).execute(TestHelper.get(testRequestUrlFail));
+        verify(httpBackend, times(1)).execute(TestHelper.get(testRequestUrlSuccess));
     }
 
     @Test
     void shouldGetNodeInfo() {
         // prepare
-        when(httpBackend.executeGet(any(), any()))
+        when(httpBackend.execute(any()))
                 .thenReturn(responseOk(new NodeInfoResponse("123", new PublicCredentials(ProtocolType.SHA256WithRSA, "key"))));
 
         // act
@@ -264,7 +262,7 @@ public class PlatformClientTest {
     @Test
     void shouldGetHealthChecks() {
         // prepare
-        when(httpBackend.executeGet(any(), any()))
+        when(httpBackend.execute(any()))
                 .thenReturn(responseOk(new HealthChecks()));
 
         // act
@@ -277,7 +275,7 @@ public class PlatformClientTest {
     @Test
     void clientErrorShouldThrowException() {
         // prepare
-        when(httpBackend.executeGet(any(), any()))
+        when(httpBackend.execute(any()))
                 .thenReturn(response(400, "{\"errors\":[{\"errorCode\":1234,\"errorType\":\"System\",\"message\":\"Some error with the request\"}],\"requestId\":\"req-1\"}"));
 
         // act

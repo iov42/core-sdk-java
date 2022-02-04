@@ -1,5 +1,6 @@
 package com.iov42.solutions.core.sdk;
 
+import com.iov42.solutions.core.sdk.http.HttpBackendException;
 import com.iov42.solutions.core.sdk.http.HttpBackendResponse;
 import com.iov42.solutions.core.sdk.model.PlatformError;
 import com.iov42.solutions.core.sdk.model.PublicCredentials;
@@ -14,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 class HttpHostQueryExecutor implements PlatformQueryExecutor {
@@ -37,7 +39,7 @@ class HttpHostQueryExecutor implements PlatformQueryExecutor {
             NodeInfoResponse nodeInfoResponse = httpHostWrapper.executeGet("/api/v1/node-info", null, NodeInfoResponse.class);
             log.debug("Fetching new node id...");
             if (nodeInfoResponse == null) {
-                throw new RuntimeException("Error fetching new node id!");
+                throw new HttpBackendException("Error fetching new node id!");
             }
             log.debug("New node id is {}", nodeInfoResponse.getNodeId());
             return nodeInfoResponse.getNodeId();
@@ -217,17 +219,17 @@ class HttpHostQueryExecutor implements PlatformQueryExecutor {
     private <T> T executeGet(String path, Class<T> responseClass, int retry) {
 
         if (retry >= MAX_GET_RETRY) {
-            throw new RuntimeException("Reached retry limit for get requests.");
+            throw new HttpBackendException("Reached retry limit for get requests.");
         }
 
         // add the node id to the path
         String finalPath = path + "&nodeId=" + nodeIdHolder.getValue();
 
         // build the headers
-        List<String> headers = PlatformUtils.createGetHeaders(authenticatorInfo, finalPath);
+        Map<String, List<String>> headers = PlatformUtils.createGetHeaders(authenticatorInfo, finalPath);
 
         // perform request
-        HttpBackendResponse backendResponse = httpHostWrapper.executeGet(finalPath, headers);
+        HttpBackendResponse backendResponse = httpHostWrapper.executeGet(finalPath, headers, HttpBackendResponse.class);
 
         // check for client or server errors
         if (!backendResponse.isSuccess()) {

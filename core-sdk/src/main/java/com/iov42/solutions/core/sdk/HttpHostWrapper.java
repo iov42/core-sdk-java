@@ -2,6 +2,7 @@ package com.iov42.solutions.core.sdk;
 
 import com.iov42.solutions.core.sdk.http.HttpBackend;
 import com.iov42.solutions.core.sdk.http.HttpBackendException;
+import com.iov42.solutions.core.sdk.http.HttpBackendRequest;
 import com.iov42.solutions.core.sdk.http.HttpBackendResponse;
 import com.iov42.solutions.core.sdk.model.PlatformErrorException;
 import com.iov42.solutions.core.sdk.model.responses.ErrorResponse;
@@ -11,13 +12,15 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 class HttpHostWrapper implements HttpBackend {
 
     private static final Logger log = LoggerFactory.getLogger(HttpHostWrapper.class);
 
-    private static final int MAX_RETRY_COUNT = 5;
+    private static final int MAX_REDIRECT_COUNT = 5;
 
     private final HttpBackend httpBackend;
     private final String platformHost;
@@ -27,31 +30,38 @@ class HttpHostWrapper implements HttpBackend {
         this.platformHost = platformHost;
     }
 
-    public <T> T executeGet(String url, Collection<String> headers, Class<T> responseClass) throws HttpBackendException {
-        return handleResponse(executeGet(url, headers), responseClass);
+    public <T> T executeGet(String url, Map<String, List<String>> headers, Class<T> responseClass) {
+        try {
+            return execute(1, new HttpBackendRequest(HttpBackendRequest.Method.GET, url, headers, null), responseClass).join();
+        } catch (CompletionException ex) {
+            if (ex.getCause() instanceof RuntimeException) {
+                throw (RuntimeException) ex.getCause();
+            }
+            throw new HttpBackendException(ex.getCause());
+        }
+    }
+
+    public <T> CompletableFuture<T> executePut(String url, byte[] body, Map<String, List<String>> headers, Class<T> responseClass) {
+        return execute(1, new HttpBackendRequest(HttpBackendRequest.Method.PUT, url, headers, body), responseClass);
     }
 
     @Override
-    public HttpBackendResponse executeGet(String url, Collection<String> headers) throws HttpBackendException {
-        log.debug("GET {}", url);
-        // TODO provide async option for get request
-        return httpBackend.executeGet(platformHost + url, headers);
+    public CompletableFuture<HttpBackendResponse> execute(HttpBackendRequest request) {
+        log.debug("Http {} {}", request.getMethod(), request.getRequestUrl());
+
+        HttpBackendRequest requestClone = new HttpBackendRequest(request.getMethod(),
+                platformHost + request.getRequestUrl(),
+                request.getHeaders(), request.getBody());
+
+        return httpBackend.execute(requestClone).thenApply(r -> r != null ? r.mutate(request) : null);
     }
 
-    public <T> CompletableFuture<T> executePut(String url, byte[] body, Collection<String> headers, Class<T> responseClass) throws HttpBackendException {
-        return executePut(url, body, headers)
-                .thenApply(r -> handleResponse(r, responseClass));
+    private <T> CompletableFuture<T> execute(int redirectCount, HttpBackendRequest request, Class<T> responseClass) throws HttpBackendException {
+        return execute(request).thenCompose(r -> handleResponse(redirectCount, r, responseClass));
     }
 
-    @Override
-    public CompletableFuture<HttpBackendResponse> executePut(String url, byte[] body, Collection<String> headers) throws HttpBackendException {
-        log.debug("PUT {}", url);
-        return httpBackend.executePut(platformHost + url, body, headers);
-    }
-
-    private <T> T handleResponse(HttpBackendResponse response, Class<T> responseClass) {
-        int retryCounter = MAX_RETRY_COUNT;
-        while (retryCounter-- > 0) {
+    private <T> CompletableFuture<T> handleResponse(int attempt, HttpBackendResponse response, Class<T> responseClass) {
+        if (attempt < MAX_REDIRECT_COUNT) {
             int statusCode = response.statusCode();
             if (statusCode >= 300 && statusCode <= 399) {
                 String location = getValue(response.headers().get("Location"));
@@ -64,19 +74,26 @@ class HttpHostWrapper implements HttpBackend {
                         Thread.currentThread().interrupt();
                     }
                 }
-                response = executeGet(location, null);
-                continue;
+                // build redirect request and execute
+                HttpBackendRequest redirectRequest = response.getRequest().mutate(location);
+                return execute(attempt + 1, redirectRequest, responseClass);
             }
-            break;
         }
-        return convertResponse(response, responseClass);
+        return CompletableFuture.completedFuture(convertResponse(response, responseClass));
     }
 
     public static <T> T convertResponse(HttpBackendResponse response, Class<T> clazz) {
+        if (HttpBackendResponse.class.isAssignableFrom(clazz)) {
+            // no conversion here just return the response
+            return (T) response;
+        }
+
         int statusCode = response.statusCode();
         if (!response.isSuccess() && !clazz.isAssignableFrom(ErrorResponse.class)) {
             // response is an error response
-            log.error("Request failed! Url: {}, Status: {}, Body: {}", response.getRequestUrl(), response.statusCode(), response.body());
+            if (log.isErrorEnabled()) {
+                log.error("Request failed! Url: {}, Status: {}, Body: {}", response.getRequest().getRequestUrl(), response.statusCode(), response.body());
+            }
             ErrorResponse errorResponse = convertResponse(response, ErrorResponse.class);
             throw new PlatformErrorException(statusCode, errorResponse);
         }
@@ -84,7 +101,7 @@ class HttpHostWrapper implements HttpBackend {
     }
 
     private static String getValue(List<String> values) {
-        if (values == null || values.size() == 0){
+        if (values == null || values.isEmpty()) {
             return null;
         }
         return values.get(0);

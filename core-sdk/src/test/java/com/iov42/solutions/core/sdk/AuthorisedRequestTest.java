@@ -9,10 +9,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class AuthorisedRequestTest {
+class AuthorisedRequestTest {
 
     @Test
-    public void authorisedRequestShouldBeSerializedAndDeserialized() {
+    void authorisedRequestShouldBeSerializedAndDeserialized() {
         // prepare
         SignatoryInfo signatoryInfo =
                 new SignatoryInfo("5678", ProtocolType.SHA256WithRSA, PlatformUtils.generateKeyPair(ProtocolType.SHA256WithRSA));

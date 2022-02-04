@@ -7,15 +7,12 @@ import com.iov42.solutions.core.sdk.model.requests.get.GetIdentityRequest;
 import com.iov42.solutions.core.sdk.utils.PlatformUtils;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.*;
 
-public class IdentityTest extends BaseIntegrationTest {
+class IdentityTest extends BaseIntegrationTest {
 
     @Test
-    public void identityWithRSAShouldBeCreated() {
+    void identityWithRSAShouldBeCreated() {
 
         // prepare
         var identityId = randomId();
@@ -34,7 +31,7 @@ public class IdentityTest extends BaseIntegrationTest {
     }
 
     @Test
-    public void identityWithECDSAShouldBeCreated() {
+    void identityWithECDSAShouldBeCreated() {
 
         // prepare
         var identityId = randomId();
@@ -53,7 +50,7 @@ public class IdentityTest extends BaseIntegrationTest {
     }
 
     @Test
-    public void publicKeyShouldBeRetrieved() {
+    void publicKeyShouldBeRetrieved() {
         // prepare
         var identityId = randomId();
         var actor = createIdentity(identityId);
@@ -69,7 +66,7 @@ public class IdentityTest extends BaseIntegrationTest {
     }
 
     @Test
-    public void identityShouldBeRetrieved() {
+    void identityShouldBeRetrieved() {
 
         // prepare
         var identityId = randomId();
@@ -85,7 +82,7 @@ public class IdentityTest extends BaseIntegrationTest {
     }
 
     @Test
-    public void claimsOnIdentityShouldBeCreated() {
+    void claimsOnIdentityShouldBeCreated() {
 
         // prepare
         var identityId = randomId();
@@ -102,7 +99,7 @@ public class IdentityTest extends BaseIntegrationTest {
     }
 
     @Test
-    public void claimsOnIdentityShouldBeCreatedWhenAuthenticatedByOtherIdentity() {
+    void claimsOnIdentityShouldBeCreatedWhenAuthenticatedByOtherIdentity() {
 
         // prepare
         var otherId = randomId();
@@ -123,7 +120,7 @@ public class IdentityTest extends BaseIntegrationTest {
     }
 
     @Test
-    public void claimsOnIdentityShouldBeReadByOtherIdentity() {
+    void claimsOnIdentityShouldBeReadByOtherIdentity() {
 
         // prepare
         var otherId = randomId();
@@ -147,7 +144,7 @@ public class IdentityTest extends BaseIntegrationTest {
     }
 
     @Test
-    public void claimOnIdentityShouldBeEndorsed() {
+    void claimOnIdentityShouldBeEndorsed() {
 
         // prepare
         var identityId = randomId();
@@ -177,7 +174,7 @@ public class IdentityTest extends BaseIntegrationTest {
     }
 
     @Test
-    public void delegateShouldBeAdded() {
+    void delegateShouldBeAdded() {
         // prepare
 
         var delegatorId = randomId();
