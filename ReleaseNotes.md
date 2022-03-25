@@ -1,5 +1,5 @@
 # Version 0.2
-4th April 2022
+4th March 2022
 
 - Improved HttpBackend behaviour (incl. better support for Http redirects)
 
