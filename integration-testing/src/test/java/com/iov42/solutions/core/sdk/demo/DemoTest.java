@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * as preparation step.
  *
  */
-public class DemoTest extends BaseIntegrationTest {
+class DemoTest extends BaseIntegrationTest {
 
     /**
      * Helper function to create identities.
@@ -47,7 +47,7 @@ public class DemoTest extends BaseIntegrationTest {
      *
      */
     @Test
-    public void demoScenarioShouldRunThrough() {
+    void demoScenarioShouldRunThrough() {
 
         // 0. create an Identity for Motor Vehicle Authority (MVA)
         // MVA is a imaginary state authority for motor vehicles
@@ -94,7 +94,7 @@ public class DemoTest extends BaseIntegrationTest {
                         carAssetTypeId,
                         aliceCarAssetId,
                         mva.toPublicCredentials()),
-                "The endorsement should be verified with the public credentials of the MVA identity"
+                "The endorsement should be verified with the credentials of the MVA identity"
         );
 
         // 8. (off-chain) Bob is happy with the car and trusts the registration year now - he pays Alice the requested amount of money

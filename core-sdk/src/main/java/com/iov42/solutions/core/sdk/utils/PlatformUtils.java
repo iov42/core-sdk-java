@@ -129,14 +129,13 @@ public class PlatformUtils {
      *
      * @param signatoryInfo {@link SignatoryInfo} used to sign the request
      * @param path          the path to sign
-     * @return a list of http headers for a get request
+     * @return a map of http headers for a get request
      */
-    public static List<String> createGetHeaders(SignatoryInfo signatoryInfo, String path) {
+    public static Map<String, List<String>> createGetHeaders(SignatoryInfo signatoryInfo, String path) {
         SignatureInfo authenticationSignature = sign(signatoryInfo, path);
 
-        List<String> headers = new ArrayList<>();
-        headers.add(Constants.HEADER_AUTHENTICATION);
-        headers.add(getEncodedHeaderValue(authenticationSignature));
+        Map<String, List<String>> headers = new HashMap<>();
+        headers.put(Constants.HEADER_AUTHENTICATION, Collections.singletonList(getEncodedHeaderValue(authenticationSignature)));
         return headers;
     }
 

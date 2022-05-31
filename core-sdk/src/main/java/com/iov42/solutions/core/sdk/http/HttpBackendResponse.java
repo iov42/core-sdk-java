@@ -6,9 +6,9 @@ import java.util.Map;
 /**
  * Response structure of a HTTP request.
  */
-public class HttpBackendResponse {
+public final class HttpBackendResponse {
 
-    private final String requestUrl;
+    private final HttpBackendRequest request;
 
     private final Map<String, List<String>> headers;
 
@@ -19,13 +19,13 @@ public class HttpBackendResponse {
     /**
      * Initializes a new instance of the {@link HttpBackendResponse}.
      *
-     * @param requestUrl the URL of the request
+     * @param request    the request
      * @param headers    the {@link Map} of response headers
      * @param statusCode the response status code
      * @param body       the response body
      */
-    public HttpBackendResponse(String requestUrl, Map<String, List<String>> headers, int statusCode, String body) {
-        this.requestUrl = requestUrl;
+    public HttpBackendResponse(HttpBackendRequest request, Map<String, List<String>> headers, int statusCode, String body) {
+        this.request = request;
         this.headers = headers;
         this.statusCode = statusCode;
         this.body = body;
@@ -68,11 +68,20 @@ public class HttpBackendResponse {
     }
 
     /**
-     * Returns the URL of the request.
+     * Returns the request.
      *
-     * @return the URL of the request
+     * @return the request
      */
-    public String getRequestUrl() {
-        return requestUrl;
+    public HttpBackendRequest getRequest() {
+        return request;
+    }
+
+    /**
+     * Creates a shallow clone of the response and mutates the request.
+     *
+     * @return the cloned response.
+     */
+    public HttpBackendResponse mutate(HttpBackendRequest request) {
+        return new HttpBackendResponse(request, headers, statusCode, body);
     }
 }

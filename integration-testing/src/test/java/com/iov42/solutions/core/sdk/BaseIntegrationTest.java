@@ -35,7 +35,7 @@ public abstract class BaseIntegrationTest {
 
         @Override
         public void testFailed(ExtensionContext context, Throwable cause) {
-            while (cause != null && cause instanceof Exception) {
+            while (cause instanceof Exception) {
                 Exception ex = (Exception) cause;
                 if (ex.toString().contains("Insert Platform URL here")) {
                     log.error("Please contact iov42 (at https://iov42.com/contact/) to request a valid platform URL!");
@@ -65,7 +65,6 @@ public abstract class BaseIntegrationTest {
      *
      * @see <a href="https://en.wikipedia.org/wiki/Eventual_consistency">Eventual consistency</a>
      *
-     * @throws InterruptedException
      */
     protected void ensureEventualConsistency() {
         try {

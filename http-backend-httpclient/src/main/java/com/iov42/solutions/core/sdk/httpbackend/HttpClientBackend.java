@@ -2,6 +2,7 @@ package com.iov42.solutions.core.sdk.httpbackend;
 
 import com.iov42.solutions.core.sdk.http.HttpBackendException;
 import com.iov42.solutions.core.sdk.http.HttpBackend;
+import com.iov42.solutions.core.sdk.http.HttpBackendRequest;
 import com.iov42.solutions.core.sdk.http.HttpBackendResponse;
 
 import java.net.URI;
@@ -9,8 +10,8 @@ import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.Collection;
-import java.util.Objects;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -31,38 +32,31 @@ public class HttpClientBackend implements HttpBackend {
     }
 
     @Override
-    public HttpBackendResponse executeGet(String url, Collection<String> headers) throws HttpBackendException {
+    public CompletableFuture<HttpBackendResponse> execute(HttpBackendRequest request) {
         try {
-            HttpRequest request = build(url, headers).GET().build();
-            return convert(request.uri().toString(), httpClient.send(request, HttpResponse.BodyHandlers.ofString()));
-        } catch (Exception e) {
-            throw new HttpBackendException(String.format("Failed to execute GET request: [%s]", url), e);
+            var bodyPublisher = request.getBody() != null
+                    ? HttpRequest.BodyPublishers.ofByteArray(request.getBody())
+                    : HttpRequest.BodyPublishers.noBody();
+
+            var httpRequest = build(request.getRequestUrl(), request.getHeaders())
+                    .method(request.getMethod().name(), bodyPublisher).build();
+
+            return httpClient.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofString())
+                    .thenApply(r -> convertResponse(request, r));
+        } catch (Exception ex) {
+            throw new HttpBackendException(String.format("Failed to execute async request: [%s]", request.getRequestUrl()), ex);
         }
     }
 
-    @Override
-    public CompletableFuture<HttpBackendResponse> executePut(String url, byte[] body, Collection<String> headers) throws HttpBackendException {
-        try {
-            HttpRequest request = build(url, headers).PUT(HttpRequest.BodyPublishers.ofByteArray(body)).build();
-            return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString()).thenApply(r -> convert(request.uri().toString(), r));
-        } catch (Exception e) {
-            throw new HttpBackendException(String.format("Failed to execute async POST request: [%s]", url), e);
-        }
-    }
-
-    private HttpRequest.Builder build(String url, Collection<String> headers) throws URISyntaxException {
-        HttpRequest.Builder builder = HttpRequest.newBuilder(new URI(url));
-        if (hasHeaders(headers)) {
-            builder = builder.headers(headers.toArray(String[]::new));
+    private HttpRequest.Builder build(String url, Map<String, List<String>> headers) throws URISyntaxException {
+        var builder = HttpRequest.newBuilder(new URI(url));
+        if (headers != null && !headers.isEmpty()) {
+            headers.forEach((key, values) -> values.forEach(value -> builder.header(key, value)));
         }
         return builder;
     }
 
-    private boolean hasHeaders(Collection<String> headers) {
-        return Objects.nonNull(headers) && headers.size() > 0;
-    }
-
-    private HttpBackendResponse convert(String url, HttpResponse<String> response) {
-        return new HttpBackendResponse(url, response.headers().map(), response.statusCode(), response.body());
+    private HttpBackendResponse convertResponse(HttpBackendRequest request, HttpResponse<String> httpResponse) {
+        return new HttpBackendResponse(request, httpResponse.headers().map(), httpResponse.statusCode(), httpResponse.body());
     }
 }

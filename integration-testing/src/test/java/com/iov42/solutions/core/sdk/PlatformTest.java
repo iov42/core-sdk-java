@@ -5,10 +5,10 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class PlatformTest extends BaseIntegrationTest {
+class PlatformTest extends BaseIntegrationTest {
 
     @Test
-    public void healthChecksShouldBeValid() {
+    void healthChecksShouldBeValid() {
         var checks = client().getHealthChecks();
         assertTrue(checks.isPresent());
         assertNotNull(checks.get().getBuildInfo().getName());

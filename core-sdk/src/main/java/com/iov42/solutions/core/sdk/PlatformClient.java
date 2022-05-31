@@ -1,6 +1,7 @@
 package com.iov42.solutions.core.sdk;
 
 import com.iov42.solutions.core.sdk.http.HttpBackend;
+import com.iov42.solutions.core.sdk.http.HttpBackendRequest;
 import com.iov42.solutions.core.sdk.model.HealthChecks;
 import com.iov42.solutions.core.sdk.model.SignatoryInfo;
 import com.iov42.solutions.core.sdk.model.requests.command.*;
@@ -32,7 +33,7 @@ public class PlatformClient {
      * Initializes a new {@link PlatformClient} instance.
      *
      * @param platformHostUrl the host url
-     * @param httpBackend  the underlying {@link HttpBackend} used to issue http requests
+     * @param httpBackend     the underlying {@link HttpBackend} used to issue http requests
      */
     public PlatformClient(String platformHostUrl, HttpBackend httpBackend) {
         if (Objects.isNull(platformHostUrl) || platformHostUrl.trim().length() == 0) {
@@ -108,17 +109,16 @@ public class PlatformClient {
     /**
      * Sends an {@link AuthorisedRequest} authenticated with the supplied {@link SignatoryInfo} to the platform.
      *
-     * @see <a href="https://tech.iov42.com/platform/api/#tag/requests">iov42 platform API specification: requests</a>
-     *
      * @param authorisedRequest  the {@link AuthorisedRequest}
      * @param authenticationInfo the {@link SignatoryInfo} used for authentication
      * @return a {@link CompletableFuture} of a {@link RequestInfoResponse}
+     * @see <a href="https://tech.iov42.com/platform/api/#tag/requests">iov42 platform API specification: requests</a>
      */
     public CompletableFuture<RequestInfoResponse> send(AuthorisedRequest authorisedRequest, SignatoryInfo authenticationInfo) {
         List<String> headers = PlatformUtils.createPutHeaders(authenticationInfo, authorisedRequest.getAuthorisations());
 
         // check additional custom request headers
-        if (authorisedRequest.getHeaders() != null && authorisedRequest.getHeaders().size() > 0) {
+        if (authorisedRequest.getHeaders() != null && !authorisedRequest.getHeaders().isEmpty()) {
             addExtendedHeaders(headers, authorisedRequest);
         }
         return executeCommand(authorisedRequest.getRequestId(), authorisedRequest.getBody(), headers);
@@ -127,11 +127,10 @@ public class PlatformClient {
     /**
      * Sends a {@link BaseCommandRequest} authorised and authenticated with the supplied {@link SignatoryInfo} to the platform.
      *
-     * @see <a href="https://tech.iov42.com/platform/api/#tag/requests">iov42 platform API specification: requests</a>
-     *
      * @param request       the {@link BaseCommandRequest}
      * @param signatoryInfo the {@link SignatoryInfo} used for authorisation and authentication
      * @return a {@link CompletableFuture} of a {@link RequestInfoResponse}
+     * @see <a href="https://tech.iov42.com/platform/api/#tag/requests">iov42 platform API specification: requests</a>
      */
     public CompletableFuture<RequestInfoResponse> send(BaseCommandRequest request, SignatoryInfo signatoryInfo) {
         AuthorisedRequest authorisedRequest = AuthorisedRequest.from(request).authorise(signatoryInfo);
@@ -141,9 +140,8 @@ public class PlatformClient {
     /**
      * Gets health check information.
      *
-     * @see <a href="https://tech.iov42.com/platform/api/#tag/operations/paths/~1healthchecks/get">iov42 platform API specification: health check</a>
-     *
      * @return an optional {@link HealthChecks}
+     * @see <a href="https://tech.iov42.com/platform/api/#tag/operations/paths/~1healthchecks/get">iov42 platform API specification: health check</a>
      */
     public Optional<HealthChecks> getHealthChecks() {
         return Optional.ofNullable(httpHostWrapper.executeGet("/api/v1/healthchecks", null, HealthChecks.class));
@@ -152,9 +150,8 @@ public class PlatformClient {
     /**
      * Gets information of an API node of the platform.
      *
-     * @see <a href="https://tech.iov42.com/platform/api/#tag/operations/paths/~1node-info/get">iov42 platform API specification: node info</a>
-     *
      * @return an optional {@link NodeInfoResponse}
+     * @see <a href="https://tech.iov42.com/platform/api/#tag/operations/paths/~1node-info/get">iov42 platform API specification: node info</a>
      */
     public Optional<NodeInfoResponse> getNodeInfo() {
         return Optional.ofNullable(httpHostWrapper.executeGet("/api/v1/node-info", null, NodeInfoResponse.class));
@@ -171,6 +168,7 @@ public class PlatformClient {
     }
 
     private CompletableFuture<RequestInfoResponse> executeCommand(String requestId, String body, List<String> headers) {
-        return httpHostWrapper.executePut("/api/v1/requests/" + requestId, body.getBytes(StandardCharsets.UTF_8), headers, RequestInfoResponse.class);
+        return httpHostWrapper.executePut("/api/v1/requests/" + requestId, body.getBytes(StandardCharsets.UTF_8),
+                HttpBackendRequest.buildHeaderMap(headers), RequestInfoResponse.class);
     }
 }

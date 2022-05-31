@@ -9,7 +9,7 @@ public class PlatformErrorException extends RuntimeException {
 
     private final int statusCode;
 
-    private final ErrorResponse errorResponse;
+    private final transient ErrorResponse errorResponse;
 
     /**
      * Initializes a new object.
@@ -18,6 +18,7 @@ public class PlatformErrorException extends RuntimeException {
      * @param errorResponse the {@link ErrorResponse} from the iov42 platform
      */
     public PlatformErrorException(int statusCode, ErrorResponse errorResponse) {
+        super(getDetailMessage(statusCode, errorResponse));
         this.statusCode = statusCode;
         this.errorResponse = errorResponse;
     }
@@ -38,5 +39,16 @@ public class PlatformErrorException extends RuntimeException {
      */
     public int getStatusCode() {
         return statusCode;
+    }
+
+    private static String getDetailMessage(int statusCode, ErrorResponse response) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Status code: ").append(statusCode).append("\n");
+        for (PlatformError error : response.getErrors()) {
+            sb.append("* code: ").append(error.getErrorCode())
+                    .append(", type: ").append(error.getErrorType())
+                    .append(", '").append(error.getMessage()).append("'\n");
+        }
+        return sb.toString();
     }
 }

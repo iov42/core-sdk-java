@@ -13,10 +13,10 @@ import java.math.BigInteger;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class AssetTest extends BaseIntegrationTest {
+class AssetTest extends BaseIntegrationTest {
 
     @Test
-    public void uniqueAssetShouldBeCreated() {
+    void uniqueAssetShouldBeCreated() {
 
         // prepare
         var actor = createIdentity(randomId());
@@ -37,7 +37,7 @@ public class AssetTest extends BaseIntegrationTest {
     }
 
     @Test
-    public void quantifiableAssetShouldBeCreated() {
+    void quantifiableAssetShouldBeCreated() {
 
         // prepare
         var actor = createIdentity(randomId());
@@ -58,7 +58,7 @@ public class AssetTest extends BaseIntegrationTest {
     }
 
     @Test
-    public void claimsOnUniqueAssetShouldBeCreated() {
+    void claimsOnUniqueAssetShouldBeCreated() {
         // prepare
         var actor = createIdentity(randomId());
 
@@ -88,7 +88,7 @@ public class AssetTest extends BaseIntegrationTest {
     }
 
     @Test
-    public void claimsOnUniqueAssetShouldBeEndorsed() {
+    void claimsOnUniqueAssetShouldBeEndorsed() {
 
         // prepare
         var actor = createIdentity(randomId());
@@ -116,7 +116,7 @@ public class AssetTest extends BaseIntegrationTest {
     }
 
     @Test
-    public void claimsOnAccountShouldBeCreated() {
+    void claimsOnAccountShouldBeCreated() {
         // prepare
         var actor = createIdentity(randomId());
 
@@ -139,7 +139,7 @@ public class AssetTest extends BaseIntegrationTest {
     }
 
     @Test
-    public void quantityOfAssetShouldBeTransferred() {
+    void quantityOfAssetShouldBeTransferred() {
 
         // prepare
         var sender = createIdentity(randomId());
@@ -169,7 +169,7 @@ public class AssetTest extends BaseIntegrationTest {
     }
 
     @Test
-    public void shouldGetQuantifiableAssetTransferTransaction() {
+    void shouldGetQuantifiableAssetTransferTransaction() {
         // prepare
         var sender = createIdentity(randomId());
         var receiver = createIdentity(randomId());
@@ -199,7 +199,7 @@ public class AssetTest extends BaseIntegrationTest {
     }
 
     @Test
-    public void accountShouldBeTransferred() {
+    void accountShouldBeTransferred() {
 
         // prepare
         var sender = createIdentity(randomId());
@@ -225,7 +225,7 @@ public class AssetTest extends BaseIntegrationTest {
     }
 
     @Test
-    public void uniqueAssetShouldBeTransferred() {
+    void uniqueAssetShouldBeTransferred() {
 
         // prepare
         var sender = createIdentity(randomId());
