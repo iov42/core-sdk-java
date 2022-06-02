@@ -1,6 +1,7 @@
 package com.iov42.solutions.core.sdk.utils;
 
 import com.iov42.solutions.core.sdk.CryptoBackend;
+import com.iov42.solutions.core.sdk.model.CryptoBackendException;
 
 import java.lang.reflect.Constructor;
 
@@ -14,14 +15,17 @@ import java.lang.reflect.Constructor;
 public class CryptoBackendHolder {
 
     public static final String SYSTEM_PROPERTY = "iov42.core.sdk.crypto-backend";
-    private static String backendName = System.getProperty(SYSTEM_PROPERTY);
     private static CryptoBackend backend;
 
     static {
-        initialize();
+        initialize(System.getProperty(SYSTEM_PROPERTY));
     }
 
-    private static void initialize() {
+    private CryptoBackendHolder() {
+        throw new IllegalStateException("utils");
+    }
+
+    private static void initialize(String backendName) {
         if (StringUtils.isEmpty(backendName)) {
             // instantiate default backend
             backend = new DefaultCryptoBackend();
@@ -32,7 +36,7 @@ public class CryptoBackendHolder {
                 Constructor<?> backendConstructor = clazz.getConstructor();
                 backend = (CryptoBackend) backendConstructor.newInstance();
             } catch (Exception ex) {
-                throw new RuntimeException("Could not instantiate custom CryptoBackend.", ex);
+                throw new CryptoBackendException("Could not instantiate custom CryptoBackend.", ex);
             }
         }
     }

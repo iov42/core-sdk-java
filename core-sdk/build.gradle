@@ -1,15 +1,16 @@
 dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-core:2.13.1'
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.1'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.3'
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.1'
     implementation 'org.slf4j:slf4j-api:1.7.35'
+    implementation 'org.bouncycastle:bcprov-jdk18on:1.71'
 
 
     testImplementation 'org.junit.jupiter:junit-jupiter:5.8.2'
     testImplementation 'org.mockito:mockito-core:4.3.1'
 }
 
-version = '0.2'
+version = '0.3'
 
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
