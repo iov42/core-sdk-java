@@ -1,3 +1,8 @@
+# Version 0.3
+2nd June 2022
+
+- Moved to BouncyCastle as Crypto lib for elliptic curves
+
 # Version 0.2
 4th March 2022
 
