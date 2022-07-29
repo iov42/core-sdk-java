@@ -1,28 +1,35 @@
 package com.iov42.solutions.core.sdk.model;
 
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import java.util.HashMap;
+import java.util.Map;
+
 public class HealthChecks {
 
     private BuildInfo buildInfo;
 
-    private WriteStatus broker;
+    @JsonAnySetter
+    private final Map<String, Object> details = new HashMap<>();
 
-    private ReadWriteStatus requestStore;
+    public boolean isHealthy() {
+        for (Object module : details.values()) {
+            if (module instanceof Map<?, ?>) {
+                Map<?, ?> properties = (Map<?, ?>) module;
+                for (Object state : properties.values()) {
+                    if (state instanceof Boolean && Boolean.FALSE.equals(state)) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
 
-    private ReadWriteStatus assetStore;
-
-    private ReadWriteStatus claimStore;
-
-    private ReadWriteStatus endorsementStore;
-
-    private ReadWriteStatus permissionStore;
-
-    private ReadWriteStatus proofStore;
-
-    private ReadWriteStatus transactionStore;
-
-    private ReadWriteStatus transactionEntryForReaderStore;
-
-    private HsmStatus hsm;
+    public Map<String, Object> getDetails() {
+        return details;
+    }
 
     public BuildInfo getBuildInfo() {
         return buildInfo;
@@ -32,46 +39,7 @@ public class HealthChecks {
         this.buildInfo = buildInfo;
     }
 
-    public WriteStatus getBroker() {
-        return broker;
-    }
-
-    public ReadWriteStatus getRequestStore() {
-        return requestStore;
-    }
-
-    public ReadWriteStatus getAssetStore() {
-        return assetStore;
-    }
-
-    public ReadWriteStatus getClaimStore() {
-        return claimStore;
-    }
-
-    public ReadWriteStatus getEndorsementStore() {
-        return endorsementStore;
-    }
-
-    public ReadWriteStatus getPermissionStore() {
-        return permissionStore;
-    }
-
-    public ReadWriteStatus getProofStore() {
-        return proofStore;
-    }
-
-    public ReadWriteStatus getTransactionStore() {
-        return transactionStore;
-    }
-
-    public ReadWriteStatus getTransactionEntryForReaderStore() {
-        return transactionEntryForReaderStore;
-    }
-
-    public HsmStatus getHsm() {
-        return hsm;
-    }
-
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class BuildInfo {
         private String name;
         private String version;
@@ -92,30 +60,6 @@ public class HealthChecks {
 
         public String getSbtVersion() {
             return sbtVersion;
-        }
-    }
-
-    public static class WriteStatus {
-        private Boolean canWrite;
-
-        public Boolean getCanWrite() {
-            return canWrite;
-        }
-    }
-
-    public static class ReadWriteStatus extends WriteStatus {
-        private Boolean canRead;
-
-        public Boolean getCanRead() {
-            return canRead;
-        }
-    }
-
-    public static class HsmStatus {
-        private Boolean hasKeys;
-
-        public Boolean getHasKeys() {
-            return hasKeys;
         }
     }
 }
