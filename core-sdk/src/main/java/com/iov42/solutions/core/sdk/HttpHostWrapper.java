@@ -10,7 +10,6 @@ import com.iov42.solutions.core.sdk.utils.serialization.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;

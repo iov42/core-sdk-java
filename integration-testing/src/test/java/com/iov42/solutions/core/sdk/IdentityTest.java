@@ -16,9 +16,9 @@ class IdentityTest extends BaseIntegrationTest {
 
         // prepare
         var identityId = randomId();
-        var signatoryInfo = generateSignatoryInfo(identityId, ProtocolType.SHA256WithRSA);
+        var signatoryInfo = generateSignatoryInfo(identityId, ProtocolType.SHA256_WITH_RSA);
         var publicKey = PlatformUtils.encodeBase64(signatoryInfo.getPublicKey());
-        var credentials = new PublicCredentials(ProtocolType.SHA256WithRSA, publicKey);
+        var credentials = new PublicCredentials(ProtocolType.SHA256_WITH_RSA, publicKey);
 
         // act
         var request = new CreateIdentityRequest(identityId, credentials);
@@ -35,9 +35,9 @@ class IdentityTest extends BaseIntegrationTest {
 
         // prepare
         var identityId = randomId();
-        var signatoryInfo = generateSignatoryInfo(identityId, ProtocolType.SHA256WithECDSA);
+        var signatoryInfo = generateSignatoryInfo(identityId, ProtocolType.SHA256_WITH_ECDSA);
         var publicKey = PlatformUtils.encodeBase64(signatoryInfo.getPublicKey());
-        var credentials = new PublicCredentials(ProtocolType.SHA256WithECDSA, publicKey);
+        var credentials = new PublicCredentials(ProtocolType.SHA256_WITH_ECDSA, publicKey);
 
         // act
         var request = new CreateIdentityRequest(identityId, credentials);

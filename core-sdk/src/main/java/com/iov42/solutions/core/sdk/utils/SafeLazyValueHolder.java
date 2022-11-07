@@ -39,30 +39,30 @@ public class SafeLazyValueHolder <T> {
 
         // 1. try to read the value in an optimistic way
         long stamp = lock.tryOptimisticRead();
-        T value = this.value;
-        boolean isValid = this.isValid;
-        if (isValid && validator.test(value) && lock.validate(stamp)) {
+        T localValue = this.value;
+        boolean localIsValid = this.isValid;
+        if (localIsValid && validator.test(localValue) && lock.validate(stamp)) {
             // stamp and value are validated - return
-            return value;
+            return localValue;
         }
 
         // 2. nope - invalid value, (blocking) get the write lock
         stamp = lock.writeLock();
         try {
             // 2.1 double check that the valid is still not valid
-            if (!isValid || !validator.test(value)) {
+            if (!this.isValid || !validator.test(this.value)) {
                 // get new value from producer
-                value = producer.get();
-                this.value = value;
+                localValue = producer.get();
+                this.value = localValue;
                 this.isValid = true;
             } else {
                 // get the value from this - it was produced by another thread in the meantime
-                value = this.value;
+                localValue = this.value;
             }
         } finally {
             lock.unlockWrite(stamp);
         }
-        return value;
+        return localValue;
     }
 
     /**

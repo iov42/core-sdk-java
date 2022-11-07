@@ -1,5 +1,6 @@
 package com.iov42.solutions.core.sdk.utils.serialization;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -24,6 +25,7 @@ public class JsonUtils {
             module.addSerializer(Claims.class, new ClaimsSerializer());
             MAPPER.registerModule(module);
             MAPPER.registerModule(new JavaTimeModule());
+            MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         }
     }
 
@@ -46,7 +48,7 @@ public class JsonUtils {
             }
             return ObjectMapperHolder.MAPPER.readValue(json, clazz);
         } catch (IOException e) {
-            throw new RuntimeException("Could not deserialize JSON object.", e);
+            throw new IllegalArgumentException("Could not deserialize JSON object.", e);
         }
     }
 
@@ -60,7 +62,7 @@ public class JsonUtils {
         try {
             return ObjectMapperHolder.MAPPER.writeValueAsString(pojo);
         } catch (IOException e) {
-            throw new RuntimeException(e.getMessage(), e);
+            throw new IllegalArgumentException("Could not serialize to JSON.", e);
         }
     }
 }

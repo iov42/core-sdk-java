@@ -123,7 +123,7 @@ public class SignatoryInfo {
      */
     public PublicCredentials toPublicCredentials() {
         if (publicKey == null) {
-            throw new RuntimeException("No public key specified!");
+            throw new IllegalStateException("No public key specified!");
         }
         return new PublicCredentials(protocolId, PlatformUtils.encodeBase64(publicKey));
     }

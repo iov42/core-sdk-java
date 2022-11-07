@@ -15,7 +15,7 @@ class AuthorisedRequestTest {
     void authorisedRequestShouldBeSerializedAndDeserialized() {
         // prepare
         SignatoryInfo signatoryInfo =
-                new SignatoryInfo("5678", ProtocolType.SHA256WithRSA, PlatformUtils.generateKeyPair(ProtocolType.SHA256WithRSA));
+                new SignatoryInfo("5678", ProtocolType.SHA256_WITH_RSA, PlatformUtils.generateKeyPair(ProtocolType.SHA256_WITH_RSA));
 
         CreateAssetTypeRequest request = CreateAssetTypeRequest.unique("1234");
         AuthorisedRequest authorisedRequest = AuthorisedRequest.from(request).authorise(signatoryInfo);

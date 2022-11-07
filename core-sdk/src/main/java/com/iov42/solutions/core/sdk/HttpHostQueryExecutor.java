@@ -20,7 +20,7 @@ import java.util.Objects;
 
 class HttpHostQueryExecutor implements PlatformQueryExecutor {
 
-    private static final Logger log = LoggerFactory.getLogger(HttpHostWrapper.class);
+    private static final Logger log = LoggerFactory.getLogger(HttpHostQueryExecutor.class);
 
     public static class Builder {
 
