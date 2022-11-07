@@ -80,9 +80,9 @@ public abstract class BaseIntegrationTest {
 
     protected SignatoryInfo createIdentity(String identityId) {
         String requestId = UUID.randomUUID().toString();
-        SignatoryInfo signatoryInfo = generateSignatoryInfo(identityId, ProtocolType.SHA256WithRSA);
+        SignatoryInfo signatoryInfo = generateSignatoryInfo(identityId, ProtocolType.SHA256_WITH_RSA);
         String publicKey = PlatformUtils.encodeBase64(signatoryInfo.getPublicKey());
-        PublicCredentials credentials = new PublicCredentials(ProtocolType.SHA256WithRSA, publicKey);
+        PublicCredentials credentials = new PublicCredentials(ProtocolType.SHA256_WITH_RSA, publicKey);
 
         CreateIdentityRequest request = new CreateIdentityRequest(requestId, identityId, credentials);
         platformClient.send(request, signatoryInfo)

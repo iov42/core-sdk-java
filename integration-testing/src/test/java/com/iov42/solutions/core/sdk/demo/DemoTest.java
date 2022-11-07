@@ -31,9 +31,9 @@ class DemoTest extends BaseIntegrationTest {
      * @return a {@link SignatoryInfo} of the created Identity
      */
     private SignatoryInfo createDemoIdentity(String identityId) {
-        SignatoryInfo signatoryInfo = new SignatoryInfo(identityId, ProtocolType.SHA256WithRSA, PlatformUtils.generateKeyPair(ProtocolType.SHA256WithRSA));
+        SignatoryInfo signatoryInfo = new SignatoryInfo(identityId, ProtocolType.SHA256_WITH_RSA, PlatformUtils.generateKeyPair(ProtocolType.SHA256_WITH_RSA));
         String publicKey = PlatformUtils.encodeBase64(signatoryInfo.getPublicKey());
-        PublicCredentials credentials = new PublicCredentials(ProtocolType.SHA256WithRSA, publicKey);
+        PublicCredentials credentials = new PublicCredentials(ProtocolType.SHA256_WITH_RSA, publicKey);
 
         CreateIdentityRequest request = new CreateIdentityRequest(identityId, credentials);
         client().send(request, signatoryInfo)

@@ -5,6 +5,8 @@ package com.iov42.solutions.core.sdk.utils;
  */
 public class Constants {
 
+    private Constants() {}
+
     /**
      * Http header name for authentication.
      */

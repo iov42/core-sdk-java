@@ -60,7 +60,7 @@ public class PlatformClient {
         ServiceLoader<HttpBackend> loader = ServiceLoader.load(HttpBackend.class);
         Iterator<HttpBackend> it = loader.iterator();
         if (!it.hasNext()) {
-            throw new RuntimeException("Could not find a registered HttpBackend service. Use a different constructor.");
+            throw new IllegalStateException("Could not find a registered HttpBackend service. Use a different constructor.");
         }
         HttpBackend candidate = it.next();
         if (it.hasNext()) {

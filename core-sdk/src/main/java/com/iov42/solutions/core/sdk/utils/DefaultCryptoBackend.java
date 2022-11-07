@@ -94,12 +94,12 @@ class DefaultCryptoBackend implements CryptoBackend {
         KeyPairGenerator keyGen;
         try {
             switch (protocolType) {
-                case SHA256WithECDSA:
+                case SHA256_WITH_ECDSA:
                     keyGen = KeyPairGenerator.getInstance("EC", provider);
                     keyGen.initialize(new ECGenParameterSpec(ecSpecName));
                     pair = keyGen.genKeyPair();
                     break;
-                case SHA256WithRSA:
+                case SHA256_WITH_RSA:
                     keyGen = KeyPairGenerator.getInstance("RSA", provider);
                     keyGen.initialize(2048);
                     pair = keyGen.genKeyPair();
@@ -115,9 +115,9 @@ class DefaultCryptoBackend implements CryptoBackend {
 
     private static KeyFactory getKeyFactory(ProtocolType protocolType, Provider provider) throws NoSuchAlgorithmException {
         switch (protocolType) {
-            case SHA256WithECDSA:
+            case SHA256_WITH_ECDSA:
                 return KeyFactory.getInstance("EC", provider);
-            case SHA256WithRSA:
+            case SHA256_WITH_RSA:
                 return KeyFactory.getInstance("RSA", provider);
             default:
                 throw new IllegalStateException("Unexpected value: " + protocolType);
@@ -125,15 +125,15 @@ class DefaultCryptoBackend implements CryptoBackend {
     }
 
     private static Signature getSignature(ProtocolType protocolType, Provider provider) throws NoSuchAlgorithmException {
-        String algorithm = protocolType.name();
+        String algorithm = protocolType.value();
         return Signature.getInstance(algorithm, provider);
     }
 
     private static Provider getProviderFor(ProtocolType protocolType) {
         switch (protocolType) {
-            case SHA256WithECDSA:
+            case SHA256_WITH_ECDSA:
                 return Security.getProvider("BC");
-            case SHA256WithRSA:
+            case SHA256_WITH_RSA:
                 return Security.getProvider("SunRsaSign");
             default:
                 throw new IllegalStateException("Unexpected value: " + protocolType);

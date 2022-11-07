@@ -188,11 +188,11 @@ class PlatformClientTest {
 
         String nodeIdRequestUrl = PLATFORM_HOST_URL + "/api/v1/node-info";
         when(httpBackend.execute(TestHelper.get(nodeIdRequestUrl)))
-                .thenReturn(responseOk(new NodeInfoResponse("1234", new PublicCredentials(ProtocolType.SHA256WithRSA, "key"))));
+                .thenReturn(responseOk(new NodeInfoResponse("1234", new PublicCredentials(ProtocolType.SHA256_WITH_RSA, "key"))));
 
         String testRequestUrl = PLATFORM_HOST_URL + "/api/v1/identities/" + identityId + "/public-key?requestId=req-1&nodeId=1234";
         when(httpBackend.execute(TestHelper.get(testRequestUrl)))
-                .thenReturn(responseOk(new PublicCredentials(ProtocolType.SHA256WithRSA, "mock-key")));
+                .thenReturn(responseOk(new PublicCredentials(ProtocolType.SHA256_WITH_RSA, "mock-key")));
 
         SignatoryInfo actor = randomSignatoryInfo();
 
@@ -225,12 +225,12 @@ class PlatformClientTest {
         // 2. that request fetches a new nodeId
         String nodeIdRequestUrl = PLATFORM_HOST_URL + "/api/v1/node-info";
         when(httpBackend.execute(TestHelper.get(nodeIdRequestUrl)))
-                .thenReturn(responseOk(new NodeInfoResponse("0815", new PublicCredentials(ProtocolType.SHA256WithRSA, "key"))));
+                .thenReturn(responseOk(new NodeInfoResponse("0815", new PublicCredentials(ProtocolType.SHA256_WITH_RSA, "key"))));
 
         // 3. that request is a retry of the original request #1 with a new node id that succeeds
         String testRequestUrlSuccess = PLATFORM_HOST_URL + "/api/v1/identities/" + identityId + "/public-key?requestId=req-2&nodeId=0815";
         when(httpBackend.execute(TestHelper.get(testRequestUrlSuccess)))
-                .thenReturn(responseOk(new PublicCredentials(ProtocolType.SHA256WithRSA, "mock-key")));
+                .thenReturn(responseOk(new PublicCredentials(ProtocolType.SHA256_WITH_RSA, "mock-key")));
 
         SignatoryInfo actor = randomSignatoryInfo();
 
@@ -249,7 +249,7 @@ class PlatformClientTest {
     void shouldGetNodeInfo() {
         // prepare
         when(httpBackend.execute(any()))
-                .thenReturn(responseOk(new NodeInfoResponse("123", new PublicCredentials(ProtocolType.SHA256WithRSA, "key"))));
+                .thenReturn(responseOk(new NodeInfoResponse("123", new PublicCredentials(ProtocolType.SHA256_WITH_RSA, "key"))));
 
         // act
         Optional<NodeInfoResponse> res = platformClient.getNodeInfo();
@@ -295,7 +295,7 @@ class PlatformClientTest {
     }
 
     private static SignatoryInfo randomSignatoryInfo() {
-        SignatoryInfo y = new SignatoryInfo("id", ProtocolType.SHA256WithECDSA, PlatformUtils.generateKeyPair(ProtocolType.SHA256WithECDSA));
-        return new SignatoryInfo("id", ProtocolType.SHA256WithRSA, PlatformUtils.generateKeyPair(ProtocolType.SHA256WithRSA));
+        SignatoryInfo y = new SignatoryInfo("id", ProtocolType.SHA256_WITH_ECDSA, PlatformUtils.generateKeyPair(ProtocolType.SHA256_WITH_ECDSA));
+        return new SignatoryInfo("id", ProtocolType.SHA256_WITH_RSA, PlatformUtils.generateKeyPair(ProtocolType.SHA256_WITH_RSA));
     }
 }
