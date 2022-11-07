@@ -1,6 +1,8 @@
 package com.iov42.solutions.core.sdk;
 
 import com.iov42.solutions.core.sdk.model.ProtocolType;
+import com.iov42.solutions.core.sdk.model.PublicCredentials;
+import com.iov42.solutions.core.sdk.model.requests.command.CreateIdentityRequest;
 import com.iov42.solutions.core.sdk.model.responses.RequestInfoResponse;
 import com.iov42.solutions.core.sdk.utils.serialization.JsonUtils;
 import org.junit.jupiter.api.Test;
@@ -33,7 +35,7 @@ class JsonUtilsTest {
 
     @Test
     void protocolEnumShouldBeConvertedCorrectlyToJson() {
-        String s = JsonUtils.toJson(ProtocolType.SHA256_WITH_ECDSA);
-        assertEquals("\"SHA256WithECDSA\"", s);
+        String s = JsonUtils.toJson(new PublicCredentials(ProtocolType.SHA256_WITH_RSA, "key"));
+        assertEquals("{\"key\":\"key\",\"protocolId\":\"SHA256WithRSA\"}", s);
     }
 }
