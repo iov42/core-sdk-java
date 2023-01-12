@@ -1,7 +1,7 @@
 package com.iov42.solutions.core.sdk.httpbackend;
 
 import com.iov42.solutions.core.sdk.http.HttpBackendException;
-import com.iov42.solutions.core.sdk.http.HttpBackend;
+import com.iov42.solutions.core.sdk.http.spi.HttpBackend;
 import com.iov42.solutions.core.sdk.http.HttpBackendRequest;
 import com.iov42.solutions.core.sdk.http.HttpBackendResponse;
 
@@ -10,6 +10,7 @@ import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -20,6 +21,8 @@ import java.util.concurrent.CompletableFuture;
  *  Uses the {@link HttpClient} from Java9 as underlying http client.
  */
 public class HttpClientBackend implements HttpBackend {
+
+    private static final Duration DEFAULT_REQUEST_TIMEOUT = Duration.ofSeconds(40);
 
     private final HttpClient httpClient;
 
@@ -39,7 +42,9 @@ public class HttpClientBackend implements HttpBackend {
                     : HttpRequest.BodyPublishers.noBody();
 
             var httpRequest = build(request.getRequestUrl(), request.getHeaders())
-                    .method(request.getMethod().name(), bodyPublisher).build();
+                    .method(request.getMethod().name(), bodyPublisher)
+                    .timeout(DEFAULT_REQUEST_TIMEOUT)
+                    .build();
 
             return httpClient.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofString())
                     .thenApply(r -> convertResponse(request, r));

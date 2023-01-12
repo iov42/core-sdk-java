@@ -118,4 +118,14 @@ public interface PlatformQueryExecutor {
      * @return a {@link GetClaimsResponse}
      */
     ClaimEndorsementsResponse getAssetTypeClaim(GetAssetTypeClaimRequest request);
+
+    /**
+     * Gets information about a Proof for a specific request.
+     *
+     * @see <a href="https://api.iov42.com/#tag/proofs/paths/~1proofs~1{requestId}/get">iov42 platform API specification: proofs</a>
+     *
+     * @param requestId the request id
+     * @return a {@link GetClaimsResponse}
+     */
+    ProofInfoResponse getProofs(String requestId);
 }

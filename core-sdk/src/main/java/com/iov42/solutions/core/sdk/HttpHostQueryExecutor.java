@@ -2,6 +2,7 @@ package com.iov42.solutions.core.sdk;
 
 import com.iov42.solutions.core.sdk.http.HttpBackendException;
 import com.iov42.solutions.core.sdk.http.HttpBackendResponse;
+import com.iov42.solutions.core.sdk.http.spi.HttpBackend;
 import com.iov42.solutions.core.sdk.model.PlatformError;
 import com.iov42.solutions.core.sdk.model.PublicCredentials;
 import com.iov42.solutions.core.sdk.model.SignatoryInfo;
@@ -46,6 +47,9 @@ class HttpHostQueryExecutor implements PlatformQueryExecutor {
         }
     }
 
+    private static class PlainRequest extends BaseRequest {
+    }
+
     private final HttpHostWrapper httpHostWrapper;
     private final SafeLazyValueHolder<String> nodeIdHolder;
     private final SignatoryInfo authenticatorInfo;
@@ -55,7 +59,7 @@ class HttpHostQueryExecutor implements PlatformQueryExecutor {
     /**
      * Initializes a new executor object.
      *
-     * @param httpHostWrapper   the wrapped {@link com.iov42.solutions.core.sdk.http.HttpBackend} to be used
+     * @param httpHostWrapper   the wrapped {@link HttpBackend} to be used
      * @param nodeIdHolder      the holder for the node identifier to be used
      * @param authenticatorInfo {@link SignatoryInfo} used to authenticate the request
      */
@@ -146,6 +150,15 @@ class HttpHostQueryExecutor implements PlatformQueryExecutor {
 
         String path = "/api/v1/asset-types/" + assetTypeId + "/claims/" + claim + buildQueryParameters(request);
         return executeGet(path, ClaimEndorsementsResponse.class);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ProofInfoResponse getProofs(String requestId) {
+        String path = "/api/v1/proofs/" + requestId + buildQueryParameters(new PlainRequest());
+        return executeGet(path, ProofInfoResponse.class);
     }
 
     /**

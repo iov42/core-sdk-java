@@ -1,6 +1,8 @@
 package com.iov42.solutions.core.sdk.http;
 
 
+import com.iov42.solutions.core.sdk.http.spi.HttpBackend;
+
 /**
  * Wrapper for {@link HttpBackend} exceptions.
  */

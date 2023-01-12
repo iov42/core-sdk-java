@@ -1,6 +1,6 @@
-package com.iov42.solutions.core.sdk.utils;
+package com.iov42.solutions.core.sdk.crypto;
 
-import com.iov42.solutions.core.sdk.CryptoBackend;
+import com.iov42.solutions.core.sdk.crypto.spi.CryptoBackend;
 import com.iov42.solutions.core.sdk.model.CryptoBackendException;
 import com.iov42.solutions.core.sdk.model.ProtocolType;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;

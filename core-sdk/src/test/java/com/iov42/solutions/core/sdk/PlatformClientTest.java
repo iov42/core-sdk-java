@@ -2,7 +2,7 @@ package com.iov42.solutions.core.sdk;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.iov42.solutions.core.sdk.http.HttpBackend;
+import com.iov42.solutions.core.sdk.http.spi.HttpBackend;
 import com.iov42.solutions.core.sdk.http.HttpBackendRequest;
 import com.iov42.solutions.core.sdk.http.HttpBackendResponse;
 import com.iov42.solutions.core.sdk.model.*;

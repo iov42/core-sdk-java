@@ -1,11 +1,14 @@
-package com.iov42.solutions.core.sdk.http;
+package com.iov42.solutions.core.sdk.http.spi;
+
+import com.iov42.solutions.core.sdk.http.HttpBackendRequest;
+import com.iov42.solutions.core.sdk.http.HttpBackendResponse;
 
 import java.util.concurrent.CompletableFuture;
 
 /**
  * Http backend used by the {@link com.iov42.solutions.core.sdk.PlatformClient} to communicate with the iov42 platform.
  *
- * Note: when confronted with a redirect, the HttpBackend implementation must handle it.
+ * Note: when confronted with a redirect, the HttpBackend implementation must handle it.*
  */
 public interface HttpBackend {
 

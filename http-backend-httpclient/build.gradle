@@ -2,7 +2,7 @@ dependencies {
     api project(':core-sdk')
 }
 
-version = '0.2'
+version = '0.2.1'
 
 java {
     sourceCompatibility = JavaVersion.VERSION_11
