@@ -8,7 +8,7 @@ import java.util.concurrent.CompletableFuture;
 /**
  * Http backend used by the {@link com.iov42.solutions.core.sdk.PlatformClient} to communicate with the iov42 platform.
  *
- * Note: when confronted with a redirect, the HttpBackend implementation must handle it.*
+ * Note: when confronted with a redirect, the HttpBackend implementation must handle it.
  */
 public interface HttpBackend {
 
