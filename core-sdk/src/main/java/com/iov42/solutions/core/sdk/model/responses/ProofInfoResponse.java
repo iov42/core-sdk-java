@@ -3,6 +3,10 @@ package com.iov42.solutions.core.sdk.model.responses;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.iov42.solutions.core.sdk.model.PublicCredentials;
 
+/**
+ * Structure represents information of a proof.
+ * @see <a href="https://api.iov42.com/#tag/proofs/paths/~1proofs~1{requestId}/get">iov42 platform API specification: proofs</a> for more information.
+ */
 public class ProofInfoResponse {
 
     public static class IdentifierInfo {
