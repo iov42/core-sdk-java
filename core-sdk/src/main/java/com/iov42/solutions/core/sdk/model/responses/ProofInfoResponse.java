@@ -1,6 +1,7 @@
 package com.iov42.solutions.core.sdk.model.responses;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.iov42.solutions.core.sdk.model.ProtocolType;
 import com.iov42.solutions.core.sdk.model.PublicCredentials;
 
 /**
@@ -26,14 +27,14 @@ public class ProofInfoResponse {
 
     public static class SealInfo {
         private String signature;
-        private String protocolId;
+        private ProtocolType protocolId;
         private String identityId;
 
         public String getSignature() {
             return signature;
         }
 
-        public String getProtocolId() {
+        public ProtocolType getProtocolId() {
             return protocolId;
         }
 
