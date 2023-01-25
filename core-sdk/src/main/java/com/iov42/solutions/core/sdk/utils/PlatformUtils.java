@@ -1,5 +1,6 @@
 package com.iov42.solutions.core.sdk.utils;
 
+import com.iov42.solutions.core.sdk.crypto.CryptoBackendHolder;
 import com.iov42.solutions.core.sdk.model.*;
 import com.iov42.solutions.core.sdk.utils.serialization.*;
 

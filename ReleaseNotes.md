@@ -1,3 +1,17 @@
+# Version 0.5
+12th January 2023
+
+- Refactored retry handling timeout
+- Cleanup of namespaces
+- Removed deprecated *PlatformClient.getRequest* method
+- Removed deperecated requestIdReusable field of ErrorResponse
+
+# Version 0.4
+7th November 2022
+
+- Jackson unknown property exception disabled
+- Code cleanup
+
 # Version 0.3
 2nd June 2022
 

@@ -1,4 +1,7 @@
-package com.iov42.solutions.core.sdk.http;
+package com.iov42.solutions.core.sdk.http.spi;
+
+import com.iov42.solutions.core.sdk.http.HttpBackendRequest;
+import com.iov42.solutions.core.sdk.http.HttpBackendResponse;
 
 import java.util.concurrent.CompletableFuture;
 

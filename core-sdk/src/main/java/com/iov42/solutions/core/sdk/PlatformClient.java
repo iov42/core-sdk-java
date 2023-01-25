@@ -1,6 +1,6 @@
 package com.iov42.solutions.core.sdk;
 
-import com.iov42.solutions.core.sdk.http.HttpBackend;
+import com.iov42.solutions.core.sdk.http.spi.HttpBackend;
 import com.iov42.solutions.core.sdk.http.HttpBackendRequest;
 import com.iov42.solutions.core.sdk.model.HealthChecks;
 import com.iov42.solutions.core.sdk.model.SignatoryInfo;
@@ -155,16 +155,6 @@ public class PlatformClient {
      */
     public Optional<NodeInfoResponse> getNodeInfo() {
         return Optional.ofNullable(httpHostWrapper.executeGet("/api/v1/node-info", null, NodeInfoResponse.class));
-    }
-
-    /**
-     * Gets information about a specific request.
-     *
-     * @param requestId the request identifier
-     * @return a {@link RequestInfoResponse}
-     */
-    public RequestInfoResponse getRequest(String requestId) {
-        return httpHostWrapper.executeGet("/api/v1/requests/" + requestId, null, RequestInfoResponse.class);
     }
 
     private CompletableFuture<RequestInfoResponse> executeCommand(String requestId, String body, List<String> headers) {

@@ -11,8 +11,6 @@ public class ErrorResponse {
 
     private String requestId;
 
-    private String getRequestIdReusable;
-
     private String proof;
 
     private List<PlatformError> errors;
@@ -20,9 +18,8 @@ public class ErrorResponse {
     private ErrorResponse() {
     }
 
-    ErrorResponse(String requestId, String getRequestIdReusable, String proof, List<PlatformError> errors) {
+    ErrorResponse(String requestId, String proof, List<PlatformError> errors) {
         this.requestId = requestId;
-        this.getRequestIdReusable = getRequestIdReusable;
         this.proof = proof;
         this.errors = errors;
     }
@@ -34,15 +31,6 @@ public class ErrorResponse {
      */
     public String getRequestId() {
         return requestId;
-    }
-
-    /**
-     * Returns {@code True} if the requestId is reusable, {@code False} otherwise.
-     *
-     * @return {@code True} if the requestId is reusable, {@code False} otherwise
-     */
-    public String getGetRequestIdReusable() {
-        return getRequestIdReusable;
     }
 
     /**

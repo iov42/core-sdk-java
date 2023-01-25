@@ -1,4 +1,4 @@
-package com.iov42.solutions.core.sdk;
+package com.iov42.solutions.core.sdk.crypto.spi;
 
 import com.iov42.solutions.core.sdk.model.ProtocolType;
 
