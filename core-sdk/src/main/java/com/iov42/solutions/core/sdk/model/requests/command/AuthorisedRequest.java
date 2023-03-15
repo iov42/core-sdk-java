@@ -2,6 +2,7 @@ package com.iov42.solutions.core.sdk.model.requests.command;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.iov42.solutions.core.sdk.model.Claims;
 import com.iov42.solutions.core.sdk.model.SignatoryInfo;
 import com.iov42.solutions.core.sdk.model.SignatureInfo;
 import com.iov42.solutions.core.sdk.utils.Constants;
@@ -57,12 +58,36 @@ public class AuthorisedRequest {
         String body = generateBody(commandRequest);
         if (commandRequest instanceof ClaimsContainerRequest) {
             ClaimsContainerRequest claimsContainer = (ClaimsContainerRequest) commandRequest;
-            AuthorisedRequest request = new AuthorisedRequest(commandRequest.getRequestId(), body, claimsContainer.isEndorsement());
-            request.addHeader(Constants.HEADER_IOV42_CLAIMS,
-                    PlatformUtils.getEncodedHeaderValue(PlatformUtils.claimMap(claimsContainer.getClaims())));
-            return request;
+            return from(commandRequest.getRequestId(), body, claimsContainer.getClaims(), claimsContainer.isEndorsement());
         }
-        return new AuthorisedRequest(commandRequest.getRequestId(), body, false);
+        return from(commandRequest.getRequestId(), body);
+    }
+
+    /**
+     * Creates an instance of an {@link AuthorisedRequest}.
+     *
+     * @param requestId the requestId
+     * @param body the body of the request
+     * @return the {@link AuthorisedRequest} instance
+     */
+    public static AuthorisedRequest from(String requestId, String body) {
+        return new AuthorisedRequest(requestId, body, false);
+    }
+
+    /**
+     * Creates an instance of an {@Link AuthorisedRequest}.
+     *
+     * @param requestId the requestId
+     * @param body the body of the request
+     * @param claims associated claims
+     * @param isEndorsement true whether the request is an endorsement
+     * @return the {@link AuthorisedRequest} instance
+     */
+    public static AuthorisedRequest from(String requestId, String body, Claims claims, boolean isEndorsement) {
+        AuthorisedRequest request = new AuthorisedRequest(requestId, body, isEndorsement);
+        request.addHeader(Constants.HEADER_IOV42_CLAIMS,
+                PlatformUtils.getEncodedHeaderValue(PlatformUtils.claimMap(claims)));
+        return request;
     }
 
     /**

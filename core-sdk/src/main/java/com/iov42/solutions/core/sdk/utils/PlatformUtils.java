@@ -7,6 +7,8 @@ import com.iov42.solutions.core.sdk.utils.serialization.*;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyPair;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -99,10 +101,10 @@ public class PlatformUtils {
     /**
      * Verifies an endorsement against {@link PublicCredentials} of an identity.
      *
-     * @param endorsement the endorsement (i.e. the signature of {subjectId};{subjectTypeId};{hashedClaim} - mind the ";" separator)
-     * @param hashedClaim the hashed claim
-     * @param subjectTypeId the subject type identifier
-     * @param subjectId the subject identifier
+     * @param endorsement         the endorsement (i.e. the signature of {subjectId};{subjectTypeId};{hashedClaim} - mind the ";" separator)
+     * @param hashedClaim         the hashed claim
+     * @param subjectTypeId       the subject type identifier
+     * @param subjectId           the subject identifier
      * @param endorserCredentials the {@link PublicCredentials} of the endorser
      * @return {@code True} if the endorsement could be verfied, {@code False} otherwise.
      */
@@ -114,9 +116,9 @@ public class PlatformUtils {
     /**
      * Verifies an endorsement against {@link PublicCredentials} of an identity.
      *
-     * @param endorsement the endorsement (i.e. the signature of {subjectId};{hashedClaim} - mind the ";" separator)
-     * @param hashedClaim the hashed claim
-     * @param subjectId the subject identifier
+     * @param endorsement         the endorsement (i.e. the signature of {subjectId};{hashedClaim} - mind the ";" separator)
+     * @param hashedClaim         the hashed claim
+     * @param subjectId           the subject identifier
      * @param endorserCredentials the {@link PublicCredentials} of the endorser
      * @return {@code True} if the endorsement could be verfied, {@code False} otherwise.
      */
@@ -200,5 +202,40 @@ public class PlatformUtils {
      */
     public static Map<String, String> claimMap(Claims claims) {
         return claims.getPlainClaims().stream().collect(Collectors.toMap(PlatformUtils::hashClaim, v -> v));
+    }
+
+    static final Pattern PATTERN_REQUEST_ID = Pattern.compile("(\"requestId\"\\s*:\\s*\")(?<id>.*?)(?:\")");
+    static final Pattern PATTERN_TYPE = Pattern.compile("(\"_type\"\\s*:\\s*\")(?<type>.*?)(?:\")");
+
+    /**
+     *
+     * @param body
+     * @return the requestId or null if nothing was found
+     */
+    public static String getRequestId(String body) {
+        Matcher m = PATTERN_REQUEST_ID.matcher(body);
+        return m.find() ? m.group("id") : null;
+    }
+
+    /**
+     *
+     * @param body
+     * @return the type of the body or null if nothing was found
+     */
+    public static String getType(String body) {
+        Matcher m = PATTERN_TYPE.matcher(body);
+        return m.find() ? m.group("type") : null;
+    }
+
+    /**
+     * Copies an exiting request and mutates the requestId.
+     *
+     * @param body
+     * @param requestId
+     * @return muted copy of the body
+     */
+    public static String mutateRequestId(String body, String requestId) {
+        // replace request id
+        return PATTERN_REQUEST_ID.matcher(body).replaceFirst("$1" + requestId + "$3");
     }
 }
